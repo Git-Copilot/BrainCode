@@ -1,0 +1,13 @@
+# Python-style blocks and JavaScript-style const declarations can be mixed.
+brain SimplePerceiver:
+  input stimulus: Signal
+  memory recent(capacity=8)
+  neuron detector(threshold=0.65)
+  state attention = 0.0
+
+  on stimulus as signal:
+    const response = detector.fire(signal)
+    recent.store(response)
+    attention = learn(attention, from=response, rate=0.4)
+    if attention > 0.5:
+      decide "notice"
