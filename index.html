@@ -32,7 +32,7 @@
       .intro { max-width: 690px; color: #b6c0d5; font-size: 1.08rem; line-height: 1.65; }
       .badge { display: inline-flex; gap: 8px; align-items: center; border: 1px solid #ffffff20; border-radius: 999px; padding: 7px 11px; color: #d3ddf2; font-size: .78rem; }
       .badge::before { width: 7px; height: 7px; border-radius: 50%; background: #79dfbe; content: ""; }
-      .workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 18px; align-items: start; margin-top: 30px; }
+      .workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 30px; }
       .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr); gap: 18px; }
       .panel { border: 1px solid #ffffff18; border-radius: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000025; }
       .editor-panel { overflow: hidden; }
@@ -54,57 +54,32 @@
       .notes { display: grid; gap: 12px; padding: 19px; }
       .notes p { margin: 0; color: #aeb9ce; font-size: .88rem; line-height: 1.6; }
       .notes strong { color: #e7edfa; }
-      .nerves-panel { position: sticky; top: 16px; overflow: hidden; }
-      .nerves-panel .panel-head { align-items: flex-start; }
-      .nerves-heading { display: grid; gap: 5px; }
-      .nerves-heading p { margin: 0; color: #8995ad; font-size: .73rem; font-weight: 450; line-height: 1.4; }
-      .nerve-model { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1.45; touch-action: none; cursor: grab; outline: none; }
-      .nerve-model:active { cursor: grabbing; }
-      .nerve-model:focus-visible { outline: 2px solid #83e2c2; outline-offset: -3px; }
-      .model-controls { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 14px 12px; }
-      .model-controls button { min-height: 34px; border: 1px solid #ffffff20; padding: 6px 10px; background: #222c3d; color: #d7e1f3; font-size: .73rem; }
-      .model-controls button:hover { background: #303e53; }
-      .model-controls button:focus-visible { outline: 2px solid #83e2c2; outline-offset: 2px; }
-      .nerve-legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 18px 15px; color: #aeb9ce; font-size: .74rem; }
-      .legend-item { display: inline-flex; gap: 7px; align-items: center; }
-      .legend-swatch { width: 18px; height: 3px; border-radius: 2px; background: #78e1c0; }
-      .legend-swatch.peripheral { background: #f0b970; }
-      .nerves-caption { margin: 0; border-top: 1px solid #ffffff12; padding: 12px 18px 16px; color: #8995ad; font-size: .72rem; line-height: 1.55; }
       .mapped-region { margin-top: 18px; overflow: hidden; }
       .region-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 20px 22px; border-bottom: 1px solid #ffffff12; }
       .region-title { display: grid; gap: 7px; }
       .region-title p { max-width: 760px; margin: 0; color: #aeb9ce; font-size: .86rem; line-height: 1.6; }
       .dataset-tag { border: 1px solid #79dfbe40; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .72rem; font-weight: 700; white-space: nowrap; }
       .region-content { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap: 20px; padding: 20px; }
-      .brain-views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .brain-view { margin: 0; overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #111724; }
-      .brain-view svg { display: block; width: 100%; height: auto; }
-      .brain-view figcaption { border-top: 1px solid #ffffff12; padding: 10px 12px; color: #aeb9ce; font-size: .74rem; font-weight: 650; }
-      .brain-outline { fill: #28364b; stroke: #8290a8; stroke-width: 2; stroke-linejoin: round; }
-      .network-visual { fill: #4f8dca; }
-      .network-somato { fill: #e6a84e; }
-      .network-dorsal { fill: #77b76b; }
-      .network-ventral { fill: #d87974; }
-      .network-limbic { fill: #bb83c9; }
-      .network-control { fill: #55b8a4; }
-      .network-default { fill: #d77ea9; }
-      .brain-view text { fill: #d7e1f3; font: 11px ui-sans-serif, system-ui, sans-serif; font-weight: 650; }
-      .brain-view .sub-label { fill: #8995ad; font-size: 9px; font-weight: 450; }
+      .motor-figure { margin: 0; overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #111724; }
+      .motor-figure svg { display: block; width: 100%; height: auto; }
+      .motor-figure figcaption { border-top: 1px solid #ffffff12; padding: 10px 12px; color: #8995ad; font-size: .72rem; line-height: 1.5; }
+      .motor-figure text { fill: #d7e1f3; font: 12px ui-sans-serif, system-ui, sans-serif; }
+      .motor-figure .small-label { fill: #aeb9ce; font-size: 10px; }
+      .motor-figure .section-label { fill: #9ce8d2; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+      .motor-figure .callout { fill: none; stroke: #8995ad; stroke-width: 1.4; }
+      .motor-figure .cortex-edge { fill: none; stroke: #8794a8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .motor-figure .sulcus { fill: none; stroke: #101522; stroke-width: 8; stroke-linecap: round; }
+      .motor-figure .motor-zone { fill: #78e1c0; fill-opacity: .55; stroke: #9ce8d2; stroke-width: 2; }
+      .motor-figure .map-foot { fill: #77b76b; }
+      .motor-figure .map-trunk { fill: #e6a84e; }
+      .motor-figure .map-arm { fill: #4f8dca; }
+      .motor-figure .map-hand { fill: #bb83c9; }
+      .motor-figure .map-face { fill: #d87974; }
       .region-facts { display: grid; align-content: start; gap: 14px; }
       .fact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .fact { border: 1px solid #ffffff12; border-radius: 11px; padding: 13px; background: #111724; }
       .fact strong { display: block; color: #9ce8d2; font-size: 1.15rem; }
       .fact span { display: block; margin-top: 5px; color: #aeb9ce; font-size: .73rem; line-height: 1.45; }
-      .network-key { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 12px; color: #c6d0e3; font-size: .73rem; }
-      .network-key span { display: inline-flex; gap: 7px; align-items: center; }
-      .network-dot { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; }
-      .network-dot.network-visual { background: #4f8dca; }
-      .network-dot.network-somato { background: #e6a84e; }
-      .network-dot.network-dorsal { background: #77b76b; }
-      .network-dot.network-ventral { background: #d87974; }
-      .network-dot.network-limbic { background: #bb83c9; }
-      .network-dot.network-control { background: #55b8a4; }
-      .network-dot.network-default { background: #d77ea9; }
       .region-note { margin: 0; border-left: 2px solid #f0b970; padding: 2px 0 2px 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.6; }
       .source-links { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: .78rem; }
       .disclaimer { margin: 20px 2px 0; color: #8591a8; font-size: .79rem; line-height: 1.6; }
@@ -115,13 +90,7 @@
         main { width: min(100% - 24px, 600px); padding-top: 32px; }
         .workspace, .grid { grid-template-columns: 1fr; }
         .region-content { grid-template-columns: 1fr; padding: 14px; }
-        .nerves-panel { position: static; }
-        .nerve-model { max-height: 680px; }
         textarea { min-height: 300px; }
-      }
-      @media (min-width: 761px) and (max-width: 1120px) {
-        .workspace { grid-template-columns: minmax(0, 1fr) 300px; }
-        .grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -131,7 +100,7 @@
       <h1>BrainCode</h1>
       <p class="intro">Write a small signal-processing loop and see a threshold neuron, short-term memory, learning, and a decision unfold step by step.</p>
 
-      <section class="workspace" aria-label="BrainCode playground and nerve map">
+      <section class="workspace" aria-label="BrainCode playground">
         <div class="grid">
           <div class="panel editor-panel">
             <div class="panel-head"><span>BrainCode editor</span><span class="file-label">simple_perceiver.brain</span></div>
@@ -161,117 +130,76 @@
           </div>
         </div>
 
-        <aside class="panel nerves-panel" aria-labelledby="nerves-title">
-          <div class="panel-head">
-            <div class="nerves-heading">
-              <h2 id="nerves-title">Human nervous system</h2>
-              <p>Major nerve pathways · interactive 3D schematic</p>
-            </div>
-          </div>
-          <canvas class="nerve-model" id="nerve-model" role="img" aria-label="Interactive three-dimensional schematic of a human nervous system. Drag to rotate; use the arrow keys to rotate and the plus or minus keys to zoom.">
-            Interactive 3D schematic of the brain, spinal cord, and major peripheral nerve pathways.
-          </canvas>
-          <div class="model-controls" aria-label="3D model views">
-            <button type="button" data-model-view="front">Front</button>
-            <button type="button" data-model-view="side">Side</button>
-            <button type="button" data-model-view="reset">Reset</button>
-          </div>
-          <div class="nerve-legend" aria-label="Map legend">
-            <span class="legend-item"><span class="legend-swatch"></span>Brain &amp; spinal cord</span>
-            <span class="legend-item"><span class="legend-swatch peripheral"></span>Peripheral nerves</span>
-          </div>
-          <p class="nerves-caption">Mapped regions: brain, spinal cord, cranial branches, brachial plexus, intercostal nerves, lumbar and sacral plexuses, sciatic nerves, and limb branches. Drag to rotate; scroll or pinch to zoom. Simplified educational anatomy; not every nerve or root is shown.</p>
-        </aside>
       </section>
 
       <section class="panel mapped-region" aria-labelledby="region-title">
         <div class="region-header">
           <div class="region-title">
-            <h2 id="region-title">Human brain: large-scale functional networks</h2>
-            <p>This human cortical atlas groups areas by resting-state functional connectivity. The Yeo atlas reports reproducible 7-network and 17-network parcellations estimated from 1,000 healthy adults. The views below are an orientation schematic—not the original atlas surface or individual-specific boundaries.</p>
+            <h2 id="region-title">Mapped human brain region: primary motor cortex (M1)</h2>
+            <p>This view focuses only on the precentral gyrus and its well-established, broad body-part organization. It is an orientation schematic—not an individual brain scan, stimulation map, or exact cortical boundary map.</p>
           </div>
-          <span class="dataset-tag">Human · functional MRI atlas</span>
+          <span class="dataset-tag">Human · motor mapping</span>
         </div>
         <div class="region-content">
-          <div class="brain-views" aria-label="Schematic human cortex views">
-            <figure class="brain-view">
-              <svg viewBox="0 0 340 245" role="img" aria-labelledby="lateral-title lateral-description">
-                <title id="lateral-title">Human cortical functional networks, lateral view</title>
-                <desc id="lateral-description">Schematic lateral hemisphere showing approximate locations of seven large-scale functional networks: visual, somatomotor, dorsal attention, ventral attention, limbic, frontoparietal control, and default mode.</desc>
-              <defs>
-                  <clipPath id="lateral-clip">
-                    <path d="M37 126 C37 79 72 45 124 39 C172 19 245 37 281 72 C306 96 305 129 285 148 C277 173 255 184 228 179 C206 197 184 198 158 188 C131 201 107 190 96 174 C65 175 39 157 37 126 Z"/>
-                  </clipPath>
-              </defs>
-                <rect x="0" y="0" width="340" height="245" fill="#111724"/>
-                <text x="18" y="23">LATERAL SURFACE</text>
-                <g clip-path="url(#lateral-clip)">
-                  <path class="brain-outline" d="M37 126 C37 79 72 45 124 39 C172 19 245 37 281 72 C306 96 305 129 285 148 C277 173 255 184 228 179 C206 197 184 198 158 188 C131 201 107 190 96 174 C65 175 39 157 37 126 Z"/>
-                  <ellipse class="network-visual" cx="265" cy="111" rx="31" ry="38"/>
-                  <path class="network-somato" d="M142 60 C153 69 159 84 158 104 C157 123 150 138 139 150 C129 132 126 116 128 98 C130 82 134 69 142 60 Z"/>
-                  <path class="network-dorsal" d="M176 51 C198 45 225 53 239 70 C225 82 204 87 183 81 C174 73 171 62 176 51 Z"/>
-                  <path class="network-ventral" d="M178 125 C197 111 223 111 243 122 C239 143 219 154 197 152 C186 147 179 138 178 125 Z"/>
-                  <path class="network-limbic" d="M103 145 C118 136 137 140 151 153 C152 169 139 179 122 177 C108 171 101 159 103 145 Z"/>
-                  <path class="network-control" d="M90 73 C108 60 128 62 139 76 C135 93 121 106 103 106 C91 97 86 85 90 73 Z"/>
-                  <path class="network-default" d="M169 91 C187 82 209 87 220 101 C219 117 204 126 187 121 C174 115 168 104 169 91 Z"/>
-                </g>
-                <path d="M37 126 C37 79 72 45 124 39 C172 19 245 37 281 72 C306 96 305 129 285 148 C277 173 255 184 228 179 C206 197 184 198 158 188 C131 201 107 190 96 174 C65 175 39 157 37 126 Z" fill="none" stroke="#8290a8" stroke-width="2"/>
-                <text class="sub-label" x="38" y="222">FRONTAL</text>
-                <text class="sub-label" x="258" y="222">OCCIPITAL</text>
-              </svg>
-              <figcaption>Lateral view · both hemispheres have corresponding networks</figcaption>
-            </figure>
-            <figure class="brain-view">
-              <svg viewBox="0 0 340 245" role="img" aria-labelledby="medial-title medial-description">
-                <title id="medial-title">Human cortical functional networks, medial view</title>
-                <desc id="medial-description">Schematic medial hemisphere showing approximate locations of visual, somatomotor, dorsal attention, ventral attention, limbic, frontoparietal control, and default-mode networks.</desc>
-                <defs>
-                  <clipPath id="medial-clip">
-                    <path d="M39 132 C38 84 72 50 123 43 C176 26 244 42 282 77 C302 96 302 125 284 144 C273 167 250 178 224 173 C200 192 172 193 148 183 C119 196 94 185 84 169 C56 171 40 153 39 132 Z"/>
-                  </clipPath>
-                </defs>
-                <rect x="0" y="0" width="340" height="245" fill="#111724"/>
-                <text x="18" y="23">MEDIAL SURFACE</text>
-                <g clip-path="url(#medial-clip)">
-                  <path class="brain-outline" d="M39 132 C38 84 72 50 123 43 C176 26 244 42 282 77 C302 96 302 125 284 144 C273 167 250 178 224 173 C200 192 172 193 148 183 C119 196 94 185 84 169 C56 171 40 153 39 132 Z"/>
-                  <ellipse class="network-visual" cx="270" cy="113" rx="25" ry="34"/>
-                  <path class="network-somato" d="M146 54 C157 65 162 82 160 102 C158 119 152 134 142 145 C132 128 130 112 131 94 C133 76 138 63 146 54 Z"/>
-                  <path class="network-dorsal" d="M177 52 C201 45 225 54 239 69 C225 81 206 85 187 80 C178 73 174 62 177 52 Z"/>
-                  <path class="network-ventral" d="M183 129 C200 116 224 116 241 126 C238 145 220 154 200 151 C190 146 184 138 183 129 Z"/>
-                  <path class="network-limbic" d="M104 146 C121 139 139 145 151 157 C149 171 136 180 121 175 C109 170 103 159 104 146 Z"/>
-                  <path class="network-control" d="M88 79 C104 64 126 64 139 77 C136 94 121 106 103 105 C91 98 86 89 88 79 Z"/>
-                  <path class="network-default" d="M164 95 C181 82 207 84 220 98 C220 115 204 127 187 123 C172 119 165 108 164 95 Z"/>
-                  <path d="M81 130 C121 107 177 101 237 119" fill="none" stroke="#101724" stroke-width="5"/>
-                </g>
-                <path d="M39 132 C38 84 72 50 123 43 C176 26 244 42 282 77 C302 96 302 125 284 144 C273 167 250 178 224 173 C200 192 172 193 148 183 C119 196 94 185 84 169 C56 171 40 153 39 132 Z" fill="none" stroke="#8290a8" stroke-width="2"/>
-                <text class="sub-label" x="38" y="222">FRONTAL</text>
-                <text class="sub-label" x="258" y="222">OCCIPITAL</text>
-              </svg>
-              <figcaption>Medial view · boundaries vary across people and atlas methods</figcaption>
-            </figure>
-          </div>
+          <figure class="motor-figure">
+            <svg viewBox="0 0 760 390" role="img" aria-labelledby="motor-title motor-description">
+              <title id="motor-title">Schematic of the human primary motor cortex body map</title>
+              <desc id="motor-description">A focused diagram of the precentral gyrus only, not a whole-brain model. The approximate somatotopic progression runs from leg and foot on the medial side, through trunk and arm to hand, face, and tongue on the lateral side. Regions overlap and are not to scale.</desc>
+              <rect x="0" y="0" width="760" height="390" rx="12" fill="#111724"/>
+              <text class="section-label" x="28" y="34">PRIMARY MOTOR CORTEX · PRE-CENTRAL GYRUS (M1)</text>
+              <text class="small-label" x="28" y="55">Focused cortical-region schematic · not a whole-brain rendering</text>
+
+              <text class="small-label" x="40" y="100">MEDIAL / MIDLINE</text>
+              <text class="small-label" x="550" y="100">LATERAL SURFACE</text>
+              <path class="motor-zone" d="M45 145 C95 122 148 128 194 140 C244 150 293 131 340 138 C389 146 425 164 470 153 C514 142 557 116 607 127 C654 137 692 166 710 196 C692 226 654 255 607 265 C557 276 514 250 470 239 C425 228 389 246 340 254 C293 261 244 242 194 252 C148 264 95 270 45 247 C29 220 29 173 45 145 Z"/>
+              <path class="sulcus" d="M53 119 C157 100 247 118 333 125 C426 132 519 114 606 111 C652 109 686 121 713 142"/>
+              <path class="cortex-edge" d="M45 145 C95 122 148 128 194 140 C244 150 293 131 340 138 C389 146 425 164 470 153 C514 142 557 116 607 127 C654 137 692 166 710 196 C692 226 654 255 607 265 C557 276 514 250 470 239 C425 228 389 246 340 254 C293 261 244 242 194 252 C148 264 95 270 45 247 C29 220 29 173 45 145 Z"/>
+              <path d="M44 195 H710" stroke="#101522" stroke-width="1" stroke-dasharray="4 7"/>
+
+              <g aria-label="Approximate medial-to-lateral body representation">
+                <circle class="map-foot" cx="90" cy="180" r="20"/>
+                <circle class="map-foot" cx="118" cy="213" r="15"/>
+                <circle class="map-trunk" cx="225" cy="196" r="21"/>
+                <circle class="map-arm" cx="338" cy="194" r="23"/>
+                <circle class="map-hand" cx="432" cy="193" r="29"/>
+                <circle class="map-face" cx="566" cy="192" r="24"/>
+                <circle class="map-face" cx="642" cy="194" r="19"/>
+                <path d="M624 217 C636 231 650 231 662 218" fill="none" stroke="#d87974" stroke-width="7" stroke-linecap="round"/>
+              </g>
+
+              <path class="callout" d="M95 158 L78 113 L59 113"/>
+              <text x="45" y="303">Leg / foot</text>
+              <path class="callout" d="M225 172 L225 123"/>
+              <text x="202" y="303">Trunk</text>
+              <path class="callout" d="M338 171 L338 123"/>
+              <text x="312" y="303">Arm</text>
+              <path class="callout" d="M432 164 L432 123"/>
+              <text x="402" y="303">Hand / fingers</text>
+              <path class="callout" d="M566 168 L566 123"/>
+              <text x="538" y="303">Face</text>
+              <path class="callout" d="M646 213 L669 257"/>
+              <text x="640" y="303">Mouth / tongue</text>
+
+              <path d="M70 337 H674" stroke="#69758b" stroke-width="1.5"/>
+              <path d="M70 337 l10 -5 v10 z M674 337 l-10 -5 v10 z" fill="#69758b"/>
+              <text class="small-label" x="255" y="363">Approximate medial → lateral somatotopic progression</text>
+              <text class="small-label" x="680" y="34" text-anchor="end">SCHEMATIC · NOT TO SCALE</text>
+            </svg>
+            <figcaption>Only the mapped cortical strip is depicted. The body-part order is a broad teaching summary; real motor representations are distributed, overlapping, and variable.</figcaption>
+          </figure>
 
           <div class="region-facts">
-            <div class="fact-grid" aria-label="Yeo functional atlas summary">
-              <div class="fact"><strong>1,000</strong><span>healthy adults in the Yeo et al. functional-connectivity analysis</span></div>
-              <div class="fact"><strong>7 networks</strong><span>broad functional organization of the cerebral cortex</span></div>
-              <div class="fact"><strong>17 networks</strong><span>finer-grained alternative parcellation</span></div>
-              <div class="fact"><strong>Human</strong><span>resting-state fMRI; networks inferred from correlated activity</span></div>
+            <div class="fact-grid" aria-label="Motor cortex mapping summary">
+              <div class="fact"><strong>Precentral gyrus</strong><span>Location of primary motor cortex (M1) on the frontal lobe</span></div>
+              <div class="fact"><strong>Contralateral</strong><span>Each hemisphere primarily controls voluntary movement on the opposite side</span></div>
+              <div class="fact"><strong>Somatotopy</strong><span>Body regions have an approximate ordered representation across M1</span></div>
+              <div class="fact"><strong>Not a 1:1 map</strong><span>Movements recruit overlapping populations and distributed circuits</span></div>
             </div>
-            <div class="network-key" aria-label="Seven cortical functional networks">
-              <span><i class="network-dot network-visual"></i>Visual</span>
-              <span><i class="network-dot network-somato"></i>Somatomotor</span>
-              <span><i class="network-dot network-dorsal"></i>Dorsal attention</span>
-              <span><i class="network-dot network-ventral"></i>Ventral attention</span>
-              <span><i class="network-dot network-limbic"></i>Limbic</span>
-              <span><i class="network-dot network-control"></i>Frontoparietal control</span>
-              <span><i class="network-dot network-default"></i>Default mode</span>
-            </div>
-            <p class="region-note">These are large-scale statistical networks, not individual neurons, synapses, or a full wiring diagram. Functional connectivity is correlation—not proof that one area directly causes another's activity. The colored regions are illustrative, not exact atlas boundaries or a subject-specific scan.</p>
+            <p class="region-note">This focuses on motor cortex—not speech cortex. Speech production involves interacting motor, language, auditory, and subcortical systems; this diagram does not map those systems or predict function for an individual.</p>
             <div class="source-links">
-              <a href="https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation_Yeo2011" target="_blank" rel="noopener noreferrer">Yeo 7/17 network atlas ↗</a>
-              <a href="https://doi.org/10.1152/jn.00338.2011" target="_blank" rel="noopener noreferrer">Yeo et al., J Neurophysiol (2011) ↗</a>
-              <a href="https://www.humanconnectome.org/study/hcp-young-adult" target="_blank" rel="noopener noreferrer">Human Connectome Project ↗</a>
+              <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey, human cortical stimulation maps ↗</a>
+              <a href="https://www.humanconnectome.org/study/hcp-young-adult" target="_blank" rel="noopener noreferrer">Human Connectome Project imaging data ↗</a>
+              <a href="https://doi.org/10.1016/j.neuroimage.2013.05.033" target="_blank" rel="noopener noreferrer">HCP task-fMRI methods ↗</a>
             </div>
           </div>
         </div>
@@ -413,6 +341,5 @@
         }
       });
     </script>
-    <script src="nerves-3d.js"></script>
   </body>
 </html>

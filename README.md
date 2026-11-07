@@ -7,32 +7,26 @@ whole brain, a medical tool, or a way to connect to or control a biological
 brain.
 
 Try the [BrainCode Playground](https://git-copilot.github.io/BrainCode/) in your
-browser. It includes a front-view, nerves-only schematic of selected major
-human nervous-system pathways alongside the simulator. The nerve-map panel is an
-interactive 3D schematic: drag to orbit, scroll or pinch to zoom, or use the
-Front, Side, and Reset views.
+browser. It includes a focused, schematic view of the human primary motor
+cortex alongside the simulator.
 
-## Human functional-atlas reference
+## Human motor cortex reference
 
-The playground shows the seven broad cortical functional networks from the
-human Yeo et al. atlas: visual, somatomotor, dorsal attention, ventral
-attention, limbic, frontoparietal control, and default mode. The atlas also
-provides a 17-network parcellation. These groupings were estimated from
-resting-state functional connectivity in 1,000 healthy adults, and the Human
-Connectome Project provides further large-scale human structural and functional
-neuroimaging data.
+The playground focuses on **primary motor cortex (M1)** in the precentral
+gyrus. Its diagram shows the classic broad medial-to-lateral somatotopic
+organization—leg/foot, trunk, arm/hand, and face/mouth—described in human
+cortical stimulation mapping and studied with modern functional imaging.
 
-The colored lateral and medial views are orientation schematics—not the
-original atlas surfaces, exact region boundaries, or individual-specific scan
-data. Functional connectivity means correlated activity; it does not by itself
-establish direct anatomical connections or causation. These datasets do not
-provide a human synapse-level whole-brain map, and BrainCode does not load or
-simulate the atlas data. This is a research reference, not a validated BTI or
-clinical model.
+This is a focused teaching schematic, not an individual brain scan, precise
+atlas boundary map, or exact body-part-to-cortex correspondence. Motor
+representations overlap and involve distributed populations. The simulator
+does not load imaging data or model real motor physiology. The diagram does not
+cover speech cortex, which involves interacting language, motor, auditory, and
+other systems; it is not a validated BTI or clinical model.
 
-Sources: [Yeo 7/17 network atlas](https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation_Yeo2011);
-[Yeo et al., *Journal of Neurophysiology* (2011)](https://doi.org/10.1152/jn.00338.2011);
-[Human Connectome Project](https://www.humanconnectome.org/study/hcp-young-adult).
+Sources: [Penfield & Boldrey, human cortical stimulation maps](https://doi.org/10.1093/brain/60.4.389);
+[Human Connectome Project](https://www.humanconnectome.org/study/hcp-young-adult);
+[HCP task-fMRI methods](https://doi.org/10.1016/j.neuroimage.2013.05.033).
 
 ## Run a simulation
 
