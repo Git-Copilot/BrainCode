@@ -1,14 +1,51 @@
 # BrainCode
 
-BrainCode is a tiny, experimental language for describing **brain-inspired
-simulations**: threshold neurons, short-term signal memory, a simple learning
-rule, and decisions. It is an educational software model, not a model of a
-whole brain, a medical tool, or a way to connect to or control a biological
-brain.
+BrainCode is an experimental **offline EEG motor-imagery prototyping workbench**
+with a small domain language for brain-inspired simulations. It runs locally in
+the browser: load EEG CSV, inspect C3/Cz/C4 signals, extract 8–13 Hz mu-band
+features, and evaluate a simple left/right baseline on held-out epochs.
 
 Try the [BrainCode Playground](https://git-copilot.github.io/BrainCode/) in your
-browser. It includes a focused, schematic view of the human primary motor
-cortex alongside the simulator.
+browser. It also includes a small example interpreter and a focused schematic
+of the human primary motor cortex.
+
+## EEG workbench
+
+The **Load synthetic demo** button generates a deterministic two-class example
+at 128 Hz. Its simulated C3/Cz/C4 signals contain 10 Hz oscillations, noise, and
+class-dependent mu-amplitude changes; the demo is illustrative, not recorded
+human EEG.
+
+To analyze your own data, import a UTF-8 CSV with a header and these columns:
+
+```csv
+time,C3,Cz,C4,label
+0.000000,2.1,1.4,-0.8,left
+0.007812,1.8,0.9,-1.2,left
+```
+
+`time` (in seconds) or `timestamp` (in seconds) must be evenly sampled at the
+selected sampling rate; timestamps are checked to be within 5% of the expected
+sample interval. C3, Cz, and C4 are required. The optional label column uses
+`left` or `right` on each sample; each epoch must be at least 80% consistently
+labeled for inclusion in evaluation. Values are passed through as-is—use
+consistent units and preprocessing. Sampling rate and epoch duration must
+produce a power-of-two sample count. Supported rates are 32–2048 Hz in the
+analysis library; the interface offers 128, 256, and 512 Hz.
+
+The baseline removes each epoch's mean, applies a Hamming window, estimates
+8–13 Hz power using an FFT, and fits a standardized nearest-centroid classifier
+on C3/C4 log-power features. It holds out the final 20% of epochs for each class
+in recording order and reports accuracy, balanced accuracy, and a confusion
+matrix. This is a simple within-recording demonstration, not a validated
+classifier; it does not perform notch/band-pass filtering, artifact rejection,
+cross-session validation, or personal calibration. Inspect and preprocess data
+appropriately before interpreting features.
+
+Processing stays in your browser tab. Files are not uploaded by the workbench.
+It has no headset or streaming connection, no real-time inference, and no
+hardware/device-control output. It is not medical software or a validated brain
+technology interface.
 
 ## Human motor cortex reference
 
@@ -19,10 +56,8 @@ cortical stimulation mapping and studied with modern functional imaging.
 
 This is a focused teaching schematic, not an individual brain scan, precise
 atlas boundary map, or exact body-part-to-cortex correspondence. Motor
-representations overlap and involve distributed populations. The simulator
-does not load imaging data or model real motor physiology. The diagram does not
-cover speech cortex, which involves interacting language, motor, auditory, and
-other systems; it is not a validated BTI or clinical model.
+representations overlap and involve distributed populations. The workbench
+does not load imaging data or model real motor physiology.
 
 Sources: [Penfield & Boldrey, human cortical stimulation maps](https://doi.org/10.1093/brain/60.4.389);
 [Human Connectome Project](https://www.humanconnectome.org/study/hcp-young-adult);
@@ -93,4 +128,5 @@ inspect.
 
 ```powershell
 python -m unittest
+node --test test_bti.js
 ```
