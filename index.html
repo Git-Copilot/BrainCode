@@ -70,6 +70,27 @@
       .legend-swatch { width: 18px; height: 3px; border-radius: 2px; background: #78e1c0; }
       .legend-swatch.peripheral { background: #f0b970; }
       .nerves-caption { margin: 0; border-top: 1px solid #ffffff12; padding: 12px 18px 16px; color: #8995ad; font-size: .72rem; line-height: 1.55; }
+      .mapped-region { margin-top: 18px; overflow: hidden; }
+      .region-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 20px 22px; border-bottom: 1px solid #ffffff12; }
+      .region-title { display: grid; gap: 7px; }
+      .region-title p { max-width: 760px; margin: 0; color: #aeb9ce; font-size: .86rem; line-height: 1.6; }
+      .dataset-tag { border: 1px solid #79dfbe40; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+      .region-content { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap: 20px; padding: 20px; }
+      .cortex-figure { margin: 0; overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #111724; }
+      .cortex-figure svg { display: block; width: 100%; height: auto; }
+      .cortex-figure figcaption { border-top: 1px solid #ffffff12; padding: 10px 12px; color: #8995ad; font-size: .72rem; line-height: 1.5; }
+      .cortex-layer { stroke: #101522; stroke-width: 2; }
+      .layer-label { fill: #edf2ff; font: 13px ui-sans-serif, system-ui, sans-serif; font-weight: 650; }
+      .layer-note { fill: #aeb9ce; font: 11px ui-sans-serif, system-ui, sans-serif; }
+      .region-label { fill: #d7e1f3; font: 12px ui-sans-serif, system-ui, sans-serif; font-weight: 650; }
+      .region-detail { fill: #8995ad; font: 10px ui-sans-serif, system-ui, sans-serif; }
+      .region-facts { display: grid; align-content: start; gap: 14px; }
+      .fact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .fact { border: 1px solid #ffffff12; border-radius: 11px; padding: 13px; background: #111724; }
+      .fact strong { display: block; color: #9ce8d2; font-size: 1.15rem; }
+      .fact span { display: block; margin-top: 5px; color: #aeb9ce; font-size: .73rem; line-height: 1.45; }
+      .region-note { margin: 0; border-left: 2px solid #f0b970; padding: 2px 0 2px 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.6; }
+      .source-links { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: .78rem; }
       .disclaimer { margin: 20px 2px 0; color: #8591a8; font-size: .79rem; line-height: 1.6; }
       footer { margin-top: 25px; color: #8995ad; font-size: .8rem; }
       a { color: #a3ead2; text-decoration: none; }
@@ -77,6 +98,7 @@
       @media (max-width: 760px) {
         main { width: min(100% - 24px, 600px); padding-top: 32px; }
         .workspace, .grid { grid-template-columns: 1fr; }
+        .region-content { grid-template-columns: 1fr; padding: 14px; }
         .nerves-panel { position: static; }
         .nerve-model { max-height: 680px; }
         textarea { min-height: 300px; }
@@ -144,6 +166,83 @@
           </div>
           <p class="nerves-caption">Mapped regions: brain, spinal cord, cranial branches, brachial plexus, intercostal nerves, lumbar and sacral plexuses, sciatic nerves, and limb branches. Drag to rotate; scroll or pinch to zoom. Simplified educational anatomy; not every nerve or root is shown.</p>
         </aside>
+      </section>
+
+      <section class="panel mapped-region" aria-labelledby="region-title">
+        <div class="region-header">
+          <div class="region-title">
+            <h2 id="region-title">A mapped brain region: mouse visual cortex (V1)</h2>
+            <p>For a research-grounded reference, BrainCode highlights the MICrONS functional-connectomics dataset. It combines visual-response recordings and synapse-level anatomy from the same mouse cortical tissue; it is not a human brain map or a complete working brain simulation.</p>
+          </div>
+          <span class="dataset-tag">MICrONS · mouse · multimodal connectomics</span>
+        </div>
+        <div class="region-content">
+          <figure class="cortex-figure">
+            <svg viewBox="0 0 700 340" role="img" aria-labelledby="cortex-title cortex-description">
+              <title id="cortex-title">MICrONS mouse visual cortex dataset coverage</title>
+              <desc id="cortex-description">Schematic showing six cortical layers sampled in primary visual cortex, V1, and three higher visual areas, LM, AL, and RL. The drawing is not to scale and does not show measured cell positions or connections.</desc>
+              <defs>
+                <linearGradient id="cortex-glow" x1="0" x2="1">
+                  <stop offset="0" stop-color="#83e2c2" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#83e2c2" stop-opacity=".02"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="700" height="340" rx="12" fill="#111724"/>
+              <text x="32" y="33" class="region-label">MOUSE CORTEX · DATASET COVERAGE (SCHEMATIC)</text>
+              <text x="32" y="58" class="region-detail">All six layers of V1, plus three higher visual areas within the imaged volume</text>
+              <text x="38" y="94" class="region-detail">CORTICAL SURFACE</text>
+              <path d="M38 104 H430" stroke="#69758b" stroke-width="1"/>
+              <g transform="translate(38 114)">
+                <rect class="cortex-layer" x="0" y="0" width="392" height="28" fill="#365b68"/>
+                <rect class="cortex-layer" x="0" y="28" width="392" height="42" fill="#28586a"/>
+                <rect class="cortex-layer" x="0" y="70" width="392" height="37" fill="#334c78"/>
+                <rect class="cortex-layer" x="0" y="107" width="392" height="47" fill="#4a4778"/>
+                <rect class="cortex-layer" x="0" y="154" width="392" height="30" fill="#684d77"/>
+                <rect class="cortex-layer" x="0" y="184" width="392" height="40" fill="#76545d"/>
+                <rect x="0" y="0" width="392" height="224" fill="url(#cortex-glow)"/>
+                <text x="14" y="19" class="layer-label">Layer 1</text>
+                <text x="14" y="54" class="layer-label">Layer 2/3</text>
+                <text x="14" y="94" class="layer-label">Layer 4</text>
+                <text x="14" y="136" class="layer-label">Layer 5</text>
+                <text x="14" y="176" class="layer-label">Layer 6</text>
+                <text x="364" y="19" class="layer-note" text-anchor="end">V1</text>
+                <text x="364" y="54" class="layer-note" text-anchor="end">V1</text>
+                <text x="364" y="94" class="layer-note" text-anchor="end">V1</text>
+                <text x="364" y="136" class="layer-note" text-anchor="end">V1</text>
+                <text x="364" y="176" class="layer-note" text-anchor="end">V1</text>
+                <text x="364" y="212" class="layer-note" text-anchor="end">V1</text>
+              </g>
+              <text x="452" y="119" class="region-detail">HIGHER VISUAL AREAS</text>
+              <g>
+                <rect x="452" y="132" width="210" height="48" rx="8" fill="#202c40" stroke="#ffffff20"/>
+                <rect x="452" y="189" width="210" height="48" rx="8" fill="#202c40" stroke="#ffffff20"/>
+                <rect x="452" y="246" width="210" height="48" rx="8" fill="#202c40" stroke="#ffffff20"/>
+                <text x="466" y="153" class="region-label">LM</text>
+                <text x="500" y="153" class="region-detail">lateral visual area</text>
+                <text x="466" y="210" class="region-label">AL</text>
+                <text x="500" y="210" class="region-detail">anterolateral visual area</text>
+                <text x="466" y="267" class="region-label">RL</text>
+                <text x="500" y="267" class="region-detail">rostrolateral visual area</text>
+              </g>
+              <text x="38" y="318" class="region-detail">Layer bands show coverage only — not exact thickness, cell density, or measured wiring.</text>
+            </svg>
+            <figcaption>MICrONS covers V1 across all six cortical layers and includes LM, AL, and RL. This diagram is an explanatory schematic, not a reconstruction of the dataset volume.</figcaption>
+          </figure>
+
+          <div class="region-facts">
+            <div class="fact-grid" aria-label="MICrONS dataset scale">
+              <div class="fact"><strong>~75,000</strong><span>pyramidal neurons with functional visual-response recordings (dataset estimate)</span></div>
+              <div class="fact"><strong>~200,000</strong><span>cells in the anatomical reconstruction (dataset estimate)</span></div>
+              <div class="fact"><strong>523 million+</strong><span>synapses detected in the reconstructed volume</span></div>
+              <div class="fact"><strong>~1 mm³</strong><span>cortical tissue from a postnatal-day-87 mouse</span></div>
+            </div>
+            <p class="region-note">Functional recordings and electron microscopy were acquired from the same tissue, but direct functional-to-anatomical cell matching is available only for a subset. This dataset is from mouse, not human, and does not provide a validated BTI or clinical model.</p>
+            <div class="source-links">
+              <a href="https://www.microns-explorer.org/cortical-mm3" target="_blank" rel="noopener noreferrer">MICrONS dataset &amp; explorer ↗</a>
+              <a href="https://doi.org/10.1038/s41586-025-08790-w" target="_blank" rel="noopener noreferrer">MICrONS Consortium, Nature (2025) ↗</a>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="panel notes" aria-label="How the simulation works">

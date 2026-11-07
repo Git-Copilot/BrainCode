@@ -12,6 +12,26 @@ human nervous-system pathways alongside the simulator. The nerve-map panel is an
 interactive 3D schematic: drag to orbit, scroll or pinch to zoom, or use the
 Front, Side, and Reset views.
 
+## Mapped brain reference
+
+The playground includes a schematic coverage view for the **MICrONS mouse
+visual-cortex dataset**. MICrONS paired visual-response recordings with
+electron-microscopy anatomy in the same cortical tissue, spanning all six
+layers of primary visual cortex (V1) and higher visual areas LM, AL, and RL.
+The dataset site reports roughly 75,000 functionally recorded pyramidal
+neurons, over 200,000 reconstructed cells, and more than 523 million detected
+synapses in approximately 1 mm³ of cortex from a P87 mouse. Direct matching
+between functional recordings and reconstructed cells is available only for a
+subset.
+
+The illustration is a coverage schematic, not the measured cell layout or a
+connectivity reconstruction. BrainCode's interpreter does not load or simulate
+MICrONS data. This mouse dataset is a research reference—not a human brain map,
+a validated brain-tech interface model, or a clinical tool.
+
+Sources: [MICrONS dataset and explorer](https://www.microns-explorer.org/cortical-mm3);
+[MICrONS Consortium, *Nature* (2025)](https://doi.org/10.1038/s41586-025-08790-w).
+
 ## Run a simulation
 
 Requires Python 3.10 or newer; there are no third-party dependencies.
