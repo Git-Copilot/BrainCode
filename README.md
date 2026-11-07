@@ -12,25 +12,27 @@ human nervous-system pathways alongside the simulator. The nerve-map panel is an
 interactive 3D schematic: drag to orbit, scroll or pinch to zoom, or use the
 Front, Side, and Reset views.
 
-## Mapped brain reference
+## Human functional-atlas reference
 
-The playground includes a schematic coverage view for the **MICrONS mouse
-visual-cortex dataset**. MICrONS paired visual-response recordings with
-electron-microscopy anatomy in the same cortical tissue, spanning all six
-layers of primary visual cortex (V1) and higher visual areas LM, AL, and RL.
-The dataset site reports roughly 75,000 functionally recorded pyramidal
-neurons, over 200,000 reconstructed cells, and more than 523 million detected
-synapses in approximately 1 mm³ of cortex from a P87 mouse. Direct matching
-between functional recordings and reconstructed cells is available only for a
-subset.
+The playground shows the seven broad cortical functional networks from the
+human Yeo et al. atlas: visual, somatomotor, dorsal attention, ventral
+attention, limbic, frontoparietal control, and default mode. The atlas also
+provides a 17-network parcellation. These groupings were estimated from
+resting-state functional connectivity in 1,000 healthy adults, and the Human
+Connectome Project provides further large-scale human structural and functional
+neuroimaging data.
 
-The illustration is a coverage schematic, not the measured cell layout or a
-connectivity reconstruction. BrainCode's interpreter does not load or simulate
-MICrONS data. This mouse dataset is a research reference—not a human brain map,
-a validated brain-tech interface model, or a clinical tool.
+The colored lateral and medial views are orientation schematics—not the
+original atlas surfaces, exact region boundaries, or individual-specific scan
+data. Functional connectivity means correlated activity; it does not by itself
+establish direct anatomical connections or causation. These datasets do not
+provide a human synapse-level whole-brain map, and BrainCode does not load or
+simulate the atlas data. This is a research reference, not a validated BTI or
+clinical model.
 
-Sources: [MICrONS dataset and explorer](https://www.microns-explorer.org/cortical-mm3);
-[MICrONS Consortium, *Nature* (2025)](https://doi.org/10.1038/s41586-025-08790-w).
+Sources: [Yeo 7/17 network atlas](https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation_Yeo2011);
+[Yeo et al., *Journal of Neurophysiology* (2011)](https://doi.org/10.1152/jn.00338.2011);
+[Human Connectome Project](https://www.humanconnectome.org/study/hcp-young-adult).
 
 ## Run a simulation
 
