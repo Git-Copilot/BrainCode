@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101522">
-    <meta name="description" content="Offline EEG motor-imagery prototyping and BrainCode interpreter.">
-    <title>BrainCode BTI Lab</title>
+    <meta name="description" content="BrainCode is a local biotech protocol language and transparent workflow simulator.">
+    <title>BrainCode Biotech Lab</title>
     <style>
       :root {
         color-scheme: dark;
@@ -16,654 +16,140 @@
       }
 
       * { box-sizing: border-box; }
-
       body {
-        margin: 0;
         min-width: 320px;
+        margin: 0;
         background:
           radial-gradient(ellipse at 12% 0%, #31245b 0, transparent 38rem),
           radial-gradient(ellipse at 100% 20%, #123d50 0, transparent 36rem),
           #101522;
       }
-
-      main { width: min(1460px, calc(100% - 40px)); margin: 0 auto; padding: 52px 0 42px; }
+      main { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 52px 0 42px; }
       .eyebrow { color: #9ce8d2; font-size: .76rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
       h1 { margin: 10px 0 8px; font-size: clamp(2.4rem, 6vw, 4.2rem); letter-spacing: -.055em; }
-      .intro { max-width: 690px; color: #b6c0d5; font-size: 1.08rem; line-height: 1.65; }
-      .badge { display: inline-flex; gap: 8px; align-items: center; border: 1px solid #ffffff20; border-radius: 999px; padding: 7px 11px; color: #d3ddf2; font-size: .78rem; }
-      .badge::before { width: 7px; height: 7px; border-radius: 50%; background: #79dfbe; content: ""; }
-      .workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 30px; }
-      .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr); gap: 18px; }
-      .panel { border: 1px solid #ffffff18; border-radius: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000025; }
-      .editor-panel { overflow: hidden; }
-      .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; border-bottom: 1px solid #ffffff12; color: #d8e1f3; font-size: .88rem; font-weight: 650; }
-      .file-label { color: #8995ad; font-size: .75rem; font-weight: 500; }
-      textarea { display: block; width: 100%; min-height: 315px; resize: vertical; border: 0; outline: 0; padding: 20px; background: #111724; color: #c9e6d9; font: 13px/1.7 "SFMono-Regular", Consolas, "Liberation Mono", monospace; tab-size: 2; }
-      .controls { display: grid; gap: 14px; padding: 19px; }
-      label { display: grid; gap: 8px; color: #c6d0e3; font-size: .85rem; font-weight: 600; }
-      input { width: 100%; border: 1px solid #ffffff20; border-radius: 9px; padding: 11px 12px; outline: none; background: #111724; color: #edf2ff; font: 14px ui-monospace, Consolas, monospace; }
-      input:focus, textarea:focus { box-shadow: inset 0 0 0 1px #79dfbe; }
-      .hint { margin: -4px 0 0; color: #8d99b0; font-size: .76rem; line-height: 1.45; }
-      button { min-height: 44px; border: 0; border-radius: 10px; padding: 11px 16px; background: #83e2c2; color: #10251f; cursor: pointer; font-size: .9rem; font-weight: 750; }
+      h2 { margin: 0; font-size: 1.08rem; }
+      .intro { max-width: 720px; color: #b6c0d5; font-size: 1.08rem; line-height: 1.65; }
+      .panel { margin-top: 24px; overflow: hidden; border: 1px solid #ffffff18; border-radius: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000025; }
+      .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 17px 20px; border-bottom: 1px solid #ffffff12; }
+      .panel-head p { margin: 6px 0 0; color: #aeb9ce; font-size: .84rem; line-height: 1.55; }
+      .tag { flex: 0 0 auto; border: 1px solid #79dfbe40; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .72rem; }
+      .editor { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); }
+      .editor-main { min-width: 0; border-right: 1px solid #ffffff12; }
+      .file-bar { display: flex; justify-content: space-between; gap: 12px; padding: 13px 18px; color: #d8e1f3; font-size: .8rem; }
+      .file-name { color: #8995ad; }
+      textarea { display: block; width: 100%; min-height: 420px; resize: vertical; border: 0; border-top: 1px solid #ffffff12; outline: 0; padding: 19px; background: #111724; color: #c9e6d9; font: 13px/1.75 "SFMono-Regular", Consolas, "Liberation Mono", monospace; tab-size: 2; }
+      textarea:focus { box-shadow: inset 0 0 0 1px #79dfbe; }
+      .side { display: flex; flex-direction: column; padding: 18px; }
+      .side h3 { margin: 0 0 10px; color: #e7edfa; font-size: .88rem; }
+      .side p { margin: 0 0 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.6; }
+      code { color: #9ce8d2; font: .95em "SFMono-Regular", Consolas, monospace; }
+      .run { display: grid; gap: 9px; margin-top: auto; padding-top: 20px; }
+      button { min-height: 44px; border: 0; border-radius: 10px; padding: 11px 15px; background: #83e2c2; color: #10251f; cursor: pointer; font-size: .88rem; font-weight: 750; }
       button:hover { background: #a0f1d6; }
+      button.secondary { border: 1px solid #ffffff20; background: #222c3d; color: #d7e1f3; }
+      button.secondary:hover { background: #303e53; }
       button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-      .output { min-height: 157px; margin: 0 18px 18px; overflow: auto; border: 1px solid #ffffff12; border-radius: 10px; padding: 14px; background: #111724; color: #bac6dc; font: 12px/1.7 "SFMono-Regular", Consolas, monospace; white-space: pre-wrap; }
-      .output .success { color: #97e9ca; }
-      .output .error { color: #ff9a9a; }
-      h2 { margin: 0; font-size: 1rem; }
-      .notes { display: grid; gap: 12px; padding: 19px; }
-      .notes p { margin: 0; color: #aeb9ce; font-size: .88rem; line-height: 1.6; }
-      .notes strong { color: #e7edfa; }
-      .mapped-region { margin-top: 18px; overflow: hidden; }
-      .region-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 20px 22px; border-bottom: 1px solid #ffffff12; }
-      .region-title { display: grid; gap: 7px; }
-      .region-title p { max-width: 760px; margin: 0; color: #aeb9ce; font-size: .86rem; line-height: 1.6; }
-      .dataset-tag { border: 1px solid #79dfbe40; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .72rem; font-weight: 700; white-space: nowrap; }
-      .region-content { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap: 20px; padding: 20px; }
-      .motor-figure { margin: 0; overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #111724; }
-      .motor-figure svg { display: block; width: 100%; height: auto; }
-      .motor-figure figcaption { border-top: 1px solid #ffffff12; padding: 10px 12px; color: #8995ad; font-size: .72rem; line-height: 1.5; }
-      .motor-figure text { fill: #d7e1f3; font: 12px ui-sans-serif, system-ui, sans-serif; }
-      .motor-figure .small-label { fill: #aeb9ce; font-size: 10px; }
-      .motor-figure .section-label { fill: #9ce8d2; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
-      .motor-figure .callout { fill: none; stroke: #8995ad; stroke-width: 1.4; }
-      .motor-figure .cortex-edge { fill: none; stroke: #8794a8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-      .motor-figure .sulcus { fill: none; stroke: #101522; stroke-width: 8; stroke-linecap: round; }
-      .motor-figure .motor-zone { fill: #78e1c0; fill-opacity: .55; stroke: #9ce8d2; stroke-width: 2; }
-      .motor-figure .map-foot { fill: #77b76b; }
-      .motor-figure .map-trunk { fill: #e6a84e; }
-      .motor-figure .map-arm { fill: #4f8dca; }
-      .motor-figure .map-hand { fill: #bb83c9; }
-      .motor-figure .map-face { fill: #d87974; }
-      .region-facts { display: grid; align-content: start; gap: 14px; }
-      .fact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .fact { border: 1px solid #ffffff12; border-radius: 11px; padding: 13px; background: #111724; }
-      .fact strong { display: block; color: #9ce8d2; font-size: 1.15rem; }
-      .fact span { display: block; margin-top: 5px; color: #aeb9ce; font-size: .73rem; line-height: 1.45; }
-      .region-note { margin: 0; border-left: 2px solid #f0b970; padding: 2px 0 2px 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.6; }
-      .source-links { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: .78rem; }
-      .bti-lab { margin-top: 24px; overflow: hidden; }
-      .bti-lab .panel-head { align-items: flex-start; }
-      .bti-head-copy { display: grid; gap: 6px; }
-      .bti-head-copy p { margin: 0; color: #aeb9ce; font-size: .81rem; font-weight: 450; line-height: 1.55; }
-      .offline-tag { flex: 0 0 auto; border: 1px solid #79dfbe40; border-radius: 999px; padding: 6px 9px; color: #9ce8d2; font-size: .7rem; }
-      .bti-body { display: grid; gap: 15px; padding: 18px; }
-      .bti-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .7fr) auto; gap: 14px; align-items: end; }
-      .bti-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-      .bti-actions button, .file-button { min-height: 40px; padding: 9px 13px; font-size: .78rem; }
-      .bti-actions .secondary { border: 1px solid #ffffff20; background: #222c3d; color: #d7e1f3; }
-      .bti-actions .secondary:hover { background: #303e53; }
-      .file-button { display: inline-flex; align-items: center; justify-content: center; border: 1px solid #ffffff20; border-radius: 10px; background: #222c3d; color: #d7e1f3; cursor: pointer; font-size: .78rem; font-weight: 700; }
-      .file-button:hover { background: #303e53; }
-      .file-button input { display: none; }
-      .bti-settings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .bti-settings label { gap: 6px; font-size: .76rem; }
-      select { width: 100%; min-height: 40px; border: 1px solid #ffffff20; border-radius: 9px; padding: 8px 10px; background: #111724; color: #edf2ff; font: 13px ui-sans-serif, system-ui, sans-serif; }
-      select:focus-visible, input:focus-visible { outline: 2px solid #83e2c2; outline-offset: 2px; }
-      .bti-status { min-height: 20px; margin: 0; color: #aeb9ce; font-size: .79rem; }
-      .bti-status.error { color: #ff9a9a; }
-      .bti-status.success { color: #97e9ca; }
-      .bti-plot-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); gap: 14px; }
-      .plot-card { min-width: 0; overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #111724; }
-      .plot-title { display: flex; justify-content: space-between; gap: 10px; padding: 12px 14px; color: #d7e1f3; font-size: .79rem; font-weight: 650; }
-      .plot-title span { color: #8995ad; font-size: .7rem; font-weight: 450; }
-      .bti-canvas { display: block; width: 100%; height: 210px; }
-      .bti-canvas.features { height: 210px; }
-      .bti-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-      .bti-metric { border: 1px solid #ffffff12; border-radius: 11px; padding: 12px; background: #111724; }
-      .bti-metric strong { display: block; color: #9ce8d2; font-size: 1.05rem; }
-      .bti-metric span { display: block; margin-top: 5px; color: #aeb9ce; font-size: .7rem; line-height: 1.4; }
-      .bti-details { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; }
-      .bti-explanation { margin: 0; color: #aeb9ce; font-size: .76rem; line-height: 1.6; }
-      .confusion { border-collapse: collapse; color: #c6d0e3; font-size: .73rem; text-align: center; }
-      .confusion th, .confusion td { border: 1px solid #ffffff18; padding: 6px 9px; }
-      .confusion th { color: #8995ad; font-weight: 550; }
-      .bti-caveat { margin: 0; border-left: 2px solid #f0b970; padding: 2px 0 2px 12px; color: #aeb9ce; font-size: .74rem; line-height: 1.6; }
-      .bti-download { color: #9ce8d2; font-size: .76rem; }
-      .disclaimer { margin: 20px 2px 0; color: #8591a8; font-size: .79rem; line-height: 1.6; }
-      footer { margin-top: 25px; color: #8995ad; font-size: .8rem; }
+      .result-head { padding: 17px 20px 10px; color: #d8e1f3; font-size: .84rem; font-weight: 700; }
+      .output { min-height: 170px; margin: 0 18px 18px; overflow: auto; border: 1px solid #ffffff12; border-radius: 10px; padding: 15px; background: #111724; color: #bac6dc; font: 12px/1.8 "SFMono-Regular", Consolas, monospace; white-space: pre-wrap; }
+      .output.success { color: #b9d8ce; }
+      .output.error { color: #ff9a9a; }
+      .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+      .note { border: 1px solid #ffffff12; border-radius: 12px; padding: 15px; background: #171e2de8; }
+      .note strong { display: block; margin-bottom: 6px; color: #9ce8d2; font-size: .84rem; }
+      .note span { color: #aeb9ce; font-size: .76rem; line-height: 1.55; }
+      .notice { margin: 20px 2px 0; border-left: 2px solid #f0b970; padding: 3px 0 3px 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.65; }
+      footer { margin-top: 23px; color: #8995ad; font-size: .8rem; }
       a { color: #a3ead2; text-decoration: none; }
       a:hover { text-decoration: underline; }
       @media (max-width: 760px) {
         main { width: min(100% - 24px, 600px); padding-top: 32px; }
-        .workspace, .grid { grid-template-columns: 1fr; }
-        .bti-controls, .bti-plot-grid, .bti-details { grid-template-columns: 1fr; }
-        .bti-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .bti-actions { align-items: stretch; }
-        .bti-actions button, .file-button { flex: 1 1 135px; }
-        .confusion { justify-self: start; }
-        .region-content { grid-template-columns: 1fr; padding: 14px; }
-        textarea { min-height: 300px; }
+        .editor { grid-template-columns: 1fr; }
+        .editor-main { border-right: 0; }
+        textarea { min-height: 360px; }
+        .notes { grid-template-columns: 1fr; }
+        .panel-head { align-items: flex-start; }
       }
     </style>
   </head>
   <body>
     <main>
-      <span class="badge">A tiny brain-inspired simulation language</span>
-      <h1>BrainCode BTI Lab</h1>
-      <p class="intro">An offline, transparent EEG motor-imagery prototyping bench. Load labeled signal data, inspect channels, extract features, and test a simple classifier—without sending brain data to a server.</p>
+      <span class="eyebrow">BrainCode · biotech workflow language</span>
+      <h1>Code a protocol.<br>See what it does.</h1>
+      <p class="intro">Write a small biotech-style protocol with samples, reagents, transfers, mixing, incubation, and measurements. BrainCode checks the steps and runs a transparent local simulation in your browser.</p>
 
-      <section class="panel bti-lab" aria-labelledby="bti-title">
+      <section class="panel" aria-labelledby="editor-title">
         <div class="panel-head">
-          <div class="bti-head-copy">
-            <h2 id="bti-title">EEG motor-imagery workbench</h2>
-            <p>Start with a deterministic synthetic demo or import a CSV containing sampled C3, Cz, and C4 EEG and left/right labels.</p>
+          <div>
+            <h2 id="editor-title">Protocol playground</h2>
+            <p>Edit the example or write your own. The simulator models liquid volume and a fictional signal tracer; it does not model real biology.</p>
           </div>
-          <span class="offline-tag">Runs locally in your browser</span>
+          <span class="tag">Local simulation</span>
         </div>
-        <div class="bti-body">
-          <div class="bti-controls">
-            <div class="bti-actions">
-              <button id="bti-demo" type="button">Load synthetic demo</button>
-              <label class="file-button">Import labeled CSV<input id="bti-file" type="file" accept=".csv,text/csv"></label>
-              <button id="bti-analyze" class="secondary" type="button" disabled>Analyze data</button>
-            </div>
-            <div class="bti-settings">
-              <label for="bti-rate">Sampling rate<select id="bti-rate"><option value="128">128 Hz</option><option value="256">256 Hz</option><option value="512">512 Hz</option></select></label>
-              <label for="bti-epoch">Epoch duration<select id="bti-epoch"><option value="1">1 second</option><option value="2" selected>2 seconds</option><option value="4">4 seconds</option><option value="8">8 seconds</option></select></label>
-            </div>
-            <a id="bti-download" class="bti-download" href="#" hidden>Download demo CSV</a>
+        <div class="editor">
+          <div class="editor-main">
+            <div class="file-bar"><span>Protocol source</span><span class="file-name">demo.protocol</span></div>
+            <textarea id="source" aria-label="Biotech protocol source" spellcheck="false">protocol DemoAssay:
+  sample specimen volume=50 uL signal=0.72
+  reagent buffer volume=200 uL
+
+  step prepare:
+    transfer 100 uL from buffer to specimen
+    mix specimen for 30 seconds
+  step read:
+    incubate specimen for 5 minutes at 25 C
+    measure signal of specimen as response
+  report response</textarea>
           </div>
-          <p id="bti-status" class="bti-status" role="status" aria-live="polite">No EEG loaded. Load the synthetic demo to explore the full pipeline.</p>
-          <div class="bti-plot-grid">
-            <div class="plot-card">
-              <div class="plot-title">EEG sample <span id="bti-trace-caption">C3 · Cz · C4</span></div>
-              <canvas id="bti-trace" class="bti-canvas" aria-label="Plot of sample EEG channels C3, Cz, and C4"></canvas>
+          <aside class="side" aria-label="Language reference">
+            <h3>Language basics</h3>
+            <p><code>sample name volume=50 uL signal=0.72</code><br>Declares a simulated sample and its normalized tracer signal.</p>
+            <p><code>reagent name volume=200 uL</code><br>Declares a liquid inventory. Optional <code>signal=</code> lets you model tracer dilution.</p>
+            <p><code>step name:</code> groups ordered operations. Use <code>transfer</code>, <code>mix</code>, <code>incubate</code>, then <code>measure signal</code> and <code>report</code>.</p>
+            <div class="run">
+              <button id="run" type="button">Run protocol simulation</button>
+              <button id="reset" class="secondary" type="button">Reset example</button>
             </div>
-            <div class="plot-card">
-              <div class="plot-title">8–13 Hz mu-band features <span>log power · C3 vs C4</span></div>
-              <canvas id="bti-features" class="bti-canvas features" aria-label="Scatter plot of motor imagery mu-band features"></canvas>
-            </div>
-          </div>
-          <div id="bti-metrics" class="bti-metrics" aria-label="Model evaluation results"></div>
-          <div class="bti-details">
-            <p id="bti-explanation" class="bti-explanation">This deliberately small baseline removes each epoch’s mean, applies a Hamming window, estimates 8–13 Hz power with an FFT, then uses a standardized nearest-centroid classifier. Labeled data is split by epoch into training and held-out test sets.</p>
-            <table id="bti-confusion" class="confusion" aria-label="Held-out confusion matrix"></table>
-          </div>
-          <p class="bti-caveat">Research prototype only. It accepts offline CSV; it does not connect to EEG hardware, perform clinical interpretation, or send commands to a person/device. Synthetic accuracy is not evidence of real-world performance. Use properly consented, de-identified data and handle it under your research privacy rules.</p>
+          </aside>
         </div>
+        <div class="result-head">Simulation trace and remaining volumes</div>
+        <pre id="output" class="output" role="status" aria-live="polite">Ready. Run the example to inspect its simulated steps.</pre>
       </section>
 
-      <section class="workspace" aria-label="BrainCode playground">
-        <div class="grid">
-          <div class="panel editor-panel">
-            <div class="panel-head"><span>BrainCode editor</span><span class="file-label">simple_perceiver.brain</span></div>
-              <textarea id="source" aria-label="BrainCode source" spellcheck="false">brain SimplePerceiver:
-  input stimulus: Signal
-  memory recent(capacity=8)
-  neuron detector(threshold=0.65)
-  state attention = 0.0
-
-  on stimulus as signal:
-    const response = detector.fire(signal)
-    recent.store(response)
-    attention = learn(attention, from=response, rate=0.4)
-    if attention > 0.5:
-      decide "notice"</textarea>
-          </div>
-
-          <div class="panel">
-            <div class="panel-head"><h2>Run a simulation</h2></div>
-            <form id="runner" class="controls">
-              <label for="signals">Input signals</label>
-              <input id="signals" value="0.9, 0.8, 0.2" inputmode="decimal" autocomplete="off">
-              <p class="hint">Comma-separated values from 0 to 1. Try changing the source or signal sequence.</p>
-              <button type="submit">Run BrainCode</button>
-            </form>
-            <div id="output" class="output" role="status" aria-live="polite">Ready. Run the example to see each step.</div>
-          </div>
-        </div>
-
+      <section class="notes" aria-label="Supported protocol concepts">
+        <div class="note"><strong>Samples &amp; reagents</strong><span>Declare starting volumes and a normalized simulation-only signal. Units support microliters (uL) and milliliters (mL).</span></div>
+        <div class="note"><strong>Checked operations</strong><span>Transfers conserve volume, prevent overdraw, and blend the simulated tracer value. Steps run in the order written.</span></div>
+        <div class="note"><strong>Measurements &amp; reports</strong><span>Measure the simulated signal, name the result, and report it. No network, lab equipment, or external service is involved.</span></div>
       </section>
 
-      <section class="panel mapped-region" aria-labelledby="region-title">
-        <div class="region-header">
-          <div class="region-title">
-            <h2 id="region-title">Mapped human brain region: primary motor cortex (M1)</h2>
-            <p>This view focuses only on the precentral gyrus and its well-established, broad body-part organization. It is an orientation schematic—not an individual brain scan, stimulation map, or exact cortical boundary map.</p>
-          </div>
-          <span class="dataset-tag">Human · motor mapping</span>
-        </div>
-        <div class="region-content">
-          <figure class="motor-figure">
-            <svg viewBox="0 0 760 390" role="img" aria-labelledby="motor-title motor-description">
-              <title id="motor-title">Schematic of the human primary motor cortex body map</title>
-              <desc id="motor-description">A focused diagram of the precentral gyrus only, not a whole-brain model. The approximate somatotopic progression runs from leg and foot on the medial side, through trunk and arm to hand, face, and tongue on the lateral side. Regions overlap and are not to scale.</desc>
-              <rect x="0" y="0" width="760" height="390" rx="12" fill="#111724"/>
-              <text class="section-label" x="28" y="34">PRIMARY MOTOR CORTEX · PRE-CENTRAL GYRUS (M1)</text>
-              <text class="small-label" x="28" y="55">Focused cortical-region schematic · not a whole-brain rendering</text>
-
-              <text class="small-label" x="40" y="100">MEDIAL / MIDLINE</text>
-              <text class="small-label" x="550" y="100">LATERAL SURFACE</text>
-              <path class="motor-zone" d="M45 145 C95 122 148 128 194 140 C244 150 293 131 340 138 C389 146 425 164 470 153 C514 142 557 116 607 127 C654 137 692 166 710 196 C692 226 654 255 607 265 C557 276 514 250 470 239 C425 228 389 246 340 254 C293 261 244 242 194 252 C148 264 95 270 45 247 C29 220 29 173 45 145 Z"/>
-              <path class="sulcus" d="M53 119 C157 100 247 118 333 125 C426 132 519 114 606 111 C652 109 686 121 713 142"/>
-              <path class="cortex-edge" d="M45 145 C95 122 148 128 194 140 C244 150 293 131 340 138 C389 146 425 164 470 153 C514 142 557 116 607 127 C654 137 692 166 710 196 C692 226 654 255 607 265 C557 276 514 250 470 239 C425 228 389 246 340 254 C293 261 244 242 194 252 C148 264 95 270 45 247 C29 220 29 173 45 145 Z"/>
-              <path d="M44 195 H710" stroke="#101522" stroke-width="1" stroke-dasharray="4 7"/>
-
-              <g aria-label="Approximate medial-to-lateral body representation">
-                <circle class="map-foot" cx="90" cy="180" r="20"/>
-                <circle class="map-foot" cx="118" cy="213" r="15"/>
-                <circle class="map-trunk" cx="225" cy="196" r="21"/>
-                <circle class="map-arm" cx="338" cy="194" r="23"/>
-                <circle class="map-hand" cx="432" cy="193" r="29"/>
-                <circle class="map-face" cx="566" cy="192" r="24"/>
-                <circle class="map-face" cx="642" cy="194" r="19"/>
-                <path d="M624 217 C636 231 650 231 662 218" fill="none" stroke="#d87974" stroke-width="7" stroke-linecap="round"/>
-              </g>
-
-              <path class="callout" d="M95 158 L78 113 L59 113"/>
-              <text x="45" y="303">Leg / foot</text>
-              <path class="callout" d="M225 172 L225 123"/>
-              <text x="202" y="303">Trunk</text>
-              <path class="callout" d="M338 171 L338 123"/>
-              <text x="312" y="303">Arm</text>
-              <path class="callout" d="M432 164 L432 123"/>
-              <text x="402" y="303">Hand / fingers</text>
-              <path class="callout" d="M566 168 L566 123"/>
-              <text x="538" y="303">Face</text>
-              <path class="callout" d="M646 213 L669 257"/>
-              <text x="640" y="303">Mouth / tongue</text>
-
-              <path d="M70 337 H674" stroke="#69758b" stroke-width="1.5"/>
-              <path d="M70 337 l10 -5 v10 z M674 337 l-10 -5 v10 z" fill="#69758b"/>
-              <text class="small-label" x="255" y="363">Approximate medial → lateral somatotopic progression</text>
-              <text class="small-label" x="680" y="34" text-anchor="end">SCHEMATIC · NOT TO SCALE</text>
-            </svg>
-            <figcaption>Only the mapped cortical strip is depicted. The body-part order is a broad teaching summary; real motor representations are distributed, overlapping, and variable.</figcaption>
-          </figure>
-
-          <div class="region-facts">
-            <div class="fact-grid" aria-label="Motor cortex mapping summary">
-              <div class="fact"><strong>Precentral gyrus</strong><span>Location of primary motor cortex (M1) on the frontal lobe</span></div>
-              <div class="fact"><strong>Contralateral</strong><span>Each hemisphere primarily controls voluntary movement on the opposite side</span></div>
-              <div class="fact"><strong>Somatotopy</strong><span>Body regions have an approximate ordered representation across M1</span></div>
-              <div class="fact"><strong>Not a 1:1 map</strong><span>Movements recruit overlapping populations and distributed circuits</span></div>
-            </div>
-            <p class="region-note">This focuses on motor cortex—not speech cortex. Speech production involves interacting motor, language, auditory, and subcortical systems; this diagram does not map those systems or predict function for an individual.</p>
-            <div class="source-links">
-              <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey, human cortical stimulation maps ↗</a>
-              <a href="https://www.humanconnectome.org/study/hcp-young-adult" target="_blank" rel="noopener noreferrer">Human Connectome Project imaging data ↗</a>
-              <a href="https://doi.org/10.1016/j.neuroimage.2013.05.033" target="_blank" rel="noopener noreferrer">HCP task-fMRI methods ↗</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel notes" aria-label="How the simulation works">
-        <p><strong>Neuron:</strong> fires when the input signal meets or exceeds its threshold.</p>
-        <p><strong>Learning:</strong> attention moves toward each response by the configured learning rate.</p>
-        <p><strong>Memory:</strong> stores the most recent responses up to its capacity.</p>
-        <p><strong>Decision:</strong> triggers when the attention state rises above its decision threshold.</p>
-      </section>
-
-      <p class="disclaimer">BrainCode is an educational research prototype. The browser workbench processes only user-selected offline data locally; it is not medical software, a validated BCI, or a device controller.</p>
+      <p class="notice">This is an educational language prototype, not a validated biological model or a source of laboratory procedures. Incubation and mixing are logged only; they do not model reaction kinetics, safety, biological outcomes, or real-world protocol suitability. Never use its output to run an experiment or control lab equipment.</p>
       <footer><a href="https://github.com/Git-Copilot/BrainCode">View BrainCode on GitHub</a></footer>
     </main>
+    <script src="biocode.js"></script>
     <script>
-      const sourceField = document.querySelector("#source");
-      const signalField = document.querySelector("#signals");
+      const example = document.querySelector("#source").value;
+      const source = document.querySelector("#source");
       const output = document.querySelector("#output");
-      const number = String.raw`(?:\d+(?:\.\d*)?|\.\d+)`;
 
-      function parse(source) {
-        let braceHeaders = 0;
-        let braceClosers = 0;
-        const lines = [];
-        for (const [index, rawLine] of source.split(/\r?\n/).entries()) {
-          if (rawLine.includes("\t")) throw Error(`Line ${index + 1}: use spaces, not tabs.`);
-          let text = rawLine.split("#", 1)[0].trim();
-          if (!text) continue;
-          const indent = rawLine.length - rawLine.trimStart().length;
-          text = text.replace(/;+$/, "").trimEnd();
-          if (text === "}") {
-            braceClosers++;
-            continue;
-          }
-          if (text.endsWith("{")) {
-            braceHeaders++;
-            text = `${text.slice(0, -1).trimEnd()}:`;
-          }
-          lines.push({ indent, text });
-        }
-        if (braceHeaders !== braceClosers) throw Error("Unmatched brace block.");
-        const specs = [
-          [/^brain ([A-Za-z_]\w*):$/, "brain"],
-          [/^input ([A-Za-z_]\w*): Signal$/, "input"],
-          [/^memory ([A-Za-z_]\w*)\(capacity\s*[:=]\s*(\d+)\)$/, "memory"],
-          [new RegExp(`^neuron ([A-Za-z_]\\w*)\\(threshold\\s*[:=]\\s*(${number})\\)$`), "neuron"],
-          [new RegExp(`^state ([A-Za-z_]\\w*) = (${number})$`), "state"],
-          [/^on ([A-Za-z_]\w*) as ([A-Za-z_]\w*):$/, "on"],
-          [/^(?:let|const|var) ([A-Za-z_]\w*)(?:\s*:\s*[A-Za-z_]\w*)? = ([A-Za-z_]\w*)\.fire\(([A-Za-z_]\w*)\)$/, "fire"],
-          [/^([A-Za-z_]\w*)\.store\(([A-Za-z_]\w*)\)$/, "store"],
-          [new RegExp(`^([A-Za-z_]\\w*) = learn\\(([A-Za-z_]\\w*), from\\s*[:=]\\s*([A-Za-z_]\\w*), rate\\s*[:=]\\s*(${number})\\)$`), "learn"],
-          [new RegExp(`^decide "([^"]+)" when ([A-Za-z_]\\w*) > (${number})$`), "decide"],
-          [new RegExp(`^if\\s+\\(?([A-Za-z_]\\w*)\\s*>\\s*(${number})\\)?\\s*:$`), "if"],
-          [/^decide "([^"]+)"$/, "simpleDecision"],
-        ];
-        if (lines.length !== 10 && lines.length !== 11) throw Error("Incomplete program: expected a brain, declarations, and one input handler.");
-        const parsed = {};
-        for (let i = 0; i < Math.min(lines.length, 10); i++) {
-          const [pattern, name] = specs[i];
-          const match = lines[i].text.match(pattern);
-          if (!match) break;
-          parsed[name] = match.slice(1);
-          if (lines[i].text.endsWith(":") && (!lines[i + 1] || lines[i + 1].indent <= lines[i].indent)) {
-            throw Error(`${name} block must contain an indented body.`);
-          }
-        }
-        if (!parsed.decide && lines.length === 11) {
-          const condition = lines[9].text.match(specs[10][0]);
-          const decision = lines[10].text.match(specs[11][0]);
-          if (condition && decision && lines[10].indent > lines[9].indent) {
-            parsed.if = condition.slice(1);
-            parsed.decide = [decision[1], parsed.if[0], parsed.if[1]];
-          }
-        }
-        if (!parsed.decide || !parsed.learn || !parsed.store || !parsed.fire) {
-          const bad = lines[Math.min(Object.keys(parsed).length, lines.length - 1)];
-          throw Error(`Invalid BrainCode declaration: ${bad ? bad.text : ""}`);
-        }
-        if (!["brain", "input", "memory", "neuron", "state", "on"].every(name => parsed[name])) {
-          throw Error("Missing required BrainCode declaration.");
-        }
-        if (lines.length !== (parsed.if ? 11 : 10)) {
-          throw Error(`Unexpected statements: found ${lines.length} non-empty lines.`);
-        }
-        const [brain] = parsed.brain || [];
-        const [input] = parsed.input || [];
-        const [memory, capacityText] = parsed.memory;
-        const [neuron, thresholdText] = parsed.neuron;
-        const [state, initialText] = parsed.state;
-        const [eventInput, binding] = parsed.on;
-        const [response, fireNeuron, fireBinding] = parsed.fire;
-        const [storeMemory, storedResponse] = parsed.store;
-        const [learnedState, learnState, learnResponse, rateText] = parsed.learn;
-        const [decision, decisionState, decisionThresholdText] = parsed.decide;
-        if (eventInput !== input || fireNeuron !== neuron) throw Error("on/fire references must match the declared input and neuron.");
-        if (fireBinding !== binding || storedResponse !== response) throw Error("Signal and response references must match their declarations.");
-        if (storeMemory !== memory) throw Error("store must reference the declared memory.");
-        if (learnedState !== state || learnState !== state) throw Error("learn must update the declared state.");
-        if (learnResponse !== response) throw Error("learn must use the declared neuron response.");
-        if (decisionState !== state) throw Error("decision must check the declared state.");
-        const program = {
-          brain, memory, capacity: Number(capacityText), neuron, threshold: Number(thresholdText),
-          state, initial: Number(initialText), rate: Number(rateText),
-          decision, decisionThreshold: Number(decisionThresholdText),
-        };
-        if (!Number.isInteger(program.capacity) || program.capacity < 1) throw Error("Memory capacity must be at least 1.");
-        if (program.threshold < 0 || program.threshold > 1) throw Error("Neuron threshold must be between 0 and 1.");
-        if (program.initial < 0 || program.initial > 1) throw Error("State must be between 0 and 1.");
-        if (program.rate <= 0 || program.rate > 1) throw Error("Learning rate must be greater than 0 and at most 1.");
-        if (program.decisionThreshold < 0 || program.decisionThreshold > 1) throw Error("Decision threshold must be between 0 and 1.");
-        return program;
-      }
-
-      document.querySelector("#runner").addEventListener("submit", event => {
-        event.preventDefault();
+      function showResult() {
         try {
-          const program = parse(sourceField.value);
-          const signals = signalField.value.split(",").map(value => value.trim()).map(Number);
-          if (!signals.length || signals.some(value => !Number.isFinite(value) || value < 0 || value > 1)) {
-            throw Error("Enter comma-separated signal values from 0 to 1.");
-          }
-          let attention = program.initial;
-          const recent = [];
-          const rows = [`BrainCode simulation: ${program.brain}`];
-          for (const [index, signal] of signals.entries()) {
-            const fired = signal >= program.threshold;
-            recent.push(fired);
-            if (recent.length > program.capacity) recent.shift();
-            attention += program.rate * (Number(fired) - attention);
-            const decided = attention > program.decisionThreshold;
-            rows.push(`${index + 1}: signal=${signal.toFixed(3)} fired=${fired} attention=${attention.toFixed(3)} decision=${decided ? program.decision : "none"}`);
-          }
-          output.className = "output";
-          output.textContent = rows.join("\n");
+          const result = window.BioCode.run(window.BioCode.parse(source.value));
+          const inventory = Object.entries(result.containers).map(([name, item]) =>
+            `${name} (${item.kind}): ${Number(item.volumeUl.toFixed(3))} uL remaining`
+          );
+          output.className = "output success";
+          output.textContent = [...result.trace, "", "Remaining volumes:", ...inventory].join("\n");
         } catch (error) {
           output.className = "output error";
           output.textContent = error.message;
         }
+      }
+
+      document.querySelector("#run").addEventListener("click", showResult);
+      document.querySelector("#reset").addEventListener("click", () => {
+        source.value = example;
+        output.className = "output";
+        output.textContent = "Example restored. Run it to inspect the simulated steps.";
       });
-    </script>
-    <script src="bti.js"></script>
-    <script>
-      (() => {
-        const demoButton = document.querySelector("#bti-demo");
-        const analyzeButton = document.querySelector("#bti-analyze");
-        const fileInput = document.querySelector("#bti-file");
-        const sampleRate = document.querySelector("#bti-rate");
-        const epochDuration = document.querySelector("#bti-epoch");
-        const status = document.querySelector("#bti-status");
-        const metrics = document.querySelector("#bti-metrics");
-        const explanation = document.querySelector("#bti-explanation");
-        const confusion = document.querySelector("#bti-confusion");
-        const traceCanvas = document.querySelector("#bti-trace");
-        const featureCanvas = document.querySelector("#bti-features");
-        const download = document.querySelector("#bti-download");
-        let samples = [];
-        let lastResult = null;
-        let downloadUrl = null;
-
-        function setStatus(message, kind = "") {
-          status.textContent = message;
-          status.className = `bti-status ${kind}`;
-        }
-
-        function drawCanvas(canvas, draw) {
-          const bounds = canvas.getBoundingClientRect();
-          const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-          if (!bounds.width || !bounds.height) return null;
-          canvas.width = Math.round(bounds.width * pixelRatio);
-          canvas.height = Math.round(bounds.height * pixelRatio);
-          const context = canvas.getContext("2d");
-          context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-          context.clearRect(0, 0, bounds.width, bounds.height);
-          draw(context, bounds.width, bounds.height);
-          return { width: bounds.width, height: bounds.height };
-        }
-
-        function drawTrace() {
-          if (!samples.length) {
-            drawCanvas(traceCanvas, context => {
-              context.fillStyle = "#8995ad";
-              context.font = "13px ui-sans-serif, system-ui, sans-serif";
-              context.textAlign = "center";
-              context.fillText("Load data to view EEG channels", traceCanvas.clientWidth / 2, 105);
-            });
-            return;
-          }
-          const rate = Number(sampleRate.value);
-          const epochSamples = Math.min(samples.length, rate * Number(epochDuration.value));
-          const visible = samples.slice(0, epochSamples);
-          drawCanvas(traceCanvas, (context, width, height) => {
-            const padding = { left: 42, right: 12, top: 16, bottom: 26 };
-            const plotWidth = width - padding.left - padding.right;
-            const plotHeight = height - padding.top - padding.bottom;
-            const values = visible.flatMap(sample => [sample.c3, sample.cz, sample.c4]);
-            const limit = Math.max(10, Math.max(...values.map(Math.abs)));
-            const colors = ["#78e1c0", "#8ba6ff", "#f0b970"];
-            for (let tick = -1; tick <= 1; tick++) {
-              const y = padding.top + (1 - (tick + 1) / 2) * plotHeight;
-              context.strokeStyle = "#ffffff14";
-              context.beginPath();
-              context.moveTo(padding.left, y);
-              context.lineTo(width - padding.right, y);
-              context.stroke();
-              context.fillStyle = "#8995ad";
-              context.font = "10px ui-sans-serif, system-ui, sans-serif";
-              context.textAlign = "right";
-              context.fillText(`${Math.round(tick * limit)} µV`, padding.left - 6, y + 3);
-            }
-            for (const [channelIndex, key] of ["c3", "cz", "c4"].entries()) {
-              context.beginPath();
-              visible.forEach((sample, index) => {
-                const x = padding.left + index / Math.max(1, visible.length - 1) * plotWidth;
-                const y = padding.top + (1 - sample[key] / limit) / 2 * plotHeight;
-                if (index === 0) context.moveTo(x, y);
-                else context.lineTo(x, y);
-              });
-              context.strokeStyle = colors[channelIndex];
-              context.lineWidth = 1.5;
-              context.stroke();
-            }
-            context.fillStyle = "#aeb9ce";
-            context.font = "10px ui-sans-serif, system-ui, sans-serif";
-            context.textAlign = "left";
-            context.fillText("0 s", padding.left, height - 7);
-            context.textAlign = "right";
-            context.fillText(`${((visible.length - 1) / rate).toFixed(2)} s`, width - padding.right, height - 7);
-          });
-        }
-
-        function drawFeatures(result = lastResult) {
-          drawCanvas(featureCanvas, (context, width, height) => {
-            const padding = { left: 48, right: 16, top: 18, bottom: 36 };
-            const plotWidth = width - padding.left - padding.right;
-            const plotHeight = height - padding.top - padding.bottom;
-            const points = result?.predictions ?? [];
-            const xValues = points.map(point => point.c3Mu);
-            const yValues = points.map(point => point.c4Mu);
-            const minX = Math.min(-6, ...xValues) - 0.3;
-            const maxX = Math.max(-1, ...xValues) + 0.3;
-            const minY = Math.min(-6, ...yValues) - 0.3;
-            const maxY = Math.max(-1, ...yValues) + 0.3;
-            for (let tick = 0; tick <= 4; tick++) {
-              const x = padding.left + tick / 4 * plotWidth;
-              const y = padding.top + tick / 4 * plotHeight;
-              context.strokeStyle = "#ffffff12";
-              context.beginPath();
-              context.moveTo(x, padding.top);
-              context.lineTo(x, height - padding.bottom);
-              context.moveTo(padding.left, y);
-              context.lineTo(width - padding.right, y);
-              context.stroke();
-            }
-            if (points.length) {
-              for (const point of points) {
-                const x = padding.left + (point.c3Mu - minX) / (maxX - minX) * plotWidth;
-                const y = padding.top + (maxY - point.c4Mu) / (maxY - minY) * plotHeight;
-                context.beginPath();
-                context.arc(x, y, 4, 0, 2 * Math.PI);
-                context.fillStyle = point.label === "left" ? "#78e1c0" : point.label === "right" ? "#f0b970" : "#8ba6ff";
-                context.fill();
-              }
-            } else {
-              context.fillStyle = "#8995ad";
-              context.font = "13px ui-sans-serif, system-ui, sans-serif";
-              context.textAlign = "center";
-              context.fillText("Features appear after analysis", width / 2, height / 2);
-            }
-            context.fillStyle = "#aeb9ce";
-            context.font = "10px ui-sans-serif, system-ui, sans-serif";
-            context.textAlign = "center";
-            context.fillText("C3 log mu power", padding.left + plotWidth / 2, height - 8);
-            context.save();
-            context.translate(13, padding.top + plotHeight / 2);
-            context.rotate(-Math.PI / 2);
-            context.fillText("C4 log mu power", 0, 0);
-            context.restore();
-          });
-        }
-
-        function renderResults(result) {
-          const labeledText = `${result.labeledCount} labeled epochs`;
-          const discardedText = result.discardedSamples
-            ? ` ${result.discardedSamples} trailing samples ignored.`
-            : "";
-          if (result.unlabeled) {
-            metrics.innerHTML = "";
-            confusion.innerHTML = "";
-            explanation.textContent = `Extracted ${result.epochs.length} unlabeled epochs from ${samples.length.toLocaleString()} samples. Features are exploratory only; labeled left/right epochs are required for held-out classifier evaluation.${discardedText}`;
-            drawFeatures(result);
-            setStatus(`Extracted ${result.epochs.length} epochs. This CSV has no labels, so classifier accuracy was not calculated.`, "success");
-            return;
-          }
-
-          const percent = value => `${(value * 100).toFixed(1)}%`;
-          metrics.innerHTML = [
-            ["Held-out accuracy", percent(result.accuracy)],
-            ["Balanced accuracy", percent(result.balancedAccuracy)],
-            ["Training set", `${result.trainCount} epochs`],
-            ["Test set", `${result.testCount} epochs`],
-          ].map(([title, value]) => `<div class="bti-metric"><strong>${value}</strong><span>${title}</span></div>`).join("");
-          confusion.innerHTML = `<caption class="hint">Held-out confusion matrix</caption><thead><tr><th>Actual / predicted</th><th>Left</th><th>Right</th></tr></thead><tbody><tr><th>Left</th><td>${result.confusion.left.left}</td><td>${result.confusion.left.right}</td></tr><tr><th>Right</th><td>${result.confusion.right.left}</td><td>${result.confusion.right.right}</td></tr></tbody>`;
-          explanation.textContent = `${result.epochs.length} complete epochs; ${labeledText}. Stratified chronological split: final 20% of epochs per class held out, earlier epochs used to fit standardized C3/C4 log-mu-power nearest centroids.${discardedText} This baseline is not cross-subject validation.`;
-          drawFeatures(result);
-          setStatus(`Analysis complete: ${result.epochs.length} epochs from ${samples.length.toLocaleString()} samples. Evaluation is held-out within this recording.`, "success");
-        }
-
-        function analyze() {
-          try {
-            if (!samples.length) throw Error("Load a synthetic demo or CSV first.");
-            const result = window.BTI.summarize(samples, Number(sampleRate.value), Number(epochDuration.value));
-            lastResult = result;
-            renderResults(result);
-          } catch (error) {
-            setStatus(error.message, "error");
-          }
-        }
-
-        function renderFileState(name) {
-          analyzeButton.disabled = false;
-          metrics.innerHTML = "";
-          confusion.innerHTML = "";
-          lastResult = null;
-          drawTrace();
-          drawFeatures(null);
-          setStatus(`Loaded ${name}: ${samples.length.toLocaleString()} samples. Choose settings, then analyze.`);
-        }
-
-        demoButton.addEventListener("click", () => {
-          try {
-            samples = window.BTI.createSyntheticData(Number(sampleRate.value), Number(epochDuration.value));
-            analyzeButton.disabled = false;
-            renderFileState("synthetic two-class demo");
-            if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-            downloadUrl = URL.createObjectURL(new Blob(
-              [window.BTI.createCsv(samples)],
-              { type: "text/csv" },
-            ));
-            download.href = downloadUrl;
-            download.download = "braincode-synthetic-motor-imagery.csv";
-            download.hidden = false;
-            analyze();
-          } catch (error) {
-            setStatus(error.message, "error");
-          }
-        });
-
-        analyzeButton.addEventListener("click", analyze);
-        fileInput.addEventListener("change", async () => {
-          const file = fileInput.files?.[0];
-          if (!file) return;
-          try {
-            const text = await file.text();
-            samples = window.BTI.parseCsv(text);
-            download.hidden = true;
-            renderFileState(file.name);
-          } catch (error) {
-            samples = [];
-            analyzeButton.disabled = true;
-            drawTrace();
-            drawFeatures(null);
-            setStatus(error.message, "error");
-          }
-        });
-        for (const control of [sampleRate, epochDuration]) {
-          control.addEventListener("change", () => {
-            if (samples.length) {
-              setStatus("Analysis settings changed. Analyze again to apply the new sampling rate and epoch duration.");
-            }
-            drawTrace();
-          });
-        }
-        window.addEventListener("resize", () => {
-          drawTrace();
-          drawFeatures();
-        });
-        drawTrace();
-        drawFeatures(null);
-      })();
     </script>
   </body>
 </html>

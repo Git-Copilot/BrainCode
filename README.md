@@ -1,132 +1,56 @@
 # BrainCode
 
-BrainCode is an experimental **offline EEG motor-imagery prototyping workbench**
-with a small domain language for brain-inspired simulations. It runs locally in
-the browser: load EEG CSV, inspect C3/Cz/C4 signals, extract 8–13 Hz mu-band
-features, and evaluate a simple left/right baseline on held-out epochs.
+BrainCode is an experimental **biotech protocol language and workflow
+simulator**. Write protocols with samples, reagents, liquid transfers, mixing,
+incubation, measurements, and reports; run them locally in the
+[BrainCode playground](https://git-copilot.github.io/BrainCode/).
 
-Try the [BrainCode Playground](https://git-copilot.github.io/BrainCode/) in your
-browser. It also includes a small example interpreter and a focused schematic
-of the human primary motor cortex.
+## Protocol language
 
-## EEG workbench
+```text
+protocol DemoAssay:
+  sample specimen volume=50 uL signal=0.72
+  reagent buffer volume=200 uL
 
-The **Load synthetic demo** button generates a deterministic two-class example
-at 128 Hz. Its simulated C3/Cz/C4 signals contain 10 Hz oscillations, noise, and
-class-dependent mu-amplitude changes; the demo is illustrative, not recorded
-human EEG.
-
-To analyze your own data, import a UTF-8 CSV with a header and these columns:
-
-```csv
-time,C3,Cz,C4,label
-0.000000,2.1,1.4,-0.8,left
-0.007812,1.8,0.9,-1.2,left
+  step prepare:
+    transfer 100 uL from buffer to specimen
+    mix specimen for 30 seconds
+  step read:
+    incubate specimen for 5 minutes at 25 C
+    measure signal of specimen as response
+  report response
 ```
 
-`time` (in seconds) or `timestamp` (in seconds) must be evenly sampled at the
-selected sampling rate; timestamps are checked to be within 5% of the expected
-sample interval. C3, Cz, and C4 are required. The optional label column uses
-`left` or `right` on each sample; each epoch must be at least 80% consistently
-labeled for inclusion in evaluation. Values are passed through as-is—use
-consistent units and preprocessing. Sampling rate and epoch duration must
-produce a power-of-two sample count. Supported rates are 32–2048 Hz in the
-analysis library; the interface offers 128, 256, and 512 Hz.
+Indentation defines protocol blocks. Declare at least one sample and reagent,
+then list ordered steps. Volumes support `uL` and `mL`; durations support
+seconds and minutes. Samples require a normalized `signal` from 0 to 1, which
+is a fictional tracer value used only to demonstrate measurement and dilution.
+Reagent signal defaults to zero. Transfers update remaining volumes and blend
+that tracer by volume. `mix` and `incubate` are recorded in the trace only.
+Measurements read the simulated signal, and `report` names a value measured
+earlier in the protocol.
 
-The baseline removes each epoch's mean, applies a Hamming window, estimates
-8–13 Hz power using an FFT, and fits a standardized nearest-centroid classifier
-on C3/C4 log-power features. It holds out the final 20% of epochs for each class
-in recording order and reports accuracy, balanced accuracy, and a confusion
-matrix. This is a simple within-recording demonstration, not a validated
-classifier; it does not perform notch/band-pass filtering, artifact rejection,
-cross-session validation, or personal calibration. Inspect and preprocess data
-appropriately before interpreting features.
-
-Processing stays in your browser tab. Files are not uploaded by the workbench.
-It has no headset or streaming connection, no real-time inference, and no
-hardware/device-control output. It is not medical software or a validated brain
-technology interface.
-
-## Human motor cortex reference
-
-The playground focuses on **primary motor cortex (M1)** in the precentral
-gyrus. Its diagram shows the classic broad medial-to-lateral somatotopic
-organization—leg/foot, trunk, arm/hand, and face/mouth—described in human
-cortical stimulation mapping and studied with modern functional imaging.
-
-This is a focused teaching schematic, not an individual brain scan, precise
-atlas boundary map, or exact body-part-to-cortex correspondence. Motor
-representations overlap and involve distributed populations. The workbench
-does not load imaging data or model real motor physiology.
-
-Sources: [Penfield & Boldrey, human cortical stimulation maps](https://doi.org/10.1093/brain/60.4.389);
-[Human Connectome Project](https://www.humanconnectome.org/study/hcp-young-adult);
-[HCP task-fMRI methods](https://doi.org/10.1016/j.neuroimage.2013.05.033).
-
-## Run a simulation
-
-Requires Python 3.10 or newer; there are no third-party dependencies.
+The runner checks syntax, indentation, declared containers, positive volumes,
+transfer overdraw, and measurement/report references. It runs in the browser
+without uploading data, connecting to equipment, or calling a service. The
+same parser and simulator can be tested with Node:
 
 ```powershell
-python braincode.py examples\simple_perceiver.brain --signal 0.9 --signal 0.8 --signal 0.2
+node --test test_biocode.js
 ```
 
-The program prints whether the neuron fired, the evolving attention state, and
-whether the decision threshold was crossed. Input signals and thresholds are
-normalized from `0` to `1`.
+This is a language and bookkeeping demonstration, **not** a validated
+biological model or a source of laboratory procedures. Incubation and mixing
+do not model kinetics or outcomes, and the simulator does not assess safety or
+real-world protocol suitability. Never use its output to run experiments or
+control lab equipment.
 
-## Language sketch
+## Earlier brain-simulation example
 
-BrainCode mixes readable, indentation-based blocks with familiar JavaScript
-declarations. Braces and semicolons are also supported, so either style works:
-
-```text
-brain SimplePerceiver:
-  input stimulus: Signal
-  memory recent(capacity=8)
-  neuron detector(threshold=0.65)
-  state attention = 0.0
-
-  on stimulus as signal:
-    const response = detector.fire(signal)
-    recent.store(response)
-    attention = learn(attention, from=response, rate=0.4)
-    if attention > 0.5:
-      decide "notice"
-```
-
-Equivalent brace-style blocks can use `let` or `const`, optional semicolons,
-and `if (attention > 0.5) { ... }`. Existing BrainCode programs using
-`decide "notice" when attention > 0.5` remain supported. Python code and
-JavaScript code are not embedded or executed: these are BrainCode syntax
-choices interpreted by its own small runtime.
-
-```text
-brain SimplePerceiver {
-  input stimulus: Signal;
-  memory recent(capacity: 8);
-  neuron detector(threshold: 0.65);
-  state attention = 0.0;
-  on stimulus as signal {
-    const response = detector.fire(signal);
-    recent.store(response);
-    attention = learn(attention, from=response, rate=0.4);
-    if (attention > 0.5) {
-      decide "notice";
-    }
-  }
-}
-```
-
-Each input is compared with the neuron's threshold. The learning rule moves
-`attention` toward the neuron response by the configured rate; memory retains
-the most recent responses. The interpreter intentionally supports one input,
-one neuron, one state, and one decision rule so the behavior stays easy to
-inspect.
-
-## Tests
+The repository also retains the original small neuron/learning demo as a
+separate Python interpreter. It is not the biotech protocol simulator.
 
 ```powershell
 python -m unittest
-node --test test_bti.js
+python braincode.py examples\simple_perceiver.brain --signal 0.9 --signal 0.8 --signal 0.2
 ```
