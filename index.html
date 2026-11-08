@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101522">
-    <meta name="description" content="Explore an illustrative brain expression map and visualize normalized gene-expression values by brain region.">
-    <title>BrainCode · Expression Atlas</title>
+    <meta name="description" content="Explore an interactive human cortical surface atlas focused on primary motor cortex.">
+    <title>BrainCode · Motor Cortex Atlas</title>
     <style>
       :root {
         color-scheme: dark;
@@ -40,7 +40,16 @@
       .card-head h2 { margin: 0; font-size: .94rem; }
       .card-head p { margin: 5px 0 0; color: #8995ad; font-size: .73rem; line-height: 1.5; }
       .brain-wrap { padding: 12px; }
-      .brain-svg { display: block; width: 100%; height: auto; min-height: 390px; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 48%, #20283a 0, #111724 73%); }
+      .surface-view-wrap { position: relative; height: 480px; overflow: hidden; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 45%, #20283a 0, #111724 73%); }
+      #surface-viewer { display: block; width: 100%; height: 480px; }
+      .surface-status { position: absolute; right: 12px; bottom: 8px; left: 12px; margin: 0; color: #aeb9ce; font-size: .68rem; line-height: 1.5; pointer-events: none; text-shadow: 0 1px 5px #101522; }
+      .surface-status.error { color: #ff9a9a; }
+      .surface-caption { display: flex; justify-content: space-between; gap: 12px; margin: 9px 3px 14px; color: #8995ad; font-size: .68rem; line-height: 1.5; }
+      .map-details { margin-top: 12px; border: 1px solid #ffffff14; border-radius: 11px; background: #111724; }
+      .map-details summary { padding: 11px 13px; color: #c8d2e4; cursor: pointer; font-size: .73rem; font-weight: 700; }
+      .map-details[open] summary { border-bottom: 1px solid #ffffff12; }
+      .map-details .brain-svg { border: 0; }
+      .brain-svg { display: block; width: 100%; height: auto; min-height: 390px; border-radius: 12px; background: radial-gradient(ellipse at 48% 48%, #20283a 0, #111724 73%); }
       .brain-outline { fill: url(#cortexFill); stroke: #91a0b7; stroke-width: 3; }
       .brain-fold { fill: none; stroke: #8390a7; stroke-width: 2; stroke-linecap: round; opacity: .43; }
       .region-zone { fill: #263248; stroke: #a7b3c5; stroke-width: 1; opacity: .63; }
@@ -102,6 +111,7 @@
         .hero { display: block; margin-top: 25px; }
         .dataset-label { display: block; margin-top: 10px; }
         .workspace { grid-template-columns: 1fr; }
+        .surface-view-wrap { height: 380px; }
         .brain-svg { min-height: 0; }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -112,30 +122,37 @@
   <body>
     <main>
       <header class="topbar">
-        <div class="brand"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ EXPRESSION ATLAS</span></div>
-        <span class="status-tag">Illustrative visualization · not measured data</span>
+        <div class="brand"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ MOTOR CORTEX ATLAS</span></div>
+        <span class="status-tag">Human template surface · example overlay</span>
       </header>
       <section class="hero">
         <div>
           <div class="eyebrow">Explore a mapped human brain region</div>
-          <h1>Zoom into the motor map.</h1>
-          <p class="intro">Focus on primary motor cortex (M1), a human cortical region functionally mapped by stimulation studies. The enlarged view shows its broad body-part layout; markers brighten with the selected expression profile.</p>
+          <h1>Explore the motor cortex.</h1>
+          <p class="intro">Rotate and zoom a real cortical surface mesh, then inspect the broad primary motor cortex (M1) body map. The surface is a standard atlas template; its example motor layer is not an individual recording or a gene-expression dataset.</p>
         </div>
         <span id="dataset-label" class="dataset-label">Synthetic example profiles · no experimental data loaded</span>
       </section>
 
-      <section class="workspace" aria-label="Interactive primary motor cortex expression map">
+      <section class="workspace" aria-label="Interactive primary motor cortex atlas">
         <article class="card" aria-labelledby="brain-title">
           <div class="card-head">
             <div>
-              <h2 id="brain-title">Primary motor cortex · M1</h2>
-              <p>Human hemisphere location and enlarged functional body map</p>
+              <h2 id="brain-title">Human cortical surface · left hemisphere</h2>
+              <p>ICBM152 template mesh with an example motor-surface layer</p>
             </div>
-            <span id="map-gene" class="status-tag">Demo gene A</span>
           </div>
           <div class="brain-wrap">
+            <div class="surface-view-wrap">
+              <canvas id="surface-viewer" role="img" aria-label="Interactive three-dimensional left hemisphere cortical surface"></canvas>
+              <p id="surface-status" class="surface-status" role="status" aria-live="polite">Loading the cortical surface viewer…</p>
+            </div>
+            <div class="surface-caption">
+              <span>Drag to rotate · scroll to zoom · color is the example layer</span>
+              <span>Standard atlas geometry · not an individual brain</span>
+            </div>
             <section class="command-panel" aria-label="Mapped motor action command">
-              <span class="command-title">Enter an action to flare its mapped region</span>
+              <span class="command-title">Explore the broad M1 body-map key</span>
               <form id="command-form" class="command-form">
                 <input id="action-command" type="text" maxlength="120" placeholder='Try "move hand", "walk", or "speak"' aria-label="Motor action command">
                 <button type="submit">Run action</button>
@@ -147,9 +164,11 @@
                 <button type="button" class="command-example" data-command="speak">speak</button>
                 <button type="button" class="command-example" data-command="clear">clear</button>
               </div>
-              <p id="command-status" class="command-status" role="status" aria-live="polite">Command demo only · no brain signals or devices are connected.</p>
+              <p id="command-status" class="command-status" role="status" aria-live="polite">A command highlights the schematic key below; it does not alter measured activity on the atlas surface.</p>
             </section>
-            <svg id="brain" class="brain-svg" viewBox="0 0 760 520" role="img" aria-labelledby="svg-title svg-description">
+            <details class="map-details">
+              <summary>Open the approximate M1 body-map schematic</summary>
+              <svg id="brain" class="brain-svg" viewBox="0 0 760 520" role="img" aria-labelledby="svg-title svg-description">
               <title id="svg-title">Zoomed view of the human primary motor cortex</title>
               <desc id="svg-description">A contextual left-hemisphere outline locates primary motor cortex on the precentral gyrus. An enlarged, illustrative functional map shows broad body-region locations from medial leg and foot toward lateral face and tongue. Functional subdivisions are approximate, variable, and overlapping.</desc>
               <defs>
@@ -201,19 +220,20 @@
               <g id="nodes" aria-hidden="true"></g>
               <g id="labels"></g>
               <g id="hits" aria-label="Selectable primary motor cortex body-map regions"></g>
-            </svg>
+              </svg>
             <div class="brain-footer">
-              <span>M1 body-map overlay · approximate, not to scale</span>
-              <span class="legend"><span>Lower</span><span class="legend-bar" aria-hidden="true"></span><span>Higher expression</span></span>
+              <span>Teaching schematic · approximate, overlapping, not to scale</span>
+              <span class="legend"><span>Lower</span><span class="legend-bar" aria-hidden="true"></span><span>Demo value</span></span>
             </div>
+            </details>
           </div>
         </article>
 
         <aside class="card" aria-labelledby="controls-title">
           <div class="card-head">
             <div>
-              <h2 id="controls-title">Expression profile</h2>
-              <p>Values are normalized from 0 to 1 for display</p>
+              <h2 id="controls-title">Regional display values</h2>
+              <p>Optional illustrative values · normalized from 0 to 1</p>
             </div>
           </div>
           <div class="controls">
@@ -224,7 +244,7 @@
               </label>
               <button id="download" type="button" aria-label="Download current expression profile as CSV">Export CSV</button>
             </div>
-            <p class="gene-meta">Demo genes are invented examples, not real genes or observed expression. Edit region values or load your own normalized CSV.</p>
+            <p class="gene-meta">Demo profiles are invented and do not color the atlas surface. Edit values or load your own normalized CSV to explore the schematic key.</p>
             <div class="upload-row">
               <label class="file-button">Load expression CSV<input id="file" type="file" accept=".csv,text/csv"></label>
             </div>
@@ -239,9 +259,10 @@
         </aside>
       </section>
 
-      <p class="notice"><strong>Important:</strong> The primary motor cortex body map summarizes classic human stimulation mapping; boundaries are broad, overlapping, and variable, not an individual atlas. Brightness only visualizes the normalized values shown at right. The demo profiles are invented and are not real gene-expression measurements; functional motor mapping does not itself measure gene expression. Loaded values are displayed as supplied and are not uploaded.</p>
+      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. The motor-labeled overlay is an example asset packaged with NiiVue; the asset does not include study-level provenance, so it is shown for orientation only, not as evidence of measured activity. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, do not color the 3D surface, and are not gene-expression measurements. Loaded CSV values stay in the browser.</p>
       <footer>
         <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey · human cortical stimulation maps</a>
+        · <a href="https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images" target="_blank" rel="noopener noreferrer">Surface and example layer source · NiiVue</a>
         · <a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a>
       </footer>
     </main>
@@ -372,7 +393,6 @@
               }
             });
           }
-          document.querySelector("#map-gene").textContent = currentGene;
           document.querySelector("#svg-description").textContent =
             `A zoomed human primary motor cortex map. ${currentGene} expression values are visualized across the broad medial-to-lateral leg, trunk, arm, hand, face, and tongue representation. Markers brighten with normalized values.`;
         }
@@ -451,6 +471,7 @@
               return;
             }
 
+            document.querySelector(".map-details").open = true;
             selectedRegion = result.regions[0];
             const regionNames = result.regions.map(id =>
               REGIONS.find(region => region.id === id).label
@@ -560,6 +581,49 @@
         updateGeneOptions();
         renderAll();
       })();
+    </script>
+    <script type="module">
+      const status = document.querySelector("#surface-status");
+      try {
+        const { Niivue, NVMesh } = await import(
+          "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.69.0/+esm"
+        );
+        const viewer = new Niivue({
+          backColor: [0.067, 0.082, 0.122, 1],
+          show3Dcrosshair: false,
+          meshXRay: 0,
+        });
+        viewer.setSliceType(viewer.sliceTypeRender);
+        viewer.opts.showLegend = false;
+        viewer.opts.isColorbar = true;
+        await viewer.attachTo("surface-viewer");
+        await viewer.loadMeshes([{
+          url: "assets/brain/BrainMesh_ICBM152.lh.mz3",
+          rgba255: [194, 204, 220, 255],
+        }]);
+        viewer.scene.volScaleMultiplier = 1.35;
+        status.textContent = "Atlas surface loaded. Loading the packaged motor-labeled example layer…";
+        try {
+          await NVMesh.loadLayer({
+            url: "assets/brain/BrainMesh_ICBM152.lh.motor.mz3",
+            cal_min: 0.5,
+            cal_max: 5.5,
+            useNegativeCmap: true,
+            opacity: 0.72,
+            colormap: "warm",
+            colormapNegative: "winter",
+          }, viewer.meshes[0]);
+          viewer.meshes[0].updateMesh(viewer.gl);
+          viewer.drawScene();
+          status.textContent = "Atlas surface and example motor layer loaded · layer provenance is limited; see scientific scope.";
+        } catch (error) {
+          status.textContent = `Atlas surface loaded, but the example layer failed: ${error.message}`;
+          status.classList.add("error");
+        }
+      } catch (error) {
+        status.textContent = `3D surface viewer could not load: ${error.message}`;
+        status.classList.add("error");
+      }
     </script>
   </body>
 </html>

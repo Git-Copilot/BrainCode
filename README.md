@@ -1,19 +1,34 @@
-# BrainCode Expression Atlas
+# BrainCode Motor Cortex Atlas
 
-BrainCode focuses the interactive expression viewer on **human primary motor
-cortex (M1)**. A small hemisphere view marks the precentral gyrus; the larger
-view zooms into the classic broad functional body map. Select a gene profile to
-change the brightness of neuron-like markers, edit normalized values, or
-import/export CSV. Enter a simple action such as `move hand`, `walk`, `reach`,
-or `speak` to briefly flare its mapped region.
+BrainCode is an interactive browser atlas focused on the human primary motor
+cortex (M1). The main view renders a rotatable left-hemisphere cortical surface
+from an ICBM152 template mesh. An expandable schematic summarizes the broad
+medial-to-lateral body map described in classic human cortical stimulation
+work.
 
-Try the [BrainCode Expression Atlas](https://git-copilot.github.io/BrainCode/).
+Try the [BrainCode Motor Cortex Atlas](https://git-copilot.github.io/BrainCode/).
+The 3D viewer loads NiiVue 0.69.0 from jsDelivr, so an internet connection is
+needed to display the surface.
 
-## Functional regions and expression CSV
+## Surface assets and provenance
 
-CSV files need `gene`, `region`, and `expression` columns. Expression values
-must already be normalized from `0` to `1`. Each row assigns one value to a
-gene and a broad M1 body-map region:
+The surface mesh and motor-labeled example layer are from NiiVue's demo image
+directory, pinned to commit
+[`2a060d5`](https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images).
+Their local copies are in `assets/brain/`. NiiVue's BSD 2-Clause license is
+included in `assets/brain/NIIVUE-LICENSE.txt`.
+
+The surface is standard-template geometry, not an individual scan. The bundled
+motor layer is labeled as a motor example in NiiVue's demo assets, but its file
+does not provide study-level provenance. It is included for visualization and
+must not be treated as measured activity or a validated functional atlas.
+
+## Schematic values CSV
+
+The optional side panel lets you explore normalized values on the schematic
+only; it does not recolor the 3D surface. CSV files need `gene`, `region`, and
+`expression` columns. Expression values must already be normalized from `0` to
+`1`. Each row assigns one value to a broad M1 body-map region:
 
 | Region ID | Display |
 |---|---|
@@ -34,24 +49,19 @@ GENE-X,face,0.22
 GENE-X,tongue,0.47
 ```
 
-The viewer displays imported values as provided; it does not normalize,
-interpret, or validate their biological provenance. Data is processed in the
-browser and is not uploaded.
+The built-in demo profiles are invented examples, not genes or observed
+expression. Imported CSV values are displayed as supplied; the page does not
+normalize or validate their biological provenance, and data stays in the
+browser.
 
 ## Scientific scope
 
-The medial-to-lateral body-part arrangement is a broad summary of classic
-human motor-cortex stimulation mapping. Representations overlap and vary
-between people; this diagram is not a precise or individual atlas. See
-[Penfield & Boldrey's human cortical stimulation maps](https://doi.org/10.1093/brain/60.4.389).
-
-This functional map does **not** measure gene expression. The built-in Demo
-gene profiles are invented examples to exercise the visualization, not
-observations. Brightness only encodes supplied normalized values. The
-neuron-like markers are decorative rather than cell locations, and the page
-does not make biological or clinical predictions. Action commands only trigger
-a timed visual effect on the mapped body region; they are not decoded from
-brain signals and do not control a device.
+The schematic summarizes classic human stimulation mapping
+([Penfield & Boldrey](https://doi.org/10.1093/brain/60.4.389)). Functional
+representations overlap and vary between people; this broad map is not an
+individual atlas. The command field only highlights schematic regions. It does
+not decode brain signals, alter the 3D example layer, or control a device.
+BrainCode makes no biological or clinical predictions.
 
 ## Tests
 
