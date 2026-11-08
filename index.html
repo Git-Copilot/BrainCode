@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101522">
-    <meta name="description" content="BrainCode is a local biotech protocol language and transparent workflow simulator.">
-    <title>BrainCode Biotech Lab</title>
+    <meta name="description" content="Explore an illustrative brain expression map and visualize normalized gene-expression values by brain region.">
+    <title>BrainCode · Expression Atlas</title>
     <style>
       :root {
         color-scheme: dark;
@@ -24,132 +24,438 @@
           radial-gradient(ellipse at 100% 20%, #123d50 0, transparent 36rem),
           #101522;
       }
-      main { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 52px 0 42px; }
-      .eyebrow { color: #9ce8d2; font-size: .76rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
-      h1 { margin: 10px 0 8px; font-size: clamp(2.4rem, 6vw, 4.2rem); letter-spacing: -.055em; }
-      h2 { margin: 0; font-size: 1.08rem; }
-      .intro { max-width: 720px; color: #b6c0d5; font-size: 1.08rem; line-height: 1.65; }
-      .panel { margin-top: 24px; overflow: hidden; border: 1px solid #ffffff18; border-radius: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000025; }
-      .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 17px 20px; border-bottom: 1px solid #ffffff12; }
-      .panel-head p { margin: 6px 0 0; color: #aeb9ce; font-size: .84rem; line-height: 1.55; }
-      .tag { flex: 0 0 auto; border: 1px solid #79dfbe40; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .72rem; }
-      .editor { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); }
-      .editor-main { min-width: 0; border-right: 1px solid #ffffff12; }
-      .file-bar { display: flex; justify-content: space-between; gap: 12px; padding: 13px 18px; color: #d8e1f3; font-size: .8rem; }
-      .file-name { color: #8995ad; }
-      textarea { display: block; width: 100%; min-height: 420px; resize: vertical; border: 0; border-top: 1px solid #ffffff12; outline: 0; padding: 19px; background: #111724; color: #c9e6d9; font: 13px/1.75 "SFMono-Regular", Consolas, "Liberation Mono", monospace; tab-size: 2; }
-      textarea:focus { box-shadow: inset 0 0 0 1px #79dfbe; }
-      .side { display: flex; flex-direction: column; padding: 18px; }
-      .side h3 { margin: 0 0 10px; color: #e7edfa; font-size: .88rem; }
-      .side p { margin: 0 0 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.6; }
-      code { color: #9ce8d2; font: .95em "SFMono-Regular", Consolas, monospace; }
-      .run { display: grid; gap: 9px; margin-top: auto; padding-top: 20px; }
-      button { min-height: 44px; border: 0; border-radius: 10px; padding: 11px 15px; background: #83e2c2; color: #10251f; cursor: pointer; font-size: .88rem; font-weight: 750; }
-      button:hover { background: #a0f1d6; }
-      button.secondary { border: 1px solid #ffffff20; background: #222c3d; color: #d7e1f3; }
-      button.secondary:hover { background: #303e53; }
-      button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-      .result-head { padding: 17px 20px 10px; color: #d8e1f3; font-size: .84rem; font-weight: 700; }
-      .output { min-height: 170px; margin: 0 18px 18px; overflow: auto; border: 1px solid #ffffff12; border-radius: 10px; padding: 15px; background: #111724; color: #bac6dc; font: 12px/1.8 "SFMono-Regular", Consolas, monospace; white-space: pre-wrap; }
-      .output.success { color: #b9d8ce; }
-      .output.error { color: #ff9a9a; }
-      .notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
-      .note { border: 1px solid #ffffff12; border-radius: 12px; padding: 15px; background: #171e2de8; }
-      .note strong { display: block; margin-bottom: 6px; color: #9ce8d2; font-size: .84rem; }
-      .note span { color: #aeb9ce; font-size: .76rem; line-height: 1.55; }
-      .notice { margin: 20px 2px 0; border-left: 2px solid #f0b970; padding: 3px 0 3px 12px; color: #aeb9ce; font-size: .78rem; line-height: 1.65; }
-      footer { margin-top: 23px; color: #8995ad; font-size: .8rem; }
+      main { width: min(1320px, calc(100% - 40px)); margin: 0 auto; padding: 38px 0 42px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+      .brand { display: flex; gap: 10px; align-items: center; color: #dce5f6; font-size: .82rem; font-weight: 750; letter-spacing: .03em; }
+      .brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #79dfbe60; border-radius: 9px; color: #9ce8d2; }
+      .status-tag { border: 1px solid #f0b97045; border-radius: 999px; padding: 7px 10px; color: #f0c98e; font-size: .7rem; font-weight: 650; }
+      .hero { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 32px 0 22px; }
+      .eyebrow { color: #9ce8d2; font-size: .72rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+      h1 { margin: 8px 0 8px; font-size: clamp(2.2rem, 5vw, 3.6rem); letter-spacing: -.055em; }
+      .intro { max-width: 660px; margin: 0; color: #b6c0d5; font-size: .96rem; line-height: 1.65; }
+      .dataset-label { flex: 0 0 auto; color: #9daac0; font-size: .74rem; }
+      .workspace { display: grid; grid-template-columns: minmax(0, 1.28fr) minmax(340px, .72fr); gap: 16px; align-items: stretch; }
+      .card { min-width: 0; overflow: hidden; border: 1px solid #ffffff18; border-radius: 16px; background: #171e2de8; box-shadow: 0 18px 60px #00000025; }
+      .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 16px 18px; border-bottom: 1px solid #ffffff12; }
+      .card-head h2 { margin: 0; font-size: .94rem; }
+      .card-head p { margin: 5px 0 0; color: #8995ad; font-size: .73rem; line-height: 1.5; }
+      .brain-wrap { padding: 12px; }
+      .brain-svg { display: block; width: 100%; height: auto; min-height: 390px; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 48%, #20283a 0, #111724 73%); }
+      .brain-outline { fill: url(#brainFill); stroke: #91a0b7; stroke-width: 3; }
+      .brain-fold { fill: none; stroke: #8390a7; stroke-width: 2; stroke-linecap: round; opacity: .43; }
+      .region-zone { fill: #263248; stroke: #8290a8; stroke-width: 1; opacity: .48; }
+      .region-zone.active { fill: #2f5160; stroke: #9ce8d2; opacity: .88; }
+      .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; }
+      .network-node { stroke: #d8fff1; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
+      .brain-label { fill: #aeb9ce; font: 12px ui-sans-serif, system-ui, sans-serif; pointer-events: none; }
+      .brain-label.active { fill: #c2f5e1; font-weight: 700; }
+      .region-hit { fill: transparent; stroke: transparent; cursor: pointer; }
+      .region-hit:focus-visible { stroke: #ffffff; stroke-width: 2; outline: none; }
+      .brain-footer { display: flex; justify-content: space-between; gap: 12px; padding: 0 4px 4px; color: #8995ad; font-size: .68rem; }
+      .legend { display: flex; align-items: center; gap: 7px; }
+      .legend-bar { width: 86px; height: 8px; border-radius: 9px; background: linear-gradient(90deg, #30304a, #9ce8d2, #fff4ad); }
+      .controls { display: grid; align-content: start; gap: 17px; padding: 17px; }
+      .field-label { display: block; margin-bottom: 7px; color: #aeb9ce; font-size: .73rem; font-weight: 650; }
+      select, input[type="text"] { width: 100%; min-height: 41px; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 11px; outline: none; background: #111724; color: #edf2ff; font: 13px ui-sans-serif, system-ui, sans-serif; }
+      select:focus-visible, input:focus-visible, input[type="range"]:focus-visible, button:focus-visible, .file-button:focus-within { outline: 2px solid #83e2c2; outline-offset: 2px; }
+      .gene-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+      .gene-meta { margin: 7px 0 0; color: #8995ad; font-size: .68rem; line-height: 1.5; }
+      .upload-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .new-profile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+      button, .file-button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; border: 1px solid #ffffff20; border-radius: 9px; padding: 8px 11px; background: #222c3d; color: #d7e1f3; cursor: pointer; font: 700 .72rem ui-sans-serif, system-ui, sans-serif; }
+      button:hover, .file-button:hover { background: #303e53; }
+      .file-button input { display: none; }
+      .expression-list { display: grid; gap: 13px; }
+      .expression-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 10px; align-items: center; }
+      .region-button { justify-self: start; border: 0; padding: 0; background: transparent; color: #d6deed; cursor: pointer; text-align: left; font-size: .75rem; font-weight: 650; }
+      .region-button:hover { color: #9ce8d2; background: transparent; }
+      .value { min-width: 36px; color: #9ce8d2; font: 700 .72rem ui-monospace, Consolas, monospace; text-align: right; }
+      input[type="range"] { grid-column: 1 / -1; width: 100%; height: 15px; margin: 0; accent-color: #83e2c2; cursor: pointer; }
+      .selected-region { border: 1px solid #ffffff14; border-radius: 10px; padding: 11px; background: #111724; }
+      .selected-name { display: flex; justify-content: space-between; gap: 10px; color: #e7edfa; font-size: .77rem; font-weight: 700; }
+      .selected-name span { color: #9ce8d2; font-family: ui-monospace, Consolas, monospace; }
+      .selected-copy { margin: 5px 0 0; color: #8995ad; font-size: .69rem; line-height: 1.55; }
+      .message { min-height: 16px; margin: -6px 0 0; color: #9ce8d2; font-size: .7rem; }
+      .message.error { color: #ff9a9a; }
+      .notice { margin: 16px 2px 0; border-left: 2px solid #f0b970; padding: 2px 0 2px 12px; color: #9daac0; font-size: .72rem; line-height: 1.6; }
+      .notice strong { color: #e4c28e; }
+      footer { margin-top: 21px; color: #8995ad; font-size: .76rem; }
       a { color: #a3ead2; text-decoration: none; }
       a:hover { text-decoration: underline; }
-      @media (max-width: 760px) {
-        main { width: min(100% - 24px, 600px); padding-top: 32px; }
-        .editor { grid-template-columns: 1fr; }
-        .editor-main { border-right: 0; }
-        textarea { min-height: 360px; }
-        .notes { grid-template-columns: 1fr; }
-        .panel-head { align-items: flex-start; }
+      @media (max-width: 850px) {
+        main { width: min(100% - 24px, 650px); padding-top: 24px; }
+        .hero { display: block; margin-top: 25px; }
+        .dataset-label { display: block; margin-top: 10px; }
+        .workspace { grid-template-columns: 1fr; }
+        .brain-svg { min-height: 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
       }
     </style>
   </head>
   <body>
     <main>
-      <span class="eyebrow">BrainCode · biotech workflow language</span>
-      <h1>Code a protocol.<br>See what it does.</h1>
-      <p class="intro">Write a small biotech-style protocol with samples, reagents, transfers, mixing, incubation, and measurements. BrainCode checks the steps and runs a transparent local simulation in your browser.</p>
-
-      <section class="panel" aria-labelledby="editor-title">
-        <div class="panel-head">
-          <div>
-            <h2 id="editor-title">Protocol playground</h2>
-            <p>Edit the example or write your own. The simulator models liquid volume and a fictional signal tracer; it does not model real biology.</p>
-          </div>
-          <span class="tag">Local simulation</span>
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ EXPRESSION ATLAS</span></div>
+        <span class="status-tag">Illustrative visualization · not measured data</span>
+      </header>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Explore gene expression</div>
+          <h1>A brain, lit by data.</h1>
+          <p class="intro">Choose a gene to see its normalized expression values across broad brain regions. The neuron-like points brighten with the value; select a region or edit the profile to explore the map.</p>
         </div>
-        <div class="editor">
-          <div class="editor-main">
-            <div class="file-bar"><span>Protocol source</span><span class="file-name">demo.protocol</span></div>
-            <textarea id="source" aria-label="Biotech protocol source" spellcheck="false">protocol DemoAssay:
-  sample specimen volume=50 uL signal=0.72
-  reagent buffer volume=200 uL
+        <span id="dataset-label" class="dataset-label">Synthetic example profiles · no experimental data loaded</span>
+      </section>
 
-  step prepare:
-    transfer 100 uL from buffer to specimen
-    mix specimen for 30 seconds
-  step read:
-    incubate specimen for 5 minutes at 25 C
-    measure signal of specimen as response
-  report response</textarea>
-          </div>
-          <aside class="side" aria-label="Language reference">
-            <h3>Language basics</h3>
-            <p><code>sample name volume=50 uL signal=0.72</code><br>Declares a simulated sample and its normalized tracer signal.</p>
-            <p><code>reagent name volume=200 uL</code><br>Declares a liquid inventory. Optional <code>signal=</code> lets you model tracer dilution.</p>
-            <p><code>step name:</code> groups ordered operations. Use <code>transfer</code>, <code>mix</code>, <code>incubate</code>, then <code>measure signal</code> and <code>report</code>.</p>
-            <div class="run">
-              <button id="run" type="button">Run protocol simulation</button>
-              <button id="reset" class="secondary" type="button">Reset example</button>
+      <section class="workspace" aria-label="Interactive gene expression atlas">
+        <article class="card" aria-labelledby="brain-title">
+          <div class="card-head">
+            <div>
+              <h2 id="brain-title">Brain map</h2>
+              <p>Lateral schematic · select a region to inspect its expression</p>
             </div>
-          </aside>
-        </div>
-        <div class="result-head">Simulation trace and remaining volumes</div>
-        <pre id="output" class="output" role="status" aria-live="polite">Ready. Run the example to inspect its simulated steps.</pre>
+            <span id="map-gene" class="status-tag">Demo gene A</span>
+          </div>
+          <div class="brain-wrap">
+            <svg id="brain" class="brain-svg" viewBox="0 0 760 520" role="img" aria-labelledby="svg-title svg-description">
+              <title id="svg-title">Illustrative lateral brain expression map</title>
+              <desc id="svg-description">A non-anatomical schematic with six broad regions. Neuron-like dots brighten according to the selected normalized expression values.</desc>
+              <defs>
+                <linearGradient id="brainFill" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#29344a"/>
+                  <stop offset="1" stop-color="#20293a"/>
+                </linearGradient>
+                <filter id="softGlow" x="-150%" y="-150%" width="400%" height="400%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <path class="brain-outline" d="M92 271 C67 251 69 214 86 189 C79 157 98 127 129 114 C143 82 177 66 212 76 C236 48 278 47 310 61 C339 38 382 48 405 66 C438 50 479 62 494 83 C532 71 567 91 579 119 C616 114 650 137 652 169 C685 188 690 225 670 249 C680 281 658 309 631 318 C623 350 593 368 561 362 C539 386 503 389 476 371 C446 393 412 384 392 367 C357 384 324 372 305 351 C272 372 235 360 218 338 C183 351 148 333 143 308 C120 307 101 294 92 271 Z"/>
+              <path class="region-zone" data-zone="frontal" d="M98 202 C92 164 119 126 158 117 C190 90 237 88 269 110 L292 183 L265 255 L204 279 L133 271 C106 257 92 230 98 202 Z"/>
+              <path class="region-zone" data-zone="motor" d="M276 101 C305 75 342 70 372 85 L386 143 L370 216 L329 267 L284 243 L296 181 Z"/>
+              <path class="region-zone" data-zone="parietal" d="M374 87 C412 66 457 75 483 100 L510 153 L494 216 L449 247 L381 216 L388 143 Z"/>
+              <path class="region-zone" data-zone="occipital" d="M489 111 C528 92 573 109 587 140 C624 145 648 176 644 207 L625 258 L576 278 L511 243 L502 184 Z"/>
+              <path class="region-zone" data-zone="temporal" d="M186 272 L211 254 L270 248 L328 263 L367 287 L376 328 L348 357 L294 345 L250 353 L207 334 L161 314 Z"/>
+              <path class="region-zone" data-zone="hippocampus" d="M316 335 C334 312 359 306 383 317 C402 309 432 319 444 337 C464 344 474 362 459 378 C442 391 421 374 404 379 C384 397 358 382 344 375 C324 374 309 357 316 335 Z"/>
+              <path class="brain-fold" d="M118 177 C147 151 174 158 197 171 C218 183 240 173 258 151"/>
+              <path class="brain-fold" d="M112 222 C145 204 173 218 193 233 C216 249 245 237 263 216"/>
+              <path class="brain-fold" d="M301 111 C325 126 342 115 358 104 M300 153 C322 168 346 160 365 143 M310 196 C333 208 350 197 370 177"/>
+              <path class="brain-fold" d="M397 110 C420 127 445 118 466 105 M395 158 C421 178 452 162 481 145 M397 202 C423 217 454 203 484 183"/>
+              <path class="brain-fold" d="M519 132 C544 147 565 137 584 128 M520 179 C544 194 575 178 609 173 M525 222 C553 237 580 220 614 211"/>
+              <path class="brain-fold" d="M211 294 C241 278 271 290 294 310 M260 329 C283 309 316 307 337 319"/>
+              <path d="M617 307 C643 307 657 319 661 339 C654 358 631 361 616 349" fill="none" stroke="#8290a8" stroke-width="2" opacity=".55"/>
+              <g id="links" aria-hidden="true"></g>
+              <g id="nodes" aria-hidden="true"></g>
+              <g id="labels"></g>
+              <g id="hits" aria-label="Selectable brain regions"></g>
+            </svg>
+            <div class="brain-footer">
+              <span>Neuron-like markers · schematic only</span>
+              <span class="legend"><span>Lower</span><span class="legend-bar" aria-hidden="true"></span><span>Higher expression</span></span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="card" aria-labelledby="controls-title">
+          <div class="card-head">
+            <div>
+              <h2 id="controls-title">Expression profile</h2>
+              <p>Values are normalized from 0 to 1 for display</p>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="gene-top">
+              <label>
+                <span class="field-label">Gene / profile</span>
+                <select id="gene"></select>
+              </label>
+              <button id="download" type="button" aria-label="Download current expression profile as CSV">Export CSV</button>
+            </div>
+            <p class="gene-meta">Demo genes are invented examples, not real genes or observed expression. Edit region values or load your own normalized CSV.</p>
+            <div class="upload-row">
+              <label class="file-button">Load expression CSV<input id="file" type="file" accept=".csv,text/csv"></label>
+            </div>
+            <form id="new-profile" class="new-profile">
+              <input id="new-gene-name" type="text" maxlength="80" placeholder="New profile name" aria-label="New gene profile name">
+              <button type="submit">Add profile</button>
+            </form>
+            <div id="expression-list" class="expression-list" aria-label="Expression values by brain region"></div>
+            <div id="selected-region" class="selected-region" aria-live="polite"></div>
+            <p id="message" class="message" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
       </section>
 
-      <section class="notes" aria-label="Supported protocol concepts">
-        <div class="note"><strong>Samples &amp; reagents</strong><span>Declare starting volumes and a normalized simulation-only signal. Units support microliters (uL) and milliliters (mL).</span></div>
-        <div class="note"><strong>Checked operations</strong><span>Transfers conserve volume, prevent overdraw, and blend the simulated tracer value. Steps run in the order written.</span></div>
-        <div class="note"><strong>Measurements &amp; reports</strong><span>Measure the simulated signal, name the result, and report it. No network, lab equipment, or external service is involved.</span></div>
-      </section>
-
-      <p class="notice">This is an educational language prototype, not a validated biological model or a source of laboratory procedures. Incubation and mixing are logged only; they do not model reaction kinetics, safety, biological outcomes, or real-world protocol suitability. Never use its output to run an experiment or control lab equipment.</p>
-      <footer><a href="https://github.com/Git-Copilot/BrainCode">View BrainCode on GitHub</a></footer>
+      <p class="notice"><strong>Important:</strong> The brain shape, regions, neuron-like points, and built-in profiles are illustrative—not an anatomical atlas, cell-level map, or scientific measurement. Brightness only visualizes the normalized values shown at right; it does not predict where a gene is expressed in a real brain. Loaded values are displayed as supplied and are not uploaded.</p>
+      <footer><a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a> · Expression visualization prototype</footer>
     </main>
-    <script src="biocode.js"></script>
+    <script src="expression.js"></script>
     <script>
-      const example = document.querySelector("#source").value;
-      const source = document.querySelector("#source");
-      const output = document.querySelector("#output");
+      (() => {
+        const { REGIONS, DEMO_DATA, parseCsv, toCsv } = window.ExpressionAtlas;
+        const svg = document.querySelector("#brain");
+        const geneSelect = document.querySelector("#gene");
+        const profileList = document.querySelector("#expression-list");
+        const selectedRegionCard = document.querySelector("#selected-region");
+        const message = document.querySelector("#message");
+        const datasetLabel = document.querySelector("#dataset-label");
+        const demoGenes = new Set(DEMO_DATA.map(record => record.gene));
+        const records = new Map();
+        let currentGene = "Demo gene A";
+        let selectedRegion = "frontal";
+        let isLoadedDataset = false;
 
-      function showResult() {
-        try {
-          const result = window.BioCode.run(window.BioCode.parse(source.value));
-          const inventory = Object.entries(result.containers).map(([name, item]) =>
-            `${name} (${item.kind}): ${Number(item.volumeUl.toFixed(3))} uL remaining`
-          );
-          output.className = "output success";
-          output.textContent = [...result.trace, "", "Remaining volumes:", ...inventory].join("\n");
-        } catch (error) {
-          output.className = "output error";
-          output.textContent = error.message;
+        for (const record of DEMO_DATA) {
+          if (!records.has(record.gene)) records.set(record.gene, new Map());
+          records.get(record.gene).set(record.region, record.expression);
         }
-      }
 
-      document.querySelector("#run").addEventListener("click", showResult);
-      document.querySelector("#reset").addEventListener("click", () => {
-        source.value = example;
-        output.className = "output";
-        output.textContent = "Example restored. Run it to inspect the simulated steps.";
-      });
+        const neuronPositions = {
+          frontal: [[169,174],[196,153],[219,187],[244,163],[183,220],[220,235],[252,214],[145,205],[171,250],[235,137],[263,185],[201,202]],
+          motor: [[305,130],[331,111],[352,137],[316,164],[350,177],[333,207],[300,194],[365,113],[372,158],[316,231],[345,246],[287,171]],
+          parietal: [[409,111],[438,102],[462,128],[419,145],[455,164],[405,185],[474,193],[438,213],[392,124],[478,150],[426,237],[458,229]],
+          occipital: [[533,136],[560,126],[590,149],[550,174],[594,185],[528,208],[570,222],[609,198],[540,239],[593,245],[615,166],[563,198]],
+          temporal: [[216,291],[245,278],[273,296],[303,283],[330,302],[237,318],[270,330],[307,326],[344,339],[194,311],[282,309],[323,348]],
+          hippocampus: [[338,339],[357,326],[378,341],[397,328],[416,343],[435,337],[353,359],[375,368],[398,357],[420,365],[440,352],[385,345]],
+        };
+
+        function htmlEscape(text) {
+          return String(text).replace(/[&<>"']/g, character => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+          })[character]);
+        }
+
+        function profileFor(gene = currentGene) {
+          return records.get(gene);
+        }
+
+        function colorFor(value) {
+          const low = [53, 48, 77];
+          const high = [192, 255, 222];
+          const amount = Math.sqrt(value);
+          const channels = low.map((channel, index) =>
+            Math.round(channel + (high[index] - channel) * amount)
+          );
+          return `rgb(${channels.join(" ")})`;
+        }
+
+        function addSvgElement(parent, tag, attributes = {}) {
+          const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+          for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+          parent.append(element);
+          return element;
+        }
+
+        function renderBrain() {
+          const links = document.querySelector("#links");
+          const nodes = document.querySelector("#nodes");
+          const labels = document.querySelector("#labels");
+          const hits = document.querySelector("#hits");
+          links.replaceChildren();
+          nodes.replaceChildren();
+          labels.replaceChildren();
+          hits.replaceChildren();
+          const profile = profileFor();
+          for (const region of REGIONS) {
+            const value = profile?.get(region.id) ?? 0;
+            const points = neuronPositions[region.id];
+            for (let index = 0; index < points.length - 1; index++) {
+              if (index % 2 === 0) {
+                addSvgElement(links, "line", {
+                  class: "network-link",
+                  x1: points[index][0],
+                  y1: points[index][1],
+                  x2: points[index + 1][0],
+                  y2: points[index + 1][1],
+                  opacity: (0.06 + value * 0.21).toFixed(2),
+                });
+              }
+            }
+            for (const [index, [x, y]] of points.entries()) {
+              addSvgElement(nodes, "circle", {
+                class: "network-node",
+                cx: x,
+                cy: y,
+                r: (2 + value * 3.2 + (index % 3) * 0.25).toFixed(1),
+                fill: colorFor(value),
+                opacity: (0.22 + value * 0.78).toFixed(2),
+                filter: value > 0.58 ? "url(#softGlow)" : "",
+              });
+            }
+            const zone = svg.querySelector(`[data-zone="${region.id}"]`);
+            zone.classList.toggle("active", selectedRegion === region.id);
+            const label = addSvgElement(labels, "text", {
+              class: `brain-label${selectedRegion === region.id ? " active" : ""}`,
+              x: region.x,
+              y: region.y + 48,
+              "text-anchor": "middle",
+            });
+            label.textContent = region.label;
+            const hit = addSvgElement(hits, "ellipse", {
+              class: "region-hit",
+              cx: region.x,
+              cy: region.y,
+              rx: region.id === "hippocampus" ? 65 : 62,
+              ry: region.id === "hippocampus" ? 50 : 63,
+              tabindex: "0",
+              role: "button",
+              "aria-label": `${region.label}, normalized expression ${value.toFixed(2)}`,
+              "aria-pressed": selectedRegion === region.id,
+            });
+            hit.addEventListener("click", () => selectRegion(region.id));
+            hit.addEventListener("keydown", event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                selectRegion(region.id);
+              }
+            });
+          }
+          document.querySelector("#map-gene").textContent = currentGene;
+          document.querySelector("#svg-description").textContent =
+            `An illustrative brain schematic. ${currentGene} expression values are visualized in six broad regions; markers brighten with normalized values.`;
+        }
+
+        function renderControls() {
+          profileList.replaceChildren();
+          const profile = profileFor();
+          for (const region of REGIONS) {
+            const value = profile?.get(region.id) ?? 0;
+            const item = document.createElement("div");
+            item.className = "expression-item";
+            item.innerHTML =
+              `<button class="region-button" type="button" data-region="${region.id}">${htmlEscape(region.label)}</button>` +
+              `<span class="value" id="value-${region.id}">${value.toFixed(2)}</span>` +
+              `<input type="range" min="0" max="1" step="0.01" value="${value}" ` +
+              `aria-label="${htmlEscape(region.label)} normalized expression" data-slider="${region.id}">`;
+            item.querySelector(".region-button").addEventListener("click", () => selectRegion(region.id));
+            item.querySelector("input").addEventListener("input", event => {
+              profile.set(region.id, Number(event.currentTarget.value));
+              selectedRegion = region.id;
+              document.querySelector(`#value-${region.id}`).textContent =
+                Number(event.currentTarget.value).toFixed(2);
+              message.textContent = "Profile edited · slider values are illustrative or user-provided.";
+              message.className = "message";
+              renderBrain();
+              renderSelectedRegion();
+            });
+            profileList.append(item);
+          }
+          renderSelectedRegion();
+        }
+
+        function renderSelectedRegion() {
+          const region = REGIONS.find(item => item.id === selectedRegion);
+          const profile = profileFor();
+          const value = profile?.get(selectedRegion) ?? 0;
+          selectedRegionCard.innerHTML =
+            `<div class="selected-name">${htmlEscape(region.label)}<span>${value.toFixed(2)}</span></div>` +
+            `<p class="selected-copy">Normalized expression value for ${htmlEscape(currentGene)}. This region and its points are schematic, not cell-level coordinates.</p>`;
+        }
+
+        function selectRegion(regionId) {
+          selectedRegion = regionId;
+          renderAll();
+        }
+
+        function renderAll() {
+          renderBrain();
+          renderControls();
+        }
+
+        function updateGeneOptions() {
+          const selected = currentGene;
+          geneSelect.replaceChildren();
+          for (const gene of records.keys()) {
+            const option = document.createElement("option");
+            option.value = gene;
+            option.textContent = `${gene}${demoGenes.has(gene) ? " · synthetic demo" : " · loaded"}`;
+            geneSelect.append(option);
+          }
+          geneSelect.value = selected;
+          datasetLabel.textContent = isLoadedDataset
+            ? "Loaded normalized profile · local display only"
+            : "Synthetic example profiles · no experimental data loaded";
+        }
+
+        geneSelect.addEventListener("change", () => {
+          currentGene = geneSelect.value;
+          selectedRegion = "frontal";
+          message.textContent = "";
+          renderAll();
+        });
+
+        document.querySelector("#new-profile").addEventListener("submit", event => {
+          event.preventDefault();
+          const nameInput = document.querySelector("#new-gene-name");
+          const gene = nameInput.value.trim();
+          if (!gene || gene.length > 80) {
+            message.textContent = "Enter a name between 1 and 80 characters.";
+            message.className = "message error";
+            nameInput.focus();
+            return;
+          }
+          if (records.has(gene)) {
+            message.textContent = "That profile already exists; choose it from the list.";
+            message.className = "message error";
+            return;
+          }
+          records.set(gene, new Map(REGIONS.map(region => [region.id, 0])));
+          currentGene = gene;
+          nameInput.value = "";
+          isLoadedDataset = true;
+          updateGeneOptions();
+          renderAll();
+          message.textContent = "Empty profile created. Adjust the regional values with the sliders.";
+          message.className = "message";
+        });
+
+        document.querySelector("#file").addEventListener("change", async event => {
+          const file = event.currentTarget.files?.[0];
+          if (!file) return;
+          try {
+            const parsed = parseCsv(await file.text());
+            const grouped = new Map();
+            for (const record of parsed) {
+              if (!grouped.has(record.gene)) grouped.set(record.gene, new Map());
+              grouped.get(record.gene).set(record.region, record.expression);
+            }
+            for (const [gene, values] of grouped) {
+              records.set(gene, values);
+            }
+            currentGene = grouped.keys().next().value;
+            selectedRegion = "frontal";
+            isLoadedDataset = true;
+            updateGeneOptions();
+            renderAll();
+            message.textContent = `Loaded ${parsed.length} normalized values across ${grouped.size} gene profile(s).`;
+            message.className = "message";
+          } catch (error) {
+            message.textContent = error.message;
+            message.className = "message error";
+          } finally {
+            event.currentTarget.value = "";
+          }
+        });
+
+        document.querySelector("#download").addEventListener("click", () => {
+          const csv = toCsv(REGIONS.map(region => ({
+            gene: currentGene,
+            region: region.id,
+            expression: profileFor().get(region.id) ?? 0,
+          })));
+          const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = `${currentGene.replace(/[^A-Za-z0-9_-]+/g, "_")}-expression.csv`;
+          anchor.click();
+          URL.revokeObjectURL(url);
+        });
+
+        updateGeneOptions();
+        renderAll();
+      })();
     </script>
   </body>
 </html>

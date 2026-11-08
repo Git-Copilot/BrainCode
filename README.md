@@ -1,56 +1,50 @@
-# BrainCode
+# BrainCode Expression Atlas
 
-BrainCode is an experimental **biotech protocol language and workflow
-simulator**. Write protocols with samples, reagents, liquid transfers, mixing,
-incubation, measurements, and reports; run them locally in the
-[BrainCode playground](https://git-copilot.github.io/BrainCode/).
+BrainCode's site is an interactive, local expression-profile viewer. A
+schematic lateral brain sits beside normalized expression values by broad
+region; the neuron-like markers brighten as the selected profile's values
+increase. Select a region, edit its value, add a profile, or import/export CSV.
 
-## Protocol language
+Try the [BrainCode Expression Atlas](https://git-copilot.github.io/BrainCode/).
 
-```text
-protocol DemoAssay:
-  sample specimen volume=50 uL signal=0.72
-  reagent buffer volume=200 uL
+## Expression CSV
 
-  step prepare:
-    transfer 100 uL from buffer to specimen
-    mix specimen for 30 seconds
-  step read:
-    incubate specimen for 5 minutes at 25 C
-    measure signal of specimen as response
-  report response
+Import a CSV with `gene`, `region`, and `expression` columns. Expression values
+must already be normalized from `0` to `1`. Each row assigns one value to a
+gene-region pair. Supported region IDs are `frontal`, `motor`, `parietal`,
+`occipital`, `temporal`, and `hippocampus`; their displayed names are also
+accepted. Example:
+
+```csv
+gene,region,expression
+GENE-X,frontal,0.82
+GENE-X,motor,0.61
+GENE-X,parietal,0.34
+GENE-X,occipital,0.22
+GENE-X,temporal,0.47
+GENE-X,hippocampus,0.73
 ```
 
-Indentation defines protocol blocks. Declare at least one sample and reagent,
-then list ordered steps. Volumes support `uL` and `mL`; durations support
-seconds and minutes. Samples require a normalized `signal` from 0 to 1, which
-is a fictional tracer value used only to demonstrate measurement and dilution.
-Reagent signal defaults to zero. Transfers update remaining volumes and blend
-that tracer by volume. `mix` and `incubate` are recorded in the trace only.
-Measurements read the simulated signal, and `report` names a value measured
-earlier in the protocol.
+The viewer displays imported values as provided; it does not normalize,
+interpret, or validate their biological provenance. Data is processed in the
+browser and is not uploaded.
 
-The runner checks syntax, indentation, declared containers, positive volumes,
-transfer overdraw, and measurement/report references. It runs in the browser
-without uploading data, connecting to equipment, or calling a service. The
-same parser and simulator can be tested with Node:
+## Important limitations
+
+The brain drawing, region positions, node locations, and built-in Demo gene
+profiles are illustrative placeholders, not measured data, an anatomical
+atlas, or cell-level coordinates. Brightness is only a visual encoding of the
+normalized values—not a prediction of gene expression or neuronal activity.
+This project does not include a real expression dataset or a biological model.
+
+## Tests
 
 ```powershell
+node --test test_expression.js
 node --test test_biocode.js
-```
-
-This is a language and bookkeeping demonstration, **not** a validated
-biological model or a source of laboratory procedures. Incubation and mixing
-do not model kinetics or outcomes, and the simulator does not assess safety or
-real-world protocol suitability. Never use its output to run experiments or
-control lab equipment.
-
-## Earlier brain-simulation example
-
-The repository also retains the original small neuron/learning demo as a
-separate Python interpreter. It is not the biotech protocol simulator.
-
-```powershell
 python -m unittest
-python braincode.py examples\simple_perceiver.brain --signal 0.9 --signal 0.8 --signal 0.2
 ```
+
+The repository retains the separate experimental protocol simulator and
+neuron-language example as code; they are not used by the expression-atlas
+page.
