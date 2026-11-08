@@ -12,6 +12,8 @@ needed to display the surface.
 
 ## BrainCode language
 
+[Explore the BrainCode language showcase](https://git-copilot.github.io/BrainCode/language.html).
+
 The `.brain` language runs small, event-driven neural simulations. A program
 declares a normalized signal input, rolling memory, one or more threshold
 neurons, and persistent states; its `on` handler describes what happens for

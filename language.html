@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101522">
+    <meta name="description" content="Explore BrainCode, a small event-driven language for safe, stateful neural simulations.">
+    <title>BrainCode Language · Neural Simulation</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #101522;
+        color: #edf2ff;
+        font-synthesis: none;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        min-width: 320px;
+        margin: 0;
+        background:
+          radial-gradient(ellipse at 12% 0%, #31245b 0, transparent 38rem),
+          radial-gradient(ellipse at 100% 20%, #123d50 0, transparent 36rem),
+          #101522;
+      }
+      main { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 42px; }
+      a { color: #a3ead2; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+      .brand { display: flex; gap: 10px; align-items: center; color: #dce5f6; font-size: .82rem; font-weight: 750; letter-spacing: .03em; }
+      .brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #79dfbe60; border-radius: 9px; color: #9ce8d2; }
+      .nav-links { display: flex; gap: 18px; color: #b6c0d5; font-size: .76rem; }
+      .hero { padding: 78px 0 54px; }
+      .eyebrow { color: #9ce8d2; font-size: .72rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+      h1 { max-width: 800px; margin: 12px 0; font-size: clamp(2.7rem, 7vw, 5.2rem); letter-spacing: -.065em; line-height: 1.02; }
+      .intro { max-width: 700px; margin: 16px 0 24px; color: #b6c0d5; font-size: 1.02rem; line-height: 1.7; }
+      .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      .button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 14px; background: #222c3d; color: #d7e1f3; font-size: .78rem; font-weight: 700; }
+      .button.primary { border-color: #79dfbe50; background: #244b4b; color: #c5f6df; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0 0 48px; }
+      .card { min-width: 0; border: 1px solid #ffffff18; border-radius: 14px; padding: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000020; }
+      .card h2, .section-title { margin: 0 0 8px; font-size: 1rem; letter-spacing: -.02em; }
+      .card p { margin: 0; color: #9daac0; font-size: .79rem; line-height: 1.6; }
+      .feature-number { display: block; margin-bottom: 14px; color: #9ce8d2; font: 700 .7rem ui-monospace, Consolas, monospace; }
+      .section { margin: 42px 0; }
+      .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 14px; }
+      .section-heading p { max-width: 550px; margin: 0; color: #9daac0; font-size: .78rem; line-height: 1.6; }
+      .section-title { margin: 4px 0 0; font-size: 1.5rem; }
+      .code-card { overflow: hidden; border: 1px solid #ffffff18; border-radius: 14px; background: #111724; }
+      .code-head { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #ffffff12; color: #9daac0; font: .7rem ui-monospace, Consolas, monospace; }
+      pre { overflow-x: auto; margin: 0; padding: 20px; color: #dbe5f6; font: .78rem/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
+      .code-comment { color: #8995ad; }
+      .code-keyword { color: #c6a9ff; }
+      .code-string { color: #f0c98e; }
+      .code-function { color: #9ce8d2; }
+      .output-label { color: #9ce8d2; }
+      .output-wrap { overflow-x: auto; border: 1px solid #ffffff18; border-radius: 12px; }
+      table { width: 100%; border-collapse: collapse; background: #171e2de8; text-align: left; }
+      th, td { padding: 12px 14px; border-bottom: 1px solid #ffffff12; font-size: .75rem; }
+      th { color: #9daac0; font-weight: 650; }
+      td { color: #dbe5f6; }
+      tbody tr:last-child td { border-bottom: 0; }
+      td code { color: #9ce8d2; font: .72rem ui-monospace, Consolas, monospace; }
+      .callout { margin-top: 14px; border-left: 2px solid #f0b970; padding: 3px 0 3px 12px; color: #9daac0; font-size: .75rem; line-height: 1.6; }
+      .callout strong { color: #e4c28e; }
+      .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: step; }
+      .step { counter-increment: step; }
+      .step h3 { margin: 0 0 7px; font-size: .85rem; }
+      .step h3::before { content: "0" counter(step) " / "; color: #9ce8d2; font: 700 .68rem ui-monospace, Consolas, monospace; }
+      .step code { color: #c6d4e8; font: .73rem ui-monospace, Consolas, monospace; }
+      .limit-note { margin: 34px 0 0; border: 1px solid #f0b97035; border-radius: 12px; padding: 15px 17px; background: #231f1b66; color: #b6c0d5; font-size: .75rem; line-height: 1.65; }
+      .limit-note strong { color: #f0c98e; }
+      footer { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 30px; padding-top: 18px; border-top: 1px solid #ffffff16; color: #8995ad; font-size: .74rem; }
+      @media (max-width: 760px) {
+        main { width: min(100% - 24px, 620px); padding-top: 20px; }
+        .hero { padding: 58px 0 38px; }
+        .grid, .steps { grid-template-columns: 1fr; }
+        .section-heading { display: block; }
+        .section-heading p { margin-top: 8px; }
+      }
+      @media (max-width: 460px) {
+        .topbar { align-items: flex-start; }
+        .nav-links { flex-direction: column; gap: 6px; align-items: flex-end; }
+        .hero { padding-top: 46px; }
+        th, td { padding: 10px 8px; font-size: .68rem; }
+        pre { padding: 14px; font-size: .7rem; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="topbar">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ LANGUAGE</span></a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="index.html">Motor cortex atlas</a>
+          <a href="https://github.com/Git-Copilot/BrainCode">Source on GitHub</a>
+        </nav>
+      </header>
+
+      <section class="hero">
+        <div class="eyebrow">A small language for neural simulations</div>
+        <h1>Describe a signal.<br>See how state changes.</h1>
+        <p class="intro">BrainCode is an event-driven language for exploring threshold neurons, rolling memory, and explicit outputs. Write a handler once; each normalized input sample advances its state.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="examples/simple_perceiver.brain" download>Download the example</a>
+          <a class="button" href="#run-it">Run it locally</a>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="Language features">
+        <article class="card">
+          <span class="feature-number">01 · SIGNALS</span>
+          <h2>Threshold neurons</h2>
+          <p>Declare multiple neurons with different normalized thresholds, then ask each whether the current sample fires.</p>
+        </article>
+        <article class="card">
+          <span class="feature-number">02 · STATE</span>
+          <h2>Memory that evolves</h2>
+          <p>Keep a bounded rolling window, query recent values, and update persistent state with allowlisted expressions.</p>
+        </article>
+        <article class="card">
+          <span class="feature-number">03 · OUTPUTS</span>
+          <h2>Make results explicit</h2>
+          <p>Emit named signals or decisions for each sample. The command-line runner can return one JSON record per input.</p>
+        </article>
+      </section>
+
+      <section class="section" aria-labelledby="example-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Read the program</div>
+            <h2 class="section-title" id="example-title">A motor-intent signal, step by step.</h2>
+          </div>
+          <p>This example demonstrates language mechanics on made-up normalized values. It is not a brain decoder or a biological model.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span>examples/simple_perceiver.brain</span><span>BrainCode</span></div>
+          <pre><code><span class="code-comment"># Model a simple motor-intent signal using thresholds and a rolling window.</span>
+<span class="code-keyword">brain</span> MotorIntent:
+  <span class="code-keyword">input</span> eeg: Signal
+  <span class="code-keyword">memory</span> recent(capacity=3)
+  <span class="code-keyword">neuron</span> permissive(threshold=0.4)
+  <span class="code-keyword">neuron</span> strict(threshold=0.8)
+  <span class="code-keyword">state</span> confidence = 0.1
+  <span class="code-keyword">state</span> baseline = 0.2
+
+  <span class="code-keyword">on</span> eeg as sample:
+    <span class="code-keyword">let</span> active = permissive.fire(sample)
+    <span class="code-keyword">let</span> high_confidence = strict.fire(sample)
+    recent.store(active)
+    confidence = <span class="code-function">learn</span>(confidence, from: recent.mean(), rate: 0.5)
+    baseline = <span class="code-function">max</span>(baseline, sample * 0.5)
+    <span class="code-keyword">if</span> recent.ratio() and active and not high_confidence:
+      <span class="code-keyword">decide</span> <span class="code-string">"motor-intent"</span>
+      <span class="code-keyword">emit</span> <span class="code-string">"confidence"</span>, confidence
+    <span class="code-keyword">else</span>:
+      <span class="code-keyword">emit</span> <span class="code-string">"baseline"</span>, baseline</code></pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="output-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Example output</div>
+            <h2 class="section-title" id="output-title">One result for each sample.</h2>
+          </div>
+          <p>Run with <code>0.6</code>, <code>0.9</code>, and <code>0.1</code>. Values below are from the interpreter's JSON output.</p>
+        </div>
+        <div class="output-wrap">
+          <table>
+            <thead>
+              <tr><th>Step</th><th>Input</th><th>Neuron response</th><th>Decision</th><th>Emitted signal</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td><code>0.6</code></td><td>permissive fires</td><td><code>motor-intent</code></td><td>confidence: 0.55</td></tr>
+              <tr><td>2</td><td><code>0.9</code></td><td>both fire</td><td>—</td><td>baseline: 0.45</td></tr>
+              <tr><td>3</td><td><code>0.1</code></td><td>neither fires</td><td>—</td><td>baseline: 0.45</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="callout"><strong>How it works:</strong> The first two samples cross the permissive threshold, so the rolling response ratio is high. On sample one, the strict neuron does not fire, and the handler emits the decision. On later samples, the condition is false and the else branch emits the baseline.</p>
+      </section>
+
+      <section class="section" id="run-it" aria-labelledby="run-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">Try the interpreter</div>
+            <h2 class="section-title" id="run-title">Run a program on your machine.</h2>
+          </div>
+          <p>BrainCode runs with Python and the standard library; the showcase page itself does not execute programs.</p>
+        </div>
+        <div class="steps">
+          <article class="card step">
+            <h3>Get the source</h3>
+            <p>Clone the <a href="https://github.com/Git-Copilot/BrainCode">BrainCode repository</a> or download the example above.</p>
+          </article>
+          <article class="card step">
+            <h3>Provide samples</h3>
+            <p>From the repository folder, pass normalized values from <code>0</code> to <code>1</code>:</p>
+            <pre><code>python braincode.py examples/simple_perceiver.brain --signal 0.6 --signal 0.9 --signal 0.1 --json</code></pre>
+          </article>
+          <article class="card step">
+            <h3>Inspect the records</h3>
+            <p>Each JSON line includes the input, current states, decision (if any), and explicit outputs.</p>
+          </article>
+        </div>
+      </section>
+
+      <p class="limit-note"><strong>Scope and safety:</strong> BrainCode is a lightweight simulation language, not a hardware driver, validated BCI, or clinical tool. Its interpreter evaluates expressions through a restricted operator and function allowlist; BrainCode source is not executed as Python. Example thresholds, input values, and decisions are illustrative only.</p>
+
+      <footer>
+        <a href="index.html">Explore the motor cortex atlas</a>
+        <a href="https://github.com/Git-Copilot/BrainCode">View source and tests</a>
+        <span>BrainCode · neural simulation language</span>
+      </footer>
+    </main>
+  </body>
+</html>
