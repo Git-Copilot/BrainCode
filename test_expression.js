@@ -1,20 +1,50 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const { DEMO_DATA, REGIONS, parseCommand, parseCsv, toCsv } = require("./expression.js");
+const ExpressionAtlas = require("./expression.js");
+const { REGIONS, mapExpressionToSurface, parseCommand, parseCsv, toCsv } = ExpressionAtlas;
 
-test("demo profiles have one normalized value per brain region", () => {
+test("the atlas starts without predefined expression profiles", () => {
+  assert.equal("DEMO_DATA" in ExpressionAtlas, false);
+});
+
+test("functional map defines the six broad M1 regions", () => {
   assert.deepEqual(
     REGIONS.map(region => region.id),
     ["leg_foot", "trunk", "arm", "hand", "face", "tongue"],
   );
-  const genes = [...new Set(DEMO_DATA.map(row => row.gene))];
-  assert.equal(genes.length, 3);
-  for (const gene of genes) {
-    const profile = DEMO_DATA.filter(row => row.gene === gene);
-    assert.equal(profile.length, REGIONS.length);
-    assert.deepEqual(new Set(profile.map(row => row.region)), new Set(REGIONS.map(region => region.id)));
-    assert.ok(profile.every(row => row.expression >= 0 && row.expression <= 1));
-  }
+});
+
+test("expression values map onto the matching approximate M1 surface zones", () => {
+  const vertices = [
+    [-10, -15, 40],
+    [-28, -15, 40],
+    [-37, -15, 40],
+    [-45, -15, 40],
+    [-53, -15, 40],
+    [-61, -15, 40],
+    [-37, 20, 40],
+    [-37, -15, -10],
+  ];
+  const profile = new Map([
+    ["leg_foot", 0.1],
+    ["trunk", 0.2],
+    ["arm", 0.3],
+    ["hand", 0.4],
+    ["face", 0.5],
+    ["tongue", 0.6],
+  ]);
+  const { values, hasExpression } = mapExpressionToSurface(vertices.flat(), profile);
+  assert.deepEqual([...values].map(value => Number(value.toFixed(5))), [
+    0.1, 0.2, 0.3, 0.4, 0.5, 0.6, -1, -1,
+  ]);
+  assert.equal(hasExpression, true);
+});
+
+test("zero and missing expression values do not create a lit surface layer", () => {
+  const result = mapExpressionToSurface([-37, -15, 40], new Map([["arm", 0]]));
+  assert.equal(result.values[0], 0);
+  assert.equal(result.hasExpression, false);
+  assert.throws(() => mapExpressionToSurface([1, 2], new Map()), /x, y, z/);
 });
 
 test("CSV import accepts mapped body regions, quoted genes, and CRLF rows", () => {

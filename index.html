@@ -28,7 +28,7 @@
       .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
       .brand { display: flex; gap: 10px; align-items: center; color: #dce5f6; font-size: .82rem; font-weight: 750; letter-spacing: .03em; }
       .brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #79dfbe60; border-radius: 9px; color: #9ce8d2; }
-      .status-tag { border: 1px solid #f0b97045; border-radius: 999px; padding: 7px 10px; color: #f0c98e; font-size: .7rem; font-weight: 650; }
+      .status-tag { border: 1px solid #79dfbe45; border-radius: 999px; padding: 7px 10px; color: #9ce8d2; font-size: .7rem; font-weight: 650; }
       .language-link { color: #9ce8d2; font-size: .74rem; font-weight: 700; white-space: nowrap; }
       .hero { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 32px 0 22px; }
       .eyebrow { color: #9ce8d2; font-size: .72rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
@@ -46,6 +46,9 @@
       .surface-status { position: absolute; right: 12px; bottom: 8px; left: 12px; margin: 0; color: #aeb9ce; font-size: .68rem; line-height: 1.5; pointer-events: none; text-shadow: 0 1px 5px #101522; }
       .surface-status.error { color: #ff9a9a; }
       .surface-caption { display: flex; justify-content: space-between; gap: 12px; margin: 9px 3px 14px; color: #8995ad; font-size: .68rem; line-height: 1.5; }
+      .surface-expression-key { display: flex; align-items: center; gap: 7px; color: #aeb9ce; }
+      #surface-expression-key[hidden] { display: none; }
+      .surface-expression-gradient { display: inline-block; width: 82px; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #293243, #a8733c, #ffe29a); }
       .map-details { margin-top: 12px; border: 1px solid #ffffff14; border-radius: 11px; background: #111724; }
       .map-details summary { padding: 11px 13px; color: #c8d2e4; cursor: pointer; font-size: .73rem; font-weight: 700; }
       .map-details[open] summary { border-bottom: 1px solid #ffffff12; }
@@ -125,13 +128,13 @@
       <header class="topbar">
         <div class="brand"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ MOTOR CORTEX ATLAS</span></div>
         <a class="language-link" href="language.html">Explore the language →</a>
-        <span class="status-tag">Human template surface · example overlay</span>
+        <span class="status-tag">ICBM152 template · left hemisphere</span>
       </header>
       <section class="hero">
         <div>
           <div class="eyebrow">Explore a mapped human brain region</div>
           <h1>Explore the motor cortex.</h1>
-          <p class="intro">Rotate and zoom a real cortical surface mesh, then inspect the broad primary motor cortex (M1) body map. The surface is a standard atlas template; its example motor layer is not an individual recording or a gene-expression dataset.</p>
+          <p class="intro">Rotate and zoom a standard human cortical surface. Add normalized regional values to illuminate the corresponding approximate primary motor cortex (M1) zones on the real surface and the body-map schematic.</p>
         </div>
         <span id="dataset-label" class="dataset-label">Synthetic example profiles · no experimental data loaded</span>
       </section>
@@ -141,7 +144,7 @@
           <div class="card-head">
             <div>
               <h2 id="brain-title">Human cortical surface · left hemisphere</h2>
-              <p>ICBM152 template mesh with an example motor-surface layer</p>
+              <p>ICBM152 template mesh · left hemisphere · M1 expression projection</p>
             </div>
           </div>
           <div class="brain-wrap">
@@ -150,23 +153,16 @@
               <p id="surface-status" class="surface-status" role="status" aria-live="polite">Loading the cortical surface viewer…</p>
             </div>
             <div class="surface-caption">
-              <span>Drag to rotate · scroll to zoom · color is the example layer</span>
-              <span>Standard atlas geometry · not an individual brain</span>
+              <span>Drag to rotate · scroll to zoom · colors are the selected profile</span>
+              <span id="surface-expression-key" class="surface-expression-key" hidden><span>Low</span><span class="surface-expression-gradient" aria-hidden="true"></span><span>High</span></span>
             </div>
             <section class="command-panel" aria-label="Mapped motor action command">
               <span class="command-title">Explore the broad M1 body-map key</span>
               <form id="command-form" class="command-form">
-                <input id="action-command" type="text" maxlength="120" placeholder='Try "move hand", "walk", or "speak"' aria-label="Motor action command">
+                <input id="action-command" type="text" maxlength="120" placeholder="Enter an M1 action to highlight" aria-label="Motor action command">
                 <button type="submit">Run action</button>
               </form>
-              <div class="command-examples">
-                <span>Try:</span>
-                <button type="button" class="command-example" data-command="walk">walk</button>
-                <button type="button" class="command-example" data-command="reach">reach</button>
-                <button type="button" class="command-example" data-command="speak">speak</button>
-                <button type="button" class="command-example" data-command="clear">clear</button>
-              </div>
-              <p id="command-status" class="command-status" role="status" aria-live="polite">A command highlights the schematic key below; it does not alter measured activity on the atlas surface.</p>
+              <p id="command-status" class="command-status" role="status" aria-live="polite">Enter a mapped action to highlight the schematic only. This does not alter the 3D anatomy or represent measured activity.</p>
             </section>
             <details class="map-details">
               <summary>Open the approximate M1 body-map schematic</summary>
@@ -235,18 +231,18 @@
           <div class="card-head">
             <div>
               <h2 id="controls-title">Regional display values</h2>
-              <p>Optional illustrative values · normalized from 0 to 1</p>
+              <p>User-supplied regional values · normalized from 0 to 1</p>
             </div>
           </div>
           <div class="controls">
             <div class="gene-top">
               <label>
-                <span class="field-label">Gene / profile</span>
+                <span class="field-label">Expression profile</span>
                 <select id="gene"></select>
               </label>
               <button id="download" type="button" aria-label="Download current expression profile as CSV">Export CSV</button>
             </div>
-            <p class="gene-meta">Demo profiles are invented and do not color the atlas surface. Edit values or load your own normalized CSV to explore the schematic key.</p>
+            <p class="gene-meta">No sample values are preloaded. Create a profile or load normalized CSV values to illuminate approximate M1 zones on the surface and schematic.</p>
             <div class="upload-row">
               <label class="file-button">Load expression CSV<input id="file" type="file" accept=".csv,text/csv"></label>
             </div>
@@ -261,17 +257,17 @@
         </aside>
       </section>
 
-      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. The motor-labeled overlay is an example asset packaged with NiiVue; the asset does not include study-level provenance, so it is shown for orientation only, not as evidence of measured activity. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, do not color the 3D surface, and are not gene-expression measurements. Loaded CSV values stay in the browser.</p>
+      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. User values are projected onto broad, approximate M1 zones using surface coordinates; they are not measured per-vertex expression or activity. The body-map regions summarize classic human stimulation mapping, overlap, and vary. Imported values stay in the browser and are not biologically validated.</p>
       <footer>
         <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey · human cortical stimulation maps</a>
-        · <a href="https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images" target="_blank" rel="noopener noreferrer">Surface and example layer source · NiiVue</a>
+        · <a href="https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images" target="_blank" rel="noopener noreferrer">Surface source · NiiVue</a>
         · <a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a>
       </footer>
     </main>
-    <script src="expression.js"></script>
+    <script src="expression.js?v=2"></script>
     <script>
       (() => {
-        const { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
+        const { REGIONS, mapExpressionToSurface, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
         const svg = document.querySelector("#brain");
         const geneSelect = document.querySelector("#gene");
         const profileList = document.querySelector("#expression-list");
@@ -280,18 +276,12 @@
         const datasetLabel = document.querySelector("#dataset-label");
         const commandInput = document.querySelector("#action-command");
         const commandStatus = document.querySelector("#command-status");
-        const demoGenes = new Set(DEMO_DATA.map(record => record.gene));
         const records = new Map();
-        let currentGene = "Demo gene A";
+        let currentGene = "";
         let selectedRegion = "leg_foot";
-        let isLoadedDataset = false;
+        let hasImportedDataset = false;
         let flaringRegions = new Set();
         let flareTimeout = null;
-
-        for (const record of DEMO_DATA) {
-          if (!records.has(record.gene)) records.set(record.gene, new Map());
-          records.get(record.gene).set(record.region, record.expression);
-        }
 
         const neuronPositions = {
           leg_foot: [[278,181],[289,169],[300,188],[311,177],[323,192],[329,178],[286,201],[302,210],[318,207],[331,198],[276,214],[315,184]],
@@ -315,7 +305,7 @@
         function colorFor(value) {
           const low = [53, 48, 77];
           const high = [192, 255, 222];
-          const amount = Math.sqrt(value);
+          const amount = Math.sqrt(Number(value) || 0);
           const channels = low.map((channel, index) =>
             Math.round(channel + (high[index] - channel) * amount)
           );
@@ -340,31 +330,34 @@
           hits.replaceChildren();
           const profile = profileFor();
           for (const region of REGIONS) {
-            const value = profile?.get(region.id) ?? 0;
+            const value = profile?.get(region.id) ?? null;
+            const brightness = value ?? 0;
             const points = neuronPositions[region.id];
             const isFlaring = flaringRegions.has(region.id);
-            for (let index = 0; index < points.length - 1; index++) {
-              if (index % 2 === 0) {
-                addSvgElement(links, "line", {
-                  class: "network-link",
-                  x1: points[index][0],
-                  y1: points[index][1],
-                  x2: points[index + 1][0],
-                  y2: points[index + 1][1],
-                  opacity: (0.06 + value * 0.21).toFixed(2),
+            if (profile) {
+              for (let index = 0; index < points.length - 1; index++) {
+                if (index % 2 === 0) {
+                  addSvgElement(links, "line", {
+                    class: "network-link",
+                    x1: points[index][0],
+                    y1: points[index][1],
+                    x2: points[index + 1][0],
+                    y2: points[index + 1][1],
+                    opacity: (0.06 + brightness * 0.21).toFixed(2),
+                  });
+                }
+              }
+              for (const [index, [x, y]] of points.entries()) {
+                addSvgElement(nodes, "circle", {
+                  class: `network-node${isFlaring ? " flaring" : ""}`,
+                  cx: x,
+                  cy: y,
+                  r: (2 + brightness * 3.2 + (index % 3) * 0.25).toFixed(1),
+                  fill: colorFor(brightness),
+                  opacity: (0.22 + brightness * 0.78).toFixed(2),
+                  filter: brightness > 0.58 ? "url(#softGlow)" : "",
                 });
               }
-            }
-            for (const [index, [x, y]] of points.entries()) {
-              addSvgElement(nodes, "circle", {
-                class: `network-node${isFlaring ? " flaring" : ""}`,
-                cx: x,
-                cy: y,
-                r: (2 + value * 3.2 + (index % 3) * 0.25).toFixed(1),
-                fill: colorFor(value),
-                opacity: (0.22 + value * 0.78).toFixed(2),
-                filter: value > 0.58 ? "url(#softGlow)" : "",
-              });
             }
             const zone = svg.querySelector(`[data-zone="${region.id}"]`);
             zone.classList.toggle("active", selectedRegion === region.id);
@@ -384,7 +377,7 @@
               ry: 52,
               tabindex: "0",
               role: "button",
-              "aria-label": `${region.label}, normalized expression ${value.toFixed(2)}`,
+              "aria-label": `${region.label}, ${value === null ? "no value" : `normalized expression ${value.toFixed(2)}`}`,
               "aria-pressed": selectedRegion === region.id,
             });
             hit.addEventListener("click", () => selectRegion(region.id));
@@ -395,21 +388,27 @@
               }
             });
           }
-          document.querySelector("#svg-description").textContent =
-            `A zoomed human primary motor cortex map. ${currentGene} expression values are visualized across the broad medial-to-lateral leg, trunk, arm, hand, face, and tongue representation. Markers brighten with normalized values.`;
+          document.querySelector("#svg-description").textContent = currentGene
+            ? `A zoomed human primary motor cortex schematic. User-provided normalized values for ${currentGene} are visualized across broad body-map regions.`
+            : "A zoomed illustrative human primary motor cortex body-map schematic. No expression values are loaded.";
         }
 
         function renderControls() {
           profileList.replaceChildren();
           const profile = profileFor();
+          if (!profile) {
+            profileList.innerHTML = "<p class=\"gene-meta\">Create a profile or import a CSV to add values here.</p>";
+            renderSelectedRegion();
+            return;
+          }
           for (const region of REGIONS) {
-            const value = profile?.get(region.id) ?? 0;
+            const value = profile.get(region.id) ?? null;
             const item = document.createElement("div");
             item.className = "expression-item";
             item.innerHTML =
               `<button class="region-button" type="button" data-region="${region.id}">${htmlEscape(region.label)}</button>` +
-              `<span class="value" id="value-${region.id}">${value.toFixed(2)}</span>` +
-              `<input type="range" min="0" max="1" step="0.01" value="${value}" ` +
+              `<span class="value" id="value-${region.id}">${value === null ? "—" : value.toFixed(2)}</span>` +
+              `<input type="range" min="0" max="1" step="0.01" value="${value ?? 0}" ` +
               `aria-label="${htmlEscape(region.label)} normalized expression" data-slider="${region.id}">`;
             item.querySelector(".region-button").addEventListener("click", () => selectRegion(region.id));
             item.querySelector("input").addEventListener("input", event => {
@@ -417,10 +416,11 @@
               selectedRegion = region.id;
               document.querySelector(`#value-${region.id}`).textContent =
                 Number(event.currentTarget.value).toFixed(2);
-              message.textContent = "Profile edited · slider values are illustrative or user-provided.";
+              message.textContent = "Profile edited · values are mapped to approximate M1 surface zones.";
               message.className = "message";
               renderBrain();
               renderSelectedRegion();
+              updateBrainSurfaceExpression();
             });
             profileList.append(item);
           }
@@ -430,10 +430,16 @@
         function renderSelectedRegion() {
           const region = REGIONS.find(item => item.id === selectedRegion);
           const profile = profileFor();
-          const value = profile?.get(selectedRegion) ?? 0;
+          const value = profile?.get(selectedRegion) ?? null;
+          if (!profile) {
+            selectedRegionCard.innerHTML =
+              "<div class=\"selected-name\">No profile loaded</div>" +
+              "<p class=\"selected-copy\">Create a profile or import a CSV to inspect normalized values on the schematic.</p>";
+            return;
+          }
           selectedRegionCard.innerHTML =
-            `<div class="selected-name">${htmlEscape(region.label)}<span>${value.toFixed(2)}</span></div>` +
-            `<p class="selected-copy">Normalized expression value for ${htmlEscape(currentGene)}. Broad M1 body-map location only; not a precise or individual cortical boundary.</p>`;
+            `<div class="selected-name">${htmlEscape(region.label)}<span>${value === null ? "—" : value.toFixed(2)}</span></div>` +
+            `<p class="selected-copy">${value === null ? "No value supplied for this region." : `User-provided normalized value for ${htmlEscape(currentGene)}.`} Broad M1 body-map location only; not a precise or individual cortical boundary.</p>`;
         }
 
         function selectRegion(regionId) {
@@ -444,21 +450,76 @@
         function renderAll() {
           renderBrain();
           renderControls();
+          updateBrainSurfaceExpression();
         }
+
+        function updateBrainSurfaceExpression() {
+          const viewer = window.brainSurfaceViewer;
+          const mesh = viewer?.meshes?.[0];
+          if (!mesh) return;
+
+          const { values, hasExpression } = mapExpressionToSurface(mesh.pts, profileFor());
+          document.querySelector("#surface-expression-key").hidden = !hasExpression;
+
+          const layerIndex = mesh.layers.findIndex(layer => layer.name === "User-provided M1 expression");
+          if (!hasExpression) {
+            if (layerIndex !== -1) {
+              mesh.layers.splice(layerIndex, 1);
+              mesh.updateMesh(viewer.gl);
+              viewer.drawScene();
+            }
+            return;
+          }
+
+          const layer = layerIndex === -1
+            ? {
+                name: "User-provided M1 expression",
+                opacity: 0.92,
+                colormap: "warm",
+                cal_min: 0.01,
+                cal_max: 1,
+                cal_minNeg: 0,
+                cal_maxNeg: 0,
+                frame4D: 0,
+                nFrame4D: 1,
+                isTransparentBelowCalMin: true,
+                showLegend: false,
+                colorbarVisible: false,
+                values,
+              }
+            : mesh.layers[layerIndex];
+          layer.values = values;
+          if (layerIndex === -1) mesh.layers.push(layer);
+          mesh.updateMesh(viewer.gl);
+          viewer.drawScene();
+        }
+
+        window.updateBrainSurfaceExpression = updateBrainSurfaceExpression;
 
         function updateGeneOptions() {
           const selected = currentGene;
           geneSelect.replaceChildren();
-          for (const gene of records.keys()) {
+          if (records.size === 0) {
             const option = document.createElement("option");
-            option.value = gene;
-            option.textContent = `${gene}${demoGenes.has(gene) ? " · synthetic demo" : " · loaded"}`;
+            option.value = "";
+            option.textContent = "No profile loaded";
             geneSelect.append(option);
+            geneSelect.disabled = true;
+          } else {
+            geneSelect.disabled = false;
+            for (const gene of records.keys()) {
+              const option = document.createElement("option");
+              option.value = gene;
+              option.textContent = gene;
+              geneSelect.append(option);
+            }
+            geneSelect.value = selected;
           }
-          geneSelect.value = selected;
-          datasetLabel.textContent = isLoadedDataset
-            ? "Loaded normalized profile · local display only"
-            : "Synthetic example profiles · no experimental data loaded";
+          datasetLabel.textContent = hasImportedDataset
+            ? "Imported normalized values · browser-local display"
+            : records.size
+              ? "User-created profile · no experimental data loaded"
+              : "No expression profile loaded";
         }
 
         function runActionCommand(input) {
@@ -499,13 +560,6 @@
           event.preventDefault();
           runActionCommand(commandInput.value);
         });
-        for (const button of document.querySelectorAll(".command-example")) {
-          button.addEventListener("click", () => {
-            commandInput.value = button.dataset.command;
-            runActionCommand(button.dataset.command);
-          });
-        }
-
         geneSelect.addEventListener("change", () => {
           currentGene = geneSelect.value;
           selectedRegion = "leg_foot";
@@ -528,10 +582,10 @@
             message.className = "message error";
             return;
           }
-          records.set(gene, new Map(REGIONS.map(region => [region.id, 0])));
+          records.set(gene, new Map(REGIONS.map(region => [region.id, null])));
           currentGene = gene;
           nameInput.value = "";
-          isLoadedDataset = true;
+          hasImportedDataset = false;
           updateGeneOptions();
           renderAll();
           message.textContent = "Empty profile created. Adjust the regional values with the sliders.";
@@ -553,7 +607,7 @@
             }
             currentGene = grouped.keys().next().value;
             selectedRegion = "leg_foot";
-            isLoadedDataset = true;
+            hasImportedDataset = true;
             updateGeneOptions();
             renderAll();
             message.textContent = `Loaded ${parsed.length} normalized values across ${grouped.size} gene profile(s).`;
@@ -567,11 +621,19 @@
         });
 
         document.querySelector("#download").addEventListener("click", () => {
-          const csv = toCsv(REGIONS.map(region => ({
-            gene: currentGene,
-            region: region.id,
-            expression: profileFor().get(region.id) ?? 0,
-          })));
+          const csv = toCsv(REGIONS.flatMap(region => {
+            const expression = profileFor()?.get(region.id);
+            return expression === null || expression === undefined ? [] : [{
+              gene: currentGene,
+              region: region.id,
+              expression,
+            }];
+          }));
+          if (!csv || records.size === 0) {
+            message.textContent = "Create or import a profile before exporting values.";
+            message.className = "message error";
+            return;
+          }
           const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
           const anchor = document.createElement("a");
           anchor.href = url;
@@ -587,7 +649,7 @@
     <script type="module">
       const status = document.querySelector("#surface-status");
       try {
-        const { Niivue, NVMesh } = await import(
+        const { Niivue } = await import(
           "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.69.0/+esm"
         );
         const viewer = new Niivue({
@@ -597,31 +659,21 @@
         });
         viewer.setSliceType(viewer.sliceTypeRender);
         viewer.opts.showLegend = false;
-        viewer.opts.isColorbar = true;
+        viewer.opts.isColorbar = false;
         await viewer.attachTo("surface-viewer");
+        const isLocalFilePreview = window.location.protocol === "file:"
+          || window.location.hostname === "browser-preview-local.localhost";
+        const meshUrl = isLocalFilePreview
+          ? "https://raw.githubusercontent.com/Git-Copilot/BrainCode/0bed23b/assets/brain/BrainMesh_ICBM152.lh.mz3"
+          : "assets/brain/BrainMesh_ICBM152.lh.mz3";
         await viewer.loadMeshes([{
-          url: "assets/brain/BrainMesh_ICBM152.lh.mz3",
-          rgba255: [194, 204, 220, 255],
+          url: meshUrl,
+          rgba255: [190, 202, 220, 255],
         }]);
         viewer.scene.volScaleMultiplier = 1.35;
-        status.textContent = "Atlas surface loaded. Loading the packaged motor-labeled example layer…";
-        try {
-          await NVMesh.loadLayer({
-            url: "assets/brain/BrainMesh_ICBM152.lh.motor.mz3",
-            cal_min: 0.5,
-            cal_max: 5.5,
-            useNegativeCmap: true,
-            opacity: 0.72,
-            colormap: "warm",
-            colormapNegative: "winter",
-          }, viewer.meshes[0]);
-          viewer.meshes[0].updateMesh(viewer.gl);
-          viewer.drawScene();
-          status.textContent = "Atlas surface and example motor layer loaded · layer provenance is limited; see scientific scope.";
-        } catch (error) {
-          status.textContent = `Atlas surface loaded, but the example layer failed: ${error.message}`;
-          status.classList.add("error");
-        }
+        window.brainSurfaceViewer = viewer;
+        window.updateBrainSurfaceExpression?.();
+        status.textContent = "ICBM152 template loaded · values highlight approximate M1 zones.";
       } catch (error) {
         status.textContent = `3D surface viewer could not load: ${error.message}`;
         status.classList.add("error");

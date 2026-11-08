@@ -8,21 +8,40 @@
     { id: "tongue", label: "Mouth / tongue", x: 632, y: 278 },
   ];
 
-  const DEMO_DATA = [
-    ["Demo gene A", [0.84, 0.64, 0.42, 0.57, 0.28, 0.16]],
-    ["Demo gene B", [0.24, 0.38, 0.75, 0.48, 0.63, 0.31]],
-    ["Demo gene C", [0.33, 0.22, 0.46, 0.69, 0.78, 0.88]],
-  ].flatMap(([gene, values]) =>
-    REGIONS.map((region, index) => ({
-      gene,
-      region: region.id,
-      expression: values[index],
-    }))
-  );
+  // Approximate M1 somatotopy zones on the left template surface, not atlas labels.
+  const M1_SURFACE_BANDS = [
+    { id: "tongue", minX: -65, maxX: -57 },
+    { id: "face", minX: -57, maxX: -49 },
+    { id: "hand", minX: -49, maxX: -41 },
+    { id: "arm", minX: -41, maxX: -33 },
+    { id: "trunk", minX: -33, maxX: -24 },
+    { id: "leg_foot", minX: -24, maxX: -5 },
+  ];
+
+  function mapExpressionToSurface(positions, profile) {
+    if (!positions || positions.length % 3 !== 0) {
+      throw Error("Surface positions must contain x, y, z coordinates for each vertex.");
+    }
+    const values = new Float32Array(positions.length / 3);
+    values.fill(-1);
+    let hasExpression = false;
+    for (let vertex = 0; vertex < values.length; vertex++) {
+      const offset = vertex * 3;
+      const [x, y, z] = [positions[offset], positions[offset + 1], positions[offset + 2]];
+      if (y < -40 || y > 15 || z < -5 || z > 80) continue;
+      const band = M1_SURFACE_BANDS.find(region => x >= region.minX && x < region.maxX);
+      if (!band) continue;
+      const value = profile instanceof Map ? profile.get(band.id) : profile?.[band.id];
+      if (!Number.isFinite(value) || value < 0 || value > 1) continue;
+      values[vertex] = value;
+      hasExpression ||= value > 0;
+    }
+    return { values, hasExpression };
+  }
 
   function parseCommand(input) {
     if (typeof input !== "string" || input.trim().length > 120) {
-      throw Error("Enter a short action such as “move hand”, “walk”, or “speak”.");
+      throw Error("Enter a short action command.");
     }
     const command = input.trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\s+/g, " ");
     const aliases = {
@@ -86,7 +105,7 @@
       return { action: "flare", regions: ["face"] };
     }
 
-    throw Error('Command not recognized. Try “move hand”, “walk”, “reach”, “speak”, or “clear”.');
+    throw Error("Command not recognized. Enter a mapped M1 action or clear the current highlight.");
   }
 
   function parseCsv(text) {
@@ -178,7 +197,7 @@
     ].join("\n");
   }
 
-  const api = { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand };
+  const api = { REGIONS, mapExpressionToSurface, parseCsv, toCsv, parseCommand };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") window.ExpressionAtlas = api;
 })();
