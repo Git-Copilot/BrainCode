@@ -20,6 +20,19 @@
     }))
   );
 
+  function expressionColor(value) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) {
+      throw Error("Expression color needs a normalized value from 0 to 1.");
+    }
+    const low = [112, 48, 16];
+    const high = [255, 242, 112];
+    const amount = Math.sqrt(value);
+    const channels = low.map((channel, index) =>
+      Math.round(channel + (high[index] - channel) * amount)
+    );
+    return `rgb(${channels.join(" ")})`;
+  }
+
   function parseCommand(input) {
     if (typeof input !== "string" || input.trim().length > 120) {
       throw Error("Enter a short action such as “move hand”, “walk”, or “speak”.");
@@ -178,7 +191,7 @@
     ].join("\n");
   }
 
-  const api = { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand };
+  const api = { REGIONS, DEMO_DATA, expressionColor, parseCsv, toCsv, parseCommand };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") window.ExpressionAtlas = api;
 })();

@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const { DEMO_DATA, REGIONS, parseCommand, parseCsv, toCsv } = require("./expression.js");
+const { DEMO_DATA, REGIONS, expressionColor, parseCommand, parseCsv, toCsv } = require("./expression.js");
 
 test("demo profiles have one normalized value per brain region", () => {
   assert.deepEqual(
@@ -15,6 +15,21 @@ test("demo profiles have one normalized value per brain region", () => {
     assert.deepEqual(new Set(profile.map(row => row.region)), new Set(REGIONS.map(region => region.id)));
     assert.ok(profile.every(row => row.expression >= 0 && row.expression <= 1));
   }
+});
+
+test("expression colors warm from orange to yellow as values increase", () => {
+  const channels = value => expressionColor(value)
+    .match(/\d+/g)
+    .map(Number);
+  const low = channels(0);
+  const middle = channels(0.5);
+  const high = channels(1);
+
+  assert.deepEqual(low, [112, 48, 16]);
+  assert.deepEqual(high, [255, 242, 112]);
+  assert.ok(middle.every((channel, index) => channel > low[index] && channel < high[index]));
+  assert.throws(() => expressionColor(-0.1), /normalized value from 0 to 1/);
+  assert.throws(() => expressionColor(Number.NaN), /normalized value from 0 to 1/);
 });
 
 test("CSV import accepts mapped body regions, quoted genes, and CRLF rows", () => {
