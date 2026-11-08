@@ -33,6 +33,20 @@
     return `rgb(${channels.join(" ")})`;
   }
 
+  function expressionIntensity(value) {
+    if (!Number.isFinite(value) || value < 0 || value > 1) {
+      throw Error("Expression intensity needs a normalized value from 0 to 1.");
+    }
+    return {
+      markerRadius: 1.7 + value * 3.7,
+      opacity: 0.18 + value * 0.82,
+      flareScale: 1.25 + value * 0.7,
+      flareBrightness: 1.2 + value * 1.1,
+      pulseRadius: 1 + value * 2.2,
+      pulseDuration: 1.7 - value * 1.1,
+    };
+  }
+
   function parseCommand(input) {
     if (typeof input !== "string" || input.trim().length > 120) {
       throw Error("Enter a short action such as “move hand”, “walk”, or “speak”.");
@@ -191,7 +205,15 @@
     ].join("\n");
   }
 
-  const api = { REGIONS, DEMO_DATA, expressionColor, parseCsv, toCsv, parseCommand };
+  const api = {
+    REGIONS,
+    DEMO_DATA,
+    expressionColor,
+    expressionIntensity,
+    parseCsv,
+    toCsv,
+    parseCommand,
+  };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") window.ExpressionAtlas = api;
 })();
