@@ -1,41 +1,54 @@
 # BrainCode Expression Atlas
 
-BrainCode's site is an interactive, local expression-profile viewer. A
-schematic lateral brain sits beside normalized expression values by broad
-region; the neuron-like markers brighten as the selected profile's values
-increase. Select a region, edit its value, add a profile, or import/export CSV.
+BrainCode focuses the interactive expression viewer on **human primary motor
+cortex (M1)**. A small hemisphere view marks the precentral gyrus; the larger
+view zooms into the classic broad functional body map. Select a gene profile to
+change the brightness of neuron-like markers, edit normalized values, or
+import/export CSV.
 
 Try the [BrainCode Expression Atlas](https://git-copilot.github.io/BrainCode/).
 
-## Expression CSV
+## Functional regions and expression CSV
 
-Import a CSV with `gene`, `region`, and `expression` columns. Expression values
+CSV files need `gene`, `region`, and `expression` columns. Expression values
 must already be normalized from `0` to `1`. Each row assigns one value to a
-gene-region pair. Supported region IDs are `frontal`, `motor`, `parietal`,
-`occipital`, `temporal`, and `hippocampus`; their displayed names are also
-accepted. Example:
+gene and a broad M1 body-map region:
+
+| Region ID | Display |
+|---|---|
+| `leg_foot` | Leg / foot |
+| `trunk` | Trunk |
+| `arm` | Arm |
+| `hand` | Hand / fingers |
+| `face` | Face |
+| `tongue` | Mouth / tongue |
 
 ```csv
 gene,region,expression
-GENE-X,frontal,0.82
-GENE-X,motor,0.61
-GENE-X,parietal,0.34
-GENE-X,occipital,0.22
-GENE-X,temporal,0.47
-GENE-X,hippocampus,0.73
+GENE-X,leg_foot,0.82
+GENE-X,trunk,0.61
+GENE-X,arm,0.34
+GENE-X,hand,0.73
+GENE-X,face,0.22
+GENE-X,tongue,0.47
 ```
 
 The viewer displays imported values as provided; it does not normalize,
 interpret, or validate their biological provenance. Data is processed in the
 browser and is not uploaded.
 
-## Important limitations
+## Scientific scope
 
-The brain drawing, region positions, node locations, and built-in Demo gene
-profiles are illustrative placeholders, not measured data, an anatomical
-atlas, or cell-level coordinates. Brightness is only a visual encoding of the
-normalized values—not a prediction of gene expression or neuronal activity.
-This project does not include a real expression dataset or a biological model.
+The medial-to-lateral body-part arrangement is a broad summary of classic
+human motor-cortex stimulation mapping. Representations overlap and vary
+between people; this diagram is not a precise or individual atlas. See
+[Penfield & Boldrey's human cortical stimulation maps](https://doi.org/10.1093/brain/60.4.389).
+
+This functional map does **not** measure gene expression. The built-in Demo
+gene profiles are invented examples to exercise the visualization, not
+observations. Brightness only encodes supplied normalized values. The
+neuron-like markers are decorative rather than cell locations, and the page
+does not make biological or clinical predictions.
 
 ## Tests
 
@@ -44,7 +57,3 @@ node --test test_expression.js
 node --test test_biocode.js
 python -m unittest
 ```
-
-The repository retains the separate experimental protocol simulator and
-neuron-language example as code; they are not used by the expression-atlas
-page.

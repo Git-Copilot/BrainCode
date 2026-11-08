@@ -3,6 +3,10 @@ const test = require("node:test");
 const { DEMO_DATA, REGIONS, parseCsv, toCsv } = require("./expression.js");
 
 test("demo profiles have one normalized value per brain region", () => {
+  assert.deepEqual(
+    REGIONS.map(region => region.id),
+    ["leg_foot", "trunk", "arm", "hand", "face", "tongue"],
+  );
   const genes = [...new Set(DEMO_DATA.map(row => row.gene))];
   assert.equal(genes.length, 3);
   for (const gene of genes) {
@@ -13,20 +17,20 @@ test("demo profiles have one normalized value per brain region", () => {
   }
 });
 
-test("CSV import accepts region IDs, labels, quoted genes, and CRLF rows", () => {
+test("CSV import accepts mapped body regions, quoted genes, and CRLF rows", () => {
   const rows = parseCsv(
-    'gene,region,expression\r\n"GENE, X",frontal,0.75\r\nGENE Y,"Motor cortex",0.4\r\n',
+    'gene,region,expression\r\n"GENE, X",leg_foot,0.75\r\nGENE Y,"Hand / fingers",0.4\r\n',
   );
   assert.deepEqual(rows, [
-    { gene: "GENE, X", region: "frontal", expression: 0.75 },
-    { gene: "GENE Y", region: "motor", expression: 0.4 },
+    { gene: "GENE, X", region: "leg_foot", expression: 0.75 },
+    { gene: "GENE Y", region: "hand", expression: 0.4 },
   ]);
 });
 
 test("CSV export round-trips quoted gene names and all expression values", () => {
   const rows = [
-    { gene: 'GENE "X"', region: "frontal", expression: 0.75 },
-    { gene: "GENE Y", region: "hippocampus", expression: 0 },
+    { gene: 'GENE "X"', region: "leg_foot", expression: 0.75 },
+    { gene: "GENE Y", region: "tongue", expression: 0 },
   ];
   assert.deepEqual(parseCsv(toCsv(rows)), rows);
 });
@@ -38,11 +42,11 @@ test("CSV parser rejects missing headers, unknown regions, and invalid values", 
     /unsupported brain region/,
   );
   assert.throws(
-    () => parseCsv("gene,region,expression\nG,motor,1.1"),
+    () => parseCsv("gene,region,expression\nG,hand,1.1"),
     /normalized number from 0 to 1/,
   );
   assert.throws(
-    () => parseCsv("gene,region,expression\nG,motor,0.3\nG,motor,0.8"),
-    /duplicates G in motor/,
+    () => parseCsv("gene,region,expression\nG,hand,0.3\nG,hand,0.8"),
+    /duplicates G in hand/,
   );
 });

@@ -1,17 +1,17 @@
 (() => {
   const REGIONS = [
-    { id: "frontal", label: "Frontal cortex", x: 202, y: 205 },
-    { id: "motor", label: "Motor cortex", x: 326, y: 180 },
-    { id: "parietal", label: "Parietal cortex", x: 447, y: 186 },
-    { id: "occipital", label: "Occipital cortex", x: 572, y: 220 },
-    { id: "temporal", label: "Temporal cortex", x: 361, y: 319 },
-    { id: "hippocampus", label: "Hippocampus", x: 397, y: 351 },
+    { id: "leg_foot", label: "Leg / foot", x: 300, y: 190 },
+    { id: "trunk", label: "Trunk", x: 365, y: 195 },
+    { id: "arm", label: "Arm", x: 432, y: 211 },
+    { id: "hand", label: "Hand / fingers", x: 500, y: 230 },
+    { id: "face", label: "Face", x: 565, y: 250 },
+    { id: "tongue", label: "Mouth / tongue", x: 632, y: 278 },
   ];
 
   const DEMO_DATA = [
-    ["Demo gene A", [0.84, 0.64, 0.42, 0.28, 0.16, 0.57]],
-    ["Demo gene B", [0.24, 0.38, 0.75, 0.63, 0.31, 0.48]],
-    ["Demo gene C", [0.33, 0.22, 0.46, 0.78, 0.88, 0.69]],
+    ["Demo gene A", [0.84, 0.64, 0.42, 0.57, 0.28, 0.16]],
+    ["Demo gene B", [0.24, 0.38, 0.75, 0.48, 0.63, 0.31]],
+    ["Demo gene C", [0.33, 0.22, 0.46, 0.69, 0.78, 0.88]],
   ].flatMap(([gene, values]) =>
     REGIONS.map((region, index) => ({
       gene,
@@ -69,6 +69,11 @@
       [region.id.toLowerCase(), region.id],
       [region.label.toLowerCase(), region.id],
     ]));
+    regionNames.set("leg", "leg_foot");
+    regionNames.set("foot", "leg_foot");
+    regionNames.set("hand", "hand");
+    regionNames.set("fingers", "hand");
+    regionNames.set("mouth", "tongue");
     if (records.length > 10001) throw Error("CSV may contain at most 10,000 expression rows.");
     const unique = new Set();
     return records.slice(1).map((values, index) => {

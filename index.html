@@ -41,14 +41,16 @@
       .card-head p { margin: 5px 0 0; color: #8995ad; font-size: .73rem; line-height: 1.5; }
       .brain-wrap { padding: 12px; }
       .brain-svg { display: block; width: 100%; height: auto; min-height: 390px; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 48%, #20283a 0, #111724 73%); }
-      .brain-outline { fill: url(#brainFill); stroke: #91a0b7; stroke-width: 3; }
+      .brain-outline { fill: url(#cortexFill); stroke: #91a0b7; stroke-width: 3; }
       .brain-fold { fill: none; stroke: #8390a7; stroke-width: 2; stroke-linecap: round; opacity: .43; }
-      .region-zone { fill: #263248; stroke: #8290a8; stroke-width: 1; opacity: .48; }
-      .region-zone.active { fill: #2f5160; stroke: #9ce8d2; opacity: .88; }
+      .region-zone { fill: #263248; stroke: #a7b3c5; stroke-width: 1; opacity: .63; }
+      .region-zone.active { fill: #396575; stroke: #c2f5e1; stroke-width: 2; opacity: 1; }
       .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; }
       .network-node { stroke: #d8fff1; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
       .brain-label { fill: #aeb9ce; font: 12px ui-sans-serif, system-ui, sans-serif; pointer-events: none; }
       .brain-label.active { fill: #c2f5e1; font-weight: 700; }
+      .small-label { fill: #aeb9ce; font: 10px ui-sans-serif, system-ui, sans-serif; }
+      .callout { fill: none; stroke: #f0b970; stroke-width: 1.3; }
       .region-hit { fill: transparent; stroke: transparent; cursor: pointer; }
       .region-hit:focus-visible { stroke: #ffffff; stroke-width: 2; outline: none; }
       .brain-footer { display: flex; justify-content: space-between; gap: 12px; padding: 0 4px 4px; color: #8995ad; font-size: .68rem; }
@@ -102,57 +104,78 @@
       </header>
       <section class="hero">
         <div>
-          <div class="eyebrow">Explore gene expression</div>
-          <h1>A brain, lit by data.</h1>
-          <p class="intro">Choose a gene to see its normalized expression values across broad brain regions. The neuron-like points brighten with the value; select a region or edit the profile to explore the map.</p>
+          <div class="eyebrow">Explore a mapped human brain region</div>
+          <h1>Zoom into the motor map.</h1>
+          <p class="intro">Focus on primary motor cortex (M1), a human cortical region functionally mapped by stimulation studies. The enlarged view shows its broad body-part layout; markers brighten with the selected expression profile.</p>
         </div>
         <span id="dataset-label" class="dataset-label">Synthetic example profiles · no experimental data loaded</span>
       </section>
 
-      <section class="workspace" aria-label="Interactive gene expression atlas">
+      <section class="workspace" aria-label="Interactive primary motor cortex expression map">
         <article class="card" aria-labelledby="brain-title">
           <div class="card-head">
             <div>
-              <h2 id="brain-title">Brain map</h2>
-              <p>Lateral schematic · select a region to inspect its expression</p>
+              <h2 id="brain-title">Primary motor cortex · M1</h2>
+              <p>Human hemisphere location and enlarged functional body map</p>
             </div>
             <span id="map-gene" class="status-tag">Demo gene A</span>
           </div>
           <div class="brain-wrap">
             <svg id="brain" class="brain-svg" viewBox="0 0 760 520" role="img" aria-labelledby="svg-title svg-description">
-              <title id="svg-title">Illustrative lateral brain expression map</title>
-              <desc id="svg-description">A non-anatomical schematic with six broad regions. Neuron-like dots brighten according to the selected normalized expression values.</desc>
+              <title id="svg-title">Zoomed view of the human primary motor cortex</title>
+              <desc id="svg-description">A contextual left-hemisphere outline locates primary motor cortex on the precentral gyrus. An enlarged, illustrative functional map shows broad body-region locations from medial leg and foot toward lateral face and tongue. Functional subdivisions are approximate, variable, and overlapping.</desc>
               <defs>
-                <linearGradient id="brainFill" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#29344a"/>
-                  <stop offset="1" stop-color="#20293a"/>
+                <linearGradient id="cortexFill" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#34445a"/>
+                  <stop offset="1" stop-color="#202a3b"/>
+                </linearGradient>
+                <linearGradient id="m1Fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#396575"/>
+                  <stop offset="1" stop-color="#293a51"/>
                 </linearGradient>
                 <filter id="softGlow" x="-150%" y="-150%" width="400%" height="400%">
                   <feGaussianBlur stdDeviation="3.5" result="blur"/>
                   <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                 </filter>
               </defs>
-              <path class="brain-outline" d="M92 271 C67 251 69 214 86 189 C79 157 98 127 129 114 C143 82 177 66 212 76 C236 48 278 47 310 61 C339 38 382 48 405 66 C438 50 479 62 494 83 C532 71 567 91 579 119 C616 114 650 137 652 169 C685 188 690 225 670 249 C680 281 658 309 631 318 C623 350 593 368 561 362 C539 386 503 389 476 371 C446 393 412 384 392 367 C357 384 324 372 305 351 C272 372 235 360 218 338 C183 351 148 333 143 308 C120 307 101 294 92 271 Z"/>
-              <path class="region-zone" data-zone="frontal" d="M98 202 C92 164 119 126 158 117 C190 90 237 88 269 110 L292 183 L265 255 L204 279 L133 271 C106 257 92 230 98 202 Z"/>
-              <path class="region-zone" data-zone="motor" d="M276 101 C305 75 342 70 372 85 L386 143 L370 216 L329 267 L284 243 L296 181 Z"/>
-              <path class="region-zone" data-zone="parietal" d="M374 87 C412 66 457 75 483 100 L510 153 L494 216 L449 247 L381 216 L388 143 Z"/>
-              <path class="region-zone" data-zone="occipital" d="M489 111 C528 92 573 109 587 140 C624 145 648 176 644 207 L625 258 L576 278 L511 243 L502 184 Z"/>
-              <path class="region-zone" data-zone="temporal" d="M186 272 L211 254 L270 248 L328 263 L367 287 L376 328 L348 357 L294 345 L250 353 L207 334 L161 314 Z"/>
-              <path class="region-zone" data-zone="hippocampus" d="M316 335 C334 312 359 306 383 317 C402 309 432 319 444 337 C464 344 474 362 459 378 C442 391 421 374 404 379 C384 397 358 382 344 375 C324 374 309 357 316 335 Z"/>
-              <path class="brain-fold" d="M118 177 C147 151 174 158 197 171 C218 183 240 173 258 151"/>
-              <path class="brain-fold" d="M112 222 C145 204 173 218 193 233 C216 249 245 237 263 216"/>
-              <path class="brain-fold" d="M301 111 C325 126 342 115 358 104 M300 153 C322 168 346 160 365 143 M310 196 C333 208 350 197 370 177"/>
-              <path class="brain-fold" d="M397 110 C420 127 445 118 466 105 M395 158 C421 178 452 162 481 145 M397 202 C423 217 454 203 484 183"/>
-              <path class="brain-fold" d="M519 132 C544 147 565 137 584 128 M520 179 C544 194 575 178 609 173 M525 222 C553 237 580 220 614 211"/>
-              <path class="brain-fold" d="M211 294 C241 278 271 290 294 310 M260 329 C283 309 316 307 337 319"/>
-              <path d="M617 307 C643 307 657 319 661 339 C654 358 631 361 616 349" fill="none" stroke="#8290a8" stroke-width="2" opacity=".55"/>
+              <text class="brain-label" x="30" y="34">LEFT HEMISPHERE · LOCATION</text>
+              <path class="brain-outline" d="M39 107 C34 88 47 69 66 64 C75 47 98 42 116 49 C132 34 159 37 170 53 C194 55 206 74 202 93 C211 109 201 127 186 133 C175 148 154 151 138 143 C122 153 101 145 94 133 C73 139 53 130 50 116 Z"/>
+              <path class="brain-fold" d="M59 83 C78 68 93 79 108 74 C126 65 144 71 155 82 M54 103 C73 91 89 99 104 94 M126 119 C143 105 165 111 184 96"/>
+              <path d="M112 52 C124 72 128 94 124 117 C121 128 118 136 115 141" fill="none" stroke="#f0b970" stroke-width="8" stroke-linecap="round"/>
+              <path d="M102 57 C113 76 117 98 113 119 C111 128 109 134 107 139" fill="none" stroke="#9ce8d2" stroke-width="4" stroke-linecap="round"/>
+              <text class="small-label" x="34" y="168">Precentral gyrus · M1</text>
+              <text class="small-label" x="34" y="184">Central sulcus</text>
+              <path class="callout" d="M114 124 L127 168"/>
+              <path d="M224 97 L266 122 M224 143 L266 392" fill="none" stroke="#f0b970" stroke-width="1.5" stroke-dasharray="5 5" opacity=".72"/>
+              <text class="brain-label" x="278" y="39">ZOOM · M1 FUNCTIONAL BODY MAP</text>
+              <text class="small-label" x="278" y="58">Anterior / precentral gyrus</text>
+              <path class="brain-outline" d="M274 102 C332 78 393 80 450 97 C510 114 574 136 687 182 L686 429 C600 400 532 379 464 357 C390 333 327 312 272 286 C251 225 250 159 274 102 Z"/>
+              <path d="M278 105 C338 83 395 88 451 105 C515 124 576 148 681 189 L672 245 C579 211 513 186 448 168 C387 152 329 149 269 169 Z" fill="url(#cortexFill)" opacity=".9"/>
+              <path d="M269 169 C329 149 387 152 448 168 C513 186 579 211 672 245 L664 302 C570 271 508 246 441 226 C376 207 320 205 263 225 Z" fill="url(#m1Fill)" stroke="#9ce8d2" stroke-width="2"/>
+              <path d="M263 225 C320 205 376 207 441 226 C508 246 570 271 664 302 L657 355 C564 327 499 303 433 285 C367 266 313 262 267 281 Z" fill="url(#cortexFill)" opacity=".88"/>
+              <path d="M249 112 C267 167 270 223 263 282" fill="none" stroke="#d7a86c" stroke-width="4"/>
+              <text class="small-label" x="280" y="115">Central sulcus</text>
+              <text class="small-label" x="286" y="391">Posterior / postcentral gyrus</text>
+              <path class="region-zone" data-zone="leg_foot" d="M269 169 C290 162 312 158 334 157 L333 218 C310 215 287 218 263 225 Z"/>
+              <path class="region-zone" data-zone="trunk" d="M334 157 C356 155 378 156 400 160 L399 238 C377 230 355 222 333 218 Z"/>
+              <path class="region-zone" data-zone="arm" d="M400 160 C422 164 444 169 466 176 L465 258 C442 251 420 244 399 238 Z"/>
+              <path class="region-zone" data-zone="hand" d="M466 176 C488 183 510 191 532 199 L531 280 C509 272 487 265 465 258 Z"/>
+              <path class="region-zone" data-zone="face" d="M532 199 C554 207 576 215 598 223 L597 302 C575 294 553 287 531 280 Z"/>
+              <path class="region-zone" data-zone="tongue" d="M598 223 C622 231 647 239 672 245 L664 302 C641 294 619 287 597 302 Z"/>
+              <path class="brain-fold" d="M298 125 C323 117 351 119 376 125 M296 144 C321 135 350 138 378 144 M411 126 C438 132 462 139 485 147 M407 144 C434 150 459 158 481 165 M517 159 C540 167 559 175 580 184 M512 177 C535 185 556 193 575 201"/>
+              <path class="brain-fold" d="M292 247 C320 231 349 235 378 244 M299 266 C326 252 352 256 376 265 M405 250 C429 257 451 265 475 273 M399 271 C424 277 449 288 473 294 M530 279 C551 287 574 296 594 305 M527 300 C547 309 568 315 588 323"/>
+              <path d="M277 403 H675" stroke="#69758b" stroke-width="1.3"/>
+              <path d="M277 403 l9 -5 v10 z M675 403 l-9 -5 v10 z" fill="#69758b"/>
+              <text class="small-label" x="384" y="426">Medial · leg</text>
+              <text class="small-label" x="548" y="426">Lateral · face / mouth</text>
+              <text class="small-label" x="277" y="468">Broad stimulation-map summary · representations overlap and vary</text>
               <g id="links" aria-hidden="true"></g>
               <g id="nodes" aria-hidden="true"></g>
               <g id="labels"></g>
-              <g id="hits" aria-label="Selectable brain regions"></g>
+              <g id="hits" aria-label="Selectable primary motor cortex body-map regions"></g>
             </svg>
             <div class="brain-footer">
-              <span>Neuron-like markers · schematic only</span>
+              <span>M1 body-map overlay · approximate, not to scale</span>
               <span class="legend"><span>Lower</span><span class="legend-bar" aria-hidden="true"></span><span>Higher expression</span></span>
             </div>
           </div>
@@ -188,8 +211,11 @@
         </aside>
       </section>
 
-      <p class="notice"><strong>Important:</strong> The brain shape, regions, neuron-like points, and built-in profiles are illustrative—not an anatomical atlas, cell-level map, or scientific measurement. Brightness only visualizes the normalized values shown at right; it does not predict where a gene is expressed in a real brain. Loaded values are displayed as supplied and are not uploaded.</p>
-      <footer><a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a> · Expression visualization prototype</footer>
+      <p class="notice"><strong>Important:</strong> The primary motor cortex body map summarizes classic human stimulation mapping; boundaries are broad, overlapping, and variable, not an individual atlas. Brightness only visualizes the normalized values shown at right. The demo profiles are invented and are not real gene-expression measurements; functional motor mapping does not itself measure gene expression. Loaded values are displayed as supplied and are not uploaded.</p>
+      <footer>
+        <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey · human cortical stimulation maps</a>
+        · <a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a>
+      </footer>
     </main>
     <script src="expression.js"></script>
     <script>
@@ -204,7 +230,7 @@
         const demoGenes = new Set(DEMO_DATA.map(record => record.gene));
         const records = new Map();
         let currentGene = "Demo gene A";
-        let selectedRegion = "frontal";
+        let selectedRegion = "leg_foot";
         let isLoadedDataset = false;
 
         for (const record of DEMO_DATA) {
@@ -213,12 +239,12 @@
         }
 
         const neuronPositions = {
-          frontal: [[169,174],[196,153],[219,187],[244,163],[183,220],[220,235],[252,214],[145,205],[171,250],[235,137],[263,185],[201,202]],
-          motor: [[305,130],[331,111],[352,137],[316,164],[350,177],[333,207],[300,194],[365,113],[372,158],[316,231],[345,246],[287,171]],
-          parietal: [[409,111],[438,102],[462,128],[419,145],[455,164],[405,185],[474,193],[438,213],[392,124],[478,150],[426,237],[458,229]],
-          occipital: [[533,136],[560,126],[590,149],[550,174],[594,185],[528,208],[570,222],[609,198],[540,239],[593,245],[615,166],[563,198]],
-          temporal: [[216,291],[245,278],[273,296],[303,283],[330,302],[237,318],[270,330],[307,326],[344,339],[194,311],[282,309],[323,348]],
-          hippocampus: [[338,339],[357,326],[378,341],[397,328],[416,343],[435,337],[353,359],[375,368],[398,357],[420,365],[440,352],[385,345]],
+          leg_foot: [[278,181],[289,169],[300,188],[311,177],[323,192],[329,178],[286,201],[302,210],[318,207],[331,198],[276,214],[315,184]],
+          trunk: [[338,186],[350,174],[363,196],[376,182],[390,201],[397,189],[343,209],[360,217],[377,220],[392,222],[334,202],[384,195]],
+          arm: [[405,194],[418,184],[432,204],[445,193],[459,213],[408,221],[424,230],[442,237],[459,244],[400,212],[431,218],[450,203]],
+          hand: [[470,213],[482,203],[496,225],[508,214],[521,235],[472,240],[488,249],[506,259],[523,266],[466,229],[500,239],[514,222]],
+          face: [[536,233],[548,222],[562,244],[575,234],[588,255],[539,263],[555,273],[573,282],[590,288],[530,250],[566,260],[582,244]],
+          tongue: [[603,245],[615,235],[629,257],[642,246],[657,267],[603,275],[619,284],[637,293],[655,298],[598,260],[630,273],[646,259]],
         };
 
         function htmlEscape(text) {
@@ -297,8 +323,8 @@
               class: "region-hit",
               cx: region.x,
               cy: region.y,
-              rx: region.id === "hippocampus" ? 65 : 62,
-              ry: region.id === "hippocampus" ? 50 : 63,
+              rx: 46,
+              ry: 52,
               tabindex: "0",
               role: "button",
               "aria-label": `${region.label}, normalized expression ${value.toFixed(2)}`,
@@ -314,7 +340,7 @@
           }
           document.querySelector("#map-gene").textContent = currentGene;
           document.querySelector("#svg-description").textContent =
-            `An illustrative brain schematic. ${currentGene} expression values are visualized in six broad regions; markers brighten with normalized values.`;
+            `A zoomed human primary motor cortex map. ${currentGene} expression values are visualized across the broad medial-to-lateral leg, trunk, arm, hand, face, and tongue representation. Markers brighten with normalized values.`;
         }
 
         function renderControls() {
@@ -351,7 +377,7 @@
           const value = profile?.get(selectedRegion) ?? 0;
           selectedRegionCard.innerHTML =
             `<div class="selected-name">${htmlEscape(region.label)}<span>${value.toFixed(2)}</span></div>` +
-            `<p class="selected-copy">Normalized expression value for ${htmlEscape(currentGene)}. This region and its points are schematic, not cell-level coordinates.</p>`;
+            `<p class="selected-copy">Normalized expression value for ${htmlEscape(currentGene)}. Broad M1 body-map location only; not a precise or individual cortical boundary.</p>`;
         }
 
         function selectRegion(regionId) {
@@ -381,7 +407,7 @@
 
         geneSelect.addEventListener("change", () => {
           currentGene = geneSelect.value;
-          selectedRegion = "frontal";
+          selectedRegion = "leg_foot";
           message.textContent = "";
           renderAll();
         });
@@ -425,7 +451,7 @@
               records.set(gene, values);
             }
             currentGene = grouped.keys().next().value;
-            selectedRegion = "frontal";
+            selectedRegion = "leg_foot";
             isLoadedDataset = true;
             updateGeneOptions();
             renderAll();
