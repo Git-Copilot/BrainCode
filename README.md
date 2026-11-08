@@ -29,9 +29,12 @@ graph and lists the normalized values by broad M1 region. Use **Download graph
 SVG** to save a standalone vector graph, or **Download values CSV** to save the
 six values as data. The schematic's expression markers use a warm orange-to-
 yellow scale: higher normalized values appear brighter, larger, and glow more.
-These regional values update the schematic and graph only; they are not painted
-onto the 3D atlas surface, which has no matching gene-expression measurements
-or per-region mesh mapping.
+When an action command is entered, neuron-like pulses travel along the selected
+region's connections; higher-expression regions fire larger, faster, brighter
+pulses. The command also tints the whole 3D surface orange-to-yellow according
+to the mapped region's value. This whole-surface tint is a display cue because
+the atlas has no vertex-level expression mapping; it is not measured or
+localized activity.
 
 CSV imports need `gene`, `region`, and `expression` columns. Expression values
 must already be normalized from `0` to `1`. Each row assigns one value to a
@@ -61,9 +64,11 @@ expression. Imported CSV values are displayed as supplied; the page does not
 normalize or validate their biological provenance, and data stays in the
 browser.
 
-An action command briefly brightens the grayscale 3D brain and highlights the
-corresponding broad region in the schematic. The 3D flash is a display effect,
-not measured or predicted neural activity.
+An action command briefly fires warm pulses across the selected region in the
+schematic and tints the 3D brain in proportion to its normalized expression.
+The 3D tint covers the whole model because the atlas has no vertex-level
+expression mapping; this is a display effect, not measured or predicted neural
+activity.
 
 ## Scientific scope
 

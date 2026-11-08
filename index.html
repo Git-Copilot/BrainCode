@@ -43,9 +43,8 @@
       .surface-view-wrap { position: relative; height: 480px; overflow: hidden; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 45%, #20283a 0, #111724 73%); }
       #surface-viewer { display: block; width: 100%; height: 480px; }
       .surface-view-wrap[data-model-ready="true"].flaring { border-color: #fff0a0; box-shadow: 0 0 26px #f0c98e90; }
-      #surface-viewer { filter: grayscale(1); }
       .surface-view-wrap[data-model-ready="true"].flaring #surface-viewer { animation: brain-model-flare 1.1s ease-in-out 3 alternate; }
-      @keyframes brain-model-flare { from { filter: grayscale(1) brightness(1); } to { filter: grayscale(1) brightness(1.55) drop-shadow(0 0 18px #e6e9ed); } }
+      @keyframes brain-model-flare { from { filter: brightness(1); } to { filter: brightness(var(--fire-brightness, 1.5)) drop-shadow(0 0 var(--fire-glow, 18px) var(--fire-color, #ffca55)); } }
       .surface-status { position: absolute; right: 12px; bottom: 8px; left: 12px; margin: 0; color: #aeb9ce; font-size: .68rem; line-height: 1.5; pointer-events: none; text-shadow: 0 1px 5px #101522; }
       .surface-status.error { color: #ff9a9a; }
       .surface-badges { position: absolute; top: 12px; left: 12px; display: grid; gap: 6px; pointer-events: none; }
@@ -72,12 +71,15 @@
       .brain-fold { fill: none; stroke: #8390a7; stroke-width: 2; stroke-linecap: round; opacity: .43; }
       .region-zone { fill: #263248; stroke: #a7b3c5; stroke-width: 1; opacity: .63; }
       .region-zone.active { fill: #67401e; stroke: #ffcc69; stroke-width: 2; opacity: 1; }
-      .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; }
+      .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; transition: stroke .2s ease, stroke-width .2s ease, opacity .2s ease; }
       .network-node { stroke: #ffe2aa; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
-      .network-node.flaring { stroke: #fff4bd; filter: url(#softGlow); animation: neuron-flare 1s ease-in-out 3 alternate; transform-box: fill-box; transform-origin: center; }
-      .region-zone.flaring { fill: #ffbf52; stroke: #fff0b0; stroke-width: 3; opacity: 1; animation: region-flare 1s ease-in-out 3 alternate; }
-      @keyframes neuron-flare { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(var(--flare-scale)); filter: brightness(var(--flare-brightness)) url(#softGlow); } }
-      @keyframes region-flare { from { fill-opacity: .55; } to { fill-opacity: 1; } }
+      .network-link.flaring { stroke: #ffad35; stroke-width: 2.5; filter: url(#softGlow); animation: link-fire var(--flare-speed) ease-in-out infinite alternate; }
+      .network-node.flaring { stroke: #fff4bd; filter: url(#softGlow); animation: neuron-flare var(--flare-speed) ease-in-out 3 alternate; animation-delay: var(--flare-delay); transform-box: fill-box; transform-origin: center; }
+      .neuron-pulse { pointer-events: none; }
+      .region-zone.flaring { fill: var(--flare-color); stroke: #fff0b0; stroke-width: 3; opacity: 1; filter: url(#softGlow); animation: region-flare var(--flare-speed) ease-in-out 3 alternate; }
+      @keyframes neuron-flare { from { opacity: .48; transform: scale(1); } to { opacity: 1; transform: scale(var(--flare-scale)); filter: brightness(var(--flare-brightness)) url(#softGlow); } }
+      @keyframes link-fire { from { opacity: .22; } to { opacity: var(--flare-opacity); } }
+      @keyframes region-flare { from { fill-opacity: .42; } to { fill-opacity: 1; filter: brightness(var(--flare-brightness)) url(#softGlow); } }
       .brain-label { fill: #aeb9ce; font: 12px ui-sans-serif, system-ui, sans-serif; pointer-events: none; }
       .brain-label.active { fill: #ffdc8a; font-weight: 700; }
       .small-label { fill: #aeb9ce; font: 10px ui-sans-serif, system-ui, sans-serif; }
@@ -169,7 +171,7 @@
               <p id="surface-status" class="surface-status" role="status" aria-live="polite">Loading the cortical surface viewer…</p>
             </div>
             <div class="surface-caption">
-              <span>The grayscale brain briefly brightens during a command</span>
+              <span>Expression-colored neural flare · intensity follows the selected value</span>
               <span>Standard atlas geometry · not an individual brain</span>
             </div>
             <section class="command-panel" aria-label="Mapped motor action command">
@@ -185,7 +187,7 @@
                 <button type="button" class="command-example" data-command="speak">speak</button>
                 <button type="button" class="command-example" data-command="clear">clear</button>
               </div>
-              <p id="command-status" class="command-status" role="status" aria-live="polite">A command briefly brightens the grayscale 3D brain and highlights its mapped region in the schematic.</p>
+              <p id="command-status" class="command-status" role="status" aria-live="polite">A command sends warm, expression-colored firing across the 3D brain; higher expression flares brighter.</p>
             </section>
             <details class="map-details">
               <summary>Open the approximate M1 body-map schematic</summary>
@@ -264,7 +266,7 @@
                 <select id="gene"></select>
               </label>
             </div>
-            <p class="gene-meta">Demo profiles are invented and do not color the atlas surface. Edit values or load your own normalized CSV to explore the schematic key.</p>
+            <p class="gene-meta">Demo profiles are invented. Edit values or load a normalized CSV to explore the schematic; commands use the selected region's value for a temporary whole-brain color flare.</p>
             <div class="upload-row">
               <label class="file-button">Load expression CSV<input id="file" type="file" accept=".csv,text/csv"></label>
             </div>
@@ -299,7 +301,7 @@
         </aside>
       </section>
 
-      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. The 3D surface is shown in grayscale without an activity overlay. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, do not color the 3D surface, and are not gene-expression measurements. Loaded CSV values stay in the browser.</p>
+      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. It is normally grayscale; during a command, the whole 3D surface is temporarily tinted by the mapped region's expression value. The atlas has no vertex-level regional mapping, so this is a display effect, not measured or localized activity. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, not gene-expression measurements. Loaded CSV values stay in the browser.</p>
       <footer>
         <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey · human cortical stimulation maps</a>
         · <a href="https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images" target="_blank" rel="noopener noreferrer">Surface source · NiiVue</a>
@@ -309,7 +311,15 @@
     <script src="expression.js"></script>
     <script>
       (() => {
-        const { REGIONS, DEMO_DATA, expressionColor, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
+        const {
+          REGIONS,
+          DEMO_DATA,
+          expressionColor,
+          expressionIntensity,
+          parseCsv,
+          toCsv,
+          parseCommand,
+        } = window.ExpressionAtlas;
         const svg = document.querySelector("#brain");
         const geneSelect = document.querySelector("#gene");
         const profileList = document.querySelector("#expression-list");
@@ -334,11 +344,28 @@
           if (modelFlareTimeout !== null) window.clearTimeout(modelFlareTimeout);
           modelFlareTimeout = null;
           surfaceView.classList.toggle("flaring", active);
+          const value = active
+            ? flaringRegions.size
+              ? [...flaringRegions].reduce((sum, id) => sum + (profileFor()?.get(id) ?? 0), 0) / flaringRegions.size
+              : profileFor()?.get(selectedRegion) ?? 0
+            : 0;
+          window.BrainCodeExpressionFire = { active, value };
+          window.dispatchEvent(new CustomEvent("braincode:model-flare", {
+            detail: { active, value },
+          }));
           if (active) {
+            const intensity = expressionIntensity(value);
+            surfaceView.style.setProperty("--fire-brightness", intensity.flareBrightness.toFixed(2));
+            surfaceView.style.setProperty("--fire-glow", `${(8 + value * 24).toFixed(1)}px`);
+            surfaceView.style.setProperty("--fire-color", expressionColor(value));
             modelFlareTimeout = window.setTimeout(() => {
               modelFlareTimeout = null;
               setSurfaceModelFlare(false);
             }, 3300);
+          } else {
+            surfaceView.style.removeProperty("--fire-brightness");
+            surfaceView.style.removeProperty("--fire-glow");
+            surfaceView.style.removeProperty("--fire-color");
           }
         }
 
@@ -450,37 +477,72 @@
           labels.replaceChildren();
           hits.replaceChildren();
           const profile = profileFor();
+          const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
           for (const region of REGIONS) {
             const value = profile?.get(region.id) ?? 0;
+            const intensity = expressionIntensity(value);
             const points = neuronPositions[region.id];
             const isFlaring = flaringRegions.has(region.id);
+            const flareStyle = [
+              `--flare-speed:${intensity.pulseDuration}s`,
+              `--flare-brightness:${intensity.flareBrightness.toFixed(2)}`,
+              `--flare-opacity:${intensity.opacity.toFixed(2)}`,
+            ].join(";");
             for (let index = 0; index < points.length - 1; index++) {
               if (index % 2 === 0) {
+                const [x1, y1] = points[index];
+                const [x2, y2] = points[index + 1];
                 addSvgElement(links, "line", {
-                  class: "network-link",
-                  x1: points[index][0],
-                  y1: points[index][1],
-                  x2: points[index + 1][0],
-                  y2: points[index + 1][1],
-                  opacity: (0.06 + value * 0.21).toFixed(2),
+                  class: `network-link${isFlaring ? " flaring" : ""}`,
+                  x1,
+                  y1,
+                  x2,
+                  y2,
+                  opacity: (0.06 + intensity.opacity * 0.21).toFixed(2),
+                  style: isFlaring ? flareStyle : "",
                 });
+                if (isFlaring && !reduceMotion && value > 0) {
+                  const pulse = addSvgElement(nodes, "circle", {
+                    class: "neuron-pulse",
+                    r: intensity.pulseRadius.toFixed(1),
+                    fill: expressionColor(value),
+                    opacity: intensity.opacity.toFixed(2),
+                    filter: "url(#softGlow)",
+                  });
+                  addSvgElement(pulse, "animateMotion", {
+                    path: `M ${x1} ${y1} L ${x2} ${y2}`,
+                    dur: `${intensity.pulseDuration.toFixed(2)}s`,
+                    begin: `${(index * 0.08).toFixed(2)}s`,
+                    repeatCount: "indefinite",
+                    rotate: "auto",
+                  });
+                }
               }
             }
             for (const [index, [x, y]] of points.entries()) {
+              const nodeStyle = [
+                `--flare-scale:${intensity.flareScale.toFixed(2)}`,
+                `--flare-brightness:${intensity.flareBrightness.toFixed(2)}`,
+                `--flare-speed:${intensity.pulseDuration.toFixed(2)}s`,
+                `--flare-delay:${(index * 0.045).toFixed(2)}s`,
+              ].join(";");
               addSvgElement(nodes, "circle", {
                 class: `network-node${isFlaring ? " flaring" : ""}`,
                 cx: x,
                 cy: y,
-                r: (1.7 + value * 3.7 + (index % 3) * 0.25).toFixed(1),
-                style: `--flare-scale:${(1.25 + value * 0.7).toFixed(2)};--flare-brightness:${(1.2 + value * 1.1).toFixed(2)}`,
+                r: (intensity.markerRadius + (index % 3) * 0.25).toFixed(1),
+                style: nodeStyle,
                 fill: expressionColor(value),
-                opacity: (0.18 + value * 0.82).toFixed(2),
+                opacity: intensity.opacity.toFixed(2),
                 filter: value > 0.25 ? "url(#softGlow)" : "",
               });
             }
             const zone = svg.querySelector(`[data-zone="${region.id}"]`);
             zone.classList.toggle("active", selectedRegion === region.id);
             zone.classList.toggle("flaring", isFlaring);
+            zone.style.setProperty("--flare-color", expressionColor(value));
+            zone.style.setProperty("--flare-speed", `${intensity.pulseDuration.toFixed(2)}s`);
+            zone.style.setProperty("--flare-brightness", intensity.flareBrightness.toFixed(2));
             const label = addSvgElement(labels, "text", {
               class: `brain-label${selectedRegion === region.id ? " active" : ""}`,
               x: region.x,
@@ -508,7 +570,7 @@
             });
           }
           document.querySelector("#svg-description").textContent =
-            `A zoomed human primary motor cortex map. ${currentGene} expression values are visualized across the broad medial-to-lateral leg, trunk, arm, hand, face, and tongue representation. Markers brighten with normalized values.`;
+            `A zoomed human primary motor cortex map. ${currentGene} expression values are visualized across the broad medial-to-lateral leg, trunk, arm, hand, face, and tongue representation. Markers become brighter with higher normalized values; firing commands animate warm pulses along their connections.`;
         }
 
         function renderControls() {
@@ -589,21 +651,21 @@
             }
 
             document.querySelector(".map-details").open = true;
-            setSurfaceModelFlare(true);
             selectedRegion = result.regions[0];
+            setSurfaceModelFlare(true);
             const regionNames = result.regions.map(id =>
               REGIONS.find(region => region.id === id).label
             );
             commandStatus.textContent =
-              `Visual command: ${input.trim()} → the grayscale 3D brain and ${regionNames.join(" + ")} schematic region flare briefly. ` +
-              "The 3D flare is a display effect, not measured or predicted activity.";
+              `Visual command: ${input.trim()} → warm neural pulses fire across ${regionNames.join(" + ")}. ` +
+              "The 3D flare color and brightness follow expression; this is a display effect, not measured activity.";
             commandStatus.className = "command-status";
             renderBrain();
             flareTimeout = window.setTimeout(() => {
               flaringRegions.clear();
               flareTimeout = null;
               renderBrain();
-              commandStatus.textContent = "Flare complete. Enter another action to brighten the grayscale brain and mapped schematic region.";
+              commandStatus.textContent = "Firing complete. Enter another action to replay the expression pulses.";
             }, 3300);
           } catch (error) {
             commandStatus.textContent = error.message;
@@ -723,6 +785,32 @@
     <script>
       (async () => {
       const status = document.querySelector("#surface-status");
+      const baseSurfaceColor = [205, 205, 205, 255];
+      let viewer = null;
+      function updateSurfaceFlare({ active, value = 0 }) {
+        if (!viewer) return;
+        const mesh = viewer.meshes[0];
+        if (!active) {
+          viewer.setMeshProperty(mesh.id, "rgba255", baseSurfaceColor);
+          const surfaceView = document.querySelector(".surface-view-wrap");
+          surfaceView.style.removeProperty("--fire-brightness");
+          surfaceView.style.removeProperty("--fire-glow");
+          surfaceView.style.removeProperty("--fire-color");
+          viewer.drawScene();
+          return;
+        }
+        const intensity = window.ExpressionAtlas.expressionIntensity(value);
+        const channels = window.ExpressionAtlas.expressionColor(value).match(/\d+/g).map(Number);
+        viewer.setMeshProperty(mesh.id, "rgba255", [...channels, 255]);
+        const surfaceView = document.querySelector(".surface-view-wrap");
+        surfaceView.style.setProperty("--fire-brightness", intensity.flareBrightness.toFixed(2));
+        surfaceView.style.setProperty("--fire-glow", `${(8 + value * 24).toFixed(1)}px`);
+        surfaceView.style.setProperty("--fire-color", window.ExpressionAtlas.expressionColor(value));
+        viewer.drawScene();
+      }
+      window.addEventListener("braincode:model-flare", event => {
+        updateSurfaceFlare(event.detail);
+      });
       try {
         if (!window.niivue?.Niivue) throw Error("NiiVue viewer library did not load.");
         let surfaceUrl = "assets/brain/BrainMesh_ICBM152.lh.mz3";
@@ -747,7 +835,7 @@
           }
         }
         const { Niivue } = window.niivue;
-        const viewer = new Niivue({
+        viewer = new Niivue({
           backColor: [0.067, 0.082, 0.122, 1],
           show3Dcrosshair: false,
           meshXRay: 0,
@@ -759,11 +847,12 @@
         await viewer.loadMeshes([{
           url: surfaceUrl,
           name: "BrainMesh_ICBM152.lh.mz3",
-          rgba255: [205, 205, 205, 255],
+          rgba255: baseSurfaceColor,
         }]);
         viewer.scene.volScaleMultiplier = 1.35;
         document.querySelector(".surface-view-wrap").dataset.modelReady = "true";
-        status.textContent = "Grayscale atlas surface loaded · the command flare is display-only.";
+        updateSurfaceFlare(window.BrainCodeExpressionFire ?? { active: false });
+        status.textContent = "Atlas surface loaded · commands tint it to show the selected region's expression intensity.";
       } catch (error) {
         status.textContent = `3D surface viewer could not load: ${error.message}`;
         status.classList.add("error");
