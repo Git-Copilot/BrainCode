@@ -1,6 +1,6 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const { DEMO_DATA, REGIONS, parseCsv, toCsv } = require("./expression.js");
+const { DEMO_DATA, REGIONS, parseCommand, parseCsv, toCsv } = require("./expression.js");
 
 test("demo profiles have one normalized value per brain region", () => {
   assert.deepEqual(
@@ -49,4 +49,18 @@ test("CSV parser rejects missing headers, unknown regions, and invalid values", 
     () => parseCsv("gene,region,expression\nG,hand,0.3\nG,hand,0.8"),
     /duplicates G in hand/,
   );
+});
+
+test("movement commands map to the corresponding M1 body-map regions", () => {
+  assert.deepEqual(parseCommand("move left hand"), { action: "flare", regions: ["hand"] });
+  assert.deepEqual(parseCommand("walk"), { action: "flare", regions: ["leg_foot"] });
+  assert.deepEqual(parseCommand("reach"), { action: "flare", regions: ["arm", "hand"] });
+  assert.deepEqual(parseCommand("speak"), { action: "flare", regions: ["face", "tongue"] });
+  assert.deepEqual(parseCommand("move trunk"), { action: "flare", regions: ["trunk"] });
+});
+
+test("command parser supports stopping and rejects unrecognized instructions", () => {
+  assert.deepEqual(parseCommand("clear"), { action: "clear", regions: [] });
+  assert.throws(() => parseCommand("launch a rocket"), /Command not recognized/);
+  assert.throws(() => parseCommand("x".repeat(121)), /short action/);
 });

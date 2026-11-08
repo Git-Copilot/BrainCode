@@ -20,6 +20,75 @@
     }))
   );
 
+  function parseCommand(input) {
+    if (typeof input !== "string" || input.trim().length > 120) {
+      throw Error("Enter a short action such as “move hand”, “walk”, or “speak”.");
+    }
+    const command = input.trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\s+/g, " ");
+    const aliases = {
+      leg: "leg_foot",
+      legs: "leg_foot",
+      foot: "leg_foot",
+      feet: "leg_foot",
+      walking: "leg_foot",
+      walk: "leg_foot",
+      step: "leg_foot",
+      trunk: "trunk",
+      torso: "trunk",
+      body: "trunk",
+      arm: "arm",
+      arms: "arm",
+      reaching: "arm",
+      reach: "arm",
+      hand: "hand",
+      hands: "hand",
+      finger: "hand",
+      fingers: "hand",
+      grip: "hand",
+      gripping: "hand",
+      writing: "hand",
+      write: "hand",
+      typing: "hand",
+      type: "hand",
+      face: "face",
+      facial: "face",
+      smile: "face",
+      blinking: "face",
+      blink: "face",
+      tongue: "tongue",
+      mouth: "tongue",
+      speaking: "tongue",
+      speak: "tongue",
+      talking: "tongue",
+      talk: "tongue",
+      say: "tongue",
+    };
+    if (["stop", "rest", "clear"].includes(command)) {
+      return { action: "clear", regions: [] };
+    }
+
+    const parts = command.match(/^(?:(?:move|activate|flare)\s+)?(?:(?:my|your|the|left|right)\s+)*(leg|legs|foot|feet|trunk|torso|body|arm|arms|hand|hands|finger|fingers|face|tongue|mouth)$/);
+    if (parts) return { action: "flare", regions: [aliases[parts[1]]] };
+
+    if (["walk", "walking", "step"].includes(command)) {
+      return { action: "flare", regions: [aliases[command]] };
+    }
+    if (["reach", "reaching"].includes(command)) {
+      return { action: "flare", regions: ["arm", "hand"] };
+    }
+    if (["grip", "gripping", "writing", "write", "typing", "type"].includes(command)) {
+      return { action: "flare", regions: ["hand"] };
+    }
+    if (["speak", "speaking", "talk", "talking", "say"].includes(command)) {
+      return { action: "flare", regions: ["face", "tongue"] };
+    }
+    if (["smile", "blink"].includes(command)) {
+      return { action: "flare", regions: ["face"] };
+    }
+
+    throw Error('Command not recognized. Try “move hand”, “walk”, “reach”, “speak”, or “clear”.');
+  }
+
   function parseCsv(text) {
     if (typeof text !== "string" || text.length > 5_000_000) {
       throw Error("CSV must be text no larger than 5 MB.");
@@ -109,7 +178,7 @@
     ].join("\n");
   }
 
-  const api = { REGIONS, DEMO_DATA, parseCsv, toCsv };
+  const api = { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   if (typeof window !== "undefined") window.ExpressionAtlas = api;
 })();

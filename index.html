@@ -47,6 +47,10 @@
       .region-zone.active { fill: #396575; stroke: #c2f5e1; stroke-width: 2; opacity: 1; }
       .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; }
       .network-node { stroke: #d8fff1; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
+      .network-node.flaring { fill: #fff3a1 !important; stroke: #ffffff; filter: url(#softGlow); animation: neuron-flare 1s ease-in-out 3 alternate; transform-box: fill-box; transform-origin: center; }
+      .region-zone.flaring { fill: #fff0a0; stroke: #fffbd4; stroke-width: 3; opacity: 1; animation: region-flare 1s ease-in-out 3 alternate; }
+      @keyframes neuron-flare { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.9); filter: brightness(1.8) url(#softGlow); } }
+      @keyframes region-flare { from { fill-opacity: .55; } to { fill-opacity: 1; } }
       .brain-label { fill: #aeb9ce; font: 12px ui-sans-serif, system-ui, sans-serif; pointer-events: none; }
       .brain-label.active { fill: #c2f5e1; font-weight: 700; }
       .small-label { fill: #aeb9ce; font: 10px ui-sans-serif, system-ui, sans-serif; }
@@ -56,6 +60,15 @@
       .brain-footer { display: flex; justify-content: space-between; gap: 12px; padding: 0 4px 4px; color: #8995ad; font-size: .68rem; }
       .legend { display: flex; align-items: center; gap: 7px; }
       .legend-bar { width: 86px; height: 8px; border-radius: 9px; background: linear-gradient(90deg, #30304a, #9ce8d2, #fff4ad); }
+      .command-panel { display: grid; gap: 8px; margin: 0 0 12px; border: 1px solid #ffffff12; border-radius: 11px; padding: 12px; background: #111724; }
+      .command-title { color: #e7edfa; font-size: .75rem; font-weight: 700; }
+      .command-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+      .command-form input { min-width: 0; }
+      .command-form button { border-color: #79dfbe50; background: #244b4b; color: #c5f6df; }
+      .command-examples { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: #8995ad; font-size: .67rem; }
+      .command-examples button { min-height: 28px; padding: 4px 8px; font-size: .65rem; }
+      .command-status { min-height: 16px; margin: 0; color: #9ce8d2; font-size: .69rem; line-height: 1.45; }
+      .command-status.error { color: #ff9a9a; }
       .controls { display: grid; align-content: start; gap: 17px; padding: 17px; }
       .field-label { display: block; margin-bottom: 7px; color: #aeb9ce; font-size: .73rem; font-weight: 650; }
       select, input[type="text"] { width: 100%; min-height: 41px; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 11px; outline: none; background: #111724; color: #edf2ff; font: 13px ui-sans-serif, system-ui, sans-serif; }
@@ -121,6 +134,21 @@
             <span id="map-gene" class="status-tag">Demo gene A</span>
           </div>
           <div class="brain-wrap">
+            <section class="command-panel" aria-label="Mapped motor action command">
+              <span class="command-title">Enter an action to flare its mapped region</span>
+              <form id="command-form" class="command-form">
+                <input id="action-command" type="text" maxlength="120" placeholder='Try "move hand", "walk", or "speak"' aria-label="Motor action command">
+                <button type="submit">Run action</button>
+              </form>
+              <div class="command-examples">
+                <span>Try:</span>
+                <button type="button" class="command-example" data-command="walk">walk</button>
+                <button type="button" class="command-example" data-command="reach">reach</button>
+                <button type="button" class="command-example" data-command="speak">speak</button>
+                <button type="button" class="command-example" data-command="clear">clear</button>
+              </div>
+              <p id="command-status" class="command-status" role="status" aria-live="polite">Command demo only · no brain signals or devices are connected.</p>
+            </section>
             <svg id="brain" class="brain-svg" viewBox="0 0 760 520" role="img" aria-labelledby="svg-title svg-description">
               <title id="svg-title">Zoomed view of the human primary motor cortex</title>
               <desc id="svg-description">A contextual left-hemisphere outline locates primary motor cortex on the precentral gyrus. An enlarged, illustrative functional map shows broad body-region locations from medial leg and foot toward lateral face and tongue. Functional subdivisions are approximate, variable, and overlapping.</desc>
@@ -220,18 +248,22 @@
     <script src="expression.js"></script>
     <script>
       (() => {
-        const { REGIONS, DEMO_DATA, parseCsv, toCsv } = window.ExpressionAtlas;
+        const { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
         const svg = document.querySelector("#brain");
         const geneSelect = document.querySelector("#gene");
         const profileList = document.querySelector("#expression-list");
         const selectedRegionCard = document.querySelector("#selected-region");
         const message = document.querySelector("#message");
         const datasetLabel = document.querySelector("#dataset-label");
+        const commandInput = document.querySelector("#action-command");
+        const commandStatus = document.querySelector("#command-status");
         const demoGenes = new Set(DEMO_DATA.map(record => record.gene));
         const records = new Map();
         let currentGene = "Demo gene A";
         let selectedRegion = "leg_foot";
         let isLoadedDataset = false;
+        let flaringRegions = new Set();
+        let flareTimeout = null;
 
         for (const record of DEMO_DATA) {
           if (!records.has(record.gene)) records.set(record.gene, new Map());
@@ -287,6 +319,7 @@
           for (const region of REGIONS) {
             const value = profile?.get(region.id) ?? 0;
             const points = neuronPositions[region.id];
+            const isFlaring = flaringRegions.has(region.id);
             for (let index = 0; index < points.length - 1; index++) {
               if (index % 2 === 0) {
                 addSvgElement(links, "line", {
@@ -301,7 +334,7 @@
             }
             for (const [index, [x, y]] of points.entries()) {
               addSvgElement(nodes, "circle", {
-                class: "network-node",
+                class: `network-node${isFlaring ? " flaring" : ""}`,
                 cx: x,
                 cy: y,
                 r: (2 + value * 3.2 + (index % 3) * 0.25).toFixed(1),
@@ -312,6 +345,7 @@
             }
             const zone = svg.querySelector(`[data-zone="${region.id}"]`);
             zone.classList.toggle("active", selectedRegion === region.id);
+            zone.classList.toggle("flaring", isFlaring);
             const label = addSvgElement(labels, "text", {
               class: `brain-label${selectedRegion === region.id ? " active" : ""}`,
               x: region.x,
@@ -403,6 +437,50 @@
           datasetLabel.textContent = isLoadedDataset
             ? "Loaded normalized profile · local display only"
             : "Synthetic example profiles · no experimental data loaded";
+        }
+
+        function runActionCommand(input) {
+          try {
+            const result = parseCommand(input);
+            if (flareTimeout !== null) window.clearTimeout(flareTimeout);
+            flaringRegions = new Set(result.regions);
+            if (result.action === "clear") {
+              commandStatus.textContent = "Flare cleared. This was a visual M1 mapping demo only.";
+              commandStatus.className = "command-status";
+              renderBrain();
+              return;
+            }
+
+            selectedRegion = result.regions[0];
+            const regionNames = result.regions.map(id =>
+              REGIONS.find(region => region.id === id).label
+            );
+            commandStatus.textContent =
+              `Visual command: ${input.trim()} → ${regionNames.join(" + ")} flaring briefly. ` +
+              "Mapped visualization only—not measured or predicted brain activity.";
+            commandStatus.className = "command-status";
+            renderBrain();
+            flareTimeout = window.setTimeout(() => {
+              flaringRegions.clear();
+              flareTimeout = null;
+              renderBrain();
+              commandStatus.textContent = "Flare complete. Enter another action to light its mapped M1 region.";
+            }, 3300);
+          } catch (error) {
+            commandStatus.textContent = error.message;
+            commandStatus.className = "command-status error";
+          }
+        }
+
+        document.querySelector("#command-form").addEventListener("submit", event => {
+          event.preventDefault();
+          runActionCommand(commandInput.value);
+        });
+        for (const button of document.querySelectorAll(".command-example")) {
+          button.addEventListener("click", () => {
+            commandInput.value = button.dataset.command;
+            runActionCommand(button.dataset.command);
+          });
         }
 
         geneSelect.addEventListener("change", () => {

@@ -4,7 +4,8 @@ BrainCode focuses the interactive expression viewer on **human primary motor
 cortex (M1)**. A small hemisphere view marks the precentral gyrus; the larger
 view zooms into the classic broad functional body map. Select a gene profile to
 change the brightness of neuron-like markers, edit normalized values, or
-import/export CSV.
+import/export CSV. Enter a simple action such as `move hand`, `walk`, `reach`,
+or `speak` to briefly flare its mapped region.
 
 Try the [BrainCode Expression Atlas](https://git-copilot.github.io/BrainCode/).
 
@@ -48,7 +49,9 @@ This functional map does **not** measure gene expression. The built-in Demo
 gene profiles are invented examples to exercise the visualization, not
 observations. Brightness only encodes supplied normalized values. The
 neuron-like markers are decorative rather than cell locations, and the page
-does not make biological or clinical predictions.
+does not make biological or clinical predictions. Action commands only trigger
+a timed visual effect on the mapped body region; they are not decoded from
+brain signals and do not control a device.
 
 ## Tests
 
