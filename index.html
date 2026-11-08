@@ -42,9 +42,14 @@
       .brain-wrap { padding: 12px; }
       .surface-view-wrap { position: relative; height: 480px; overflow: hidden; border: 1px solid #ffffff0f; border-radius: 12px; background: radial-gradient(ellipse at 48% 45%, #20283a 0, #111724 73%); }
       #surface-viewer { display: block; width: 100%; height: 480px; }
-      .surface-view-wrap[data-model-ready="true"].flaring { border-color: #fff0a0; box-shadow: 0 0 26px #f0c98e90; }
-      .surface-view-wrap[data-model-ready="true"].flaring #surface-viewer { animation: brain-model-flare 1.1s ease-in-out 3 alternate; }
-      @keyframes brain-model-flare { from { filter: brightness(1); } to { filter: brightness(var(--fire-brightness, 1.5)) drop-shadow(0 0 var(--fire-glow, 18px) var(--fire-color, #ffca55)); } }
+      .surface-view-wrap[data-model-ready="true"].flaring #surface-viewer { animation: brain-fire-pulse .9s ease-in-out infinite alternate; }
+      @keyframes brain-fire-pulse {
+        from { filter: brightness(1.04) drop-shadow(0 0 2px var(--fire-color, #ffad35)); }
+        to { filter: brightness(var(--fire-brightness, 1.4)) drop-shadow(0 0 var(--fire-glow, 14px) var(--fire-color, #ffad35)); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .surface-view-wrap[data-model-ready="true"].flaring #surface-viewer { animation: none; }
+      }
       .surface-status { position: absolute; right: 12px; bottom: 8px; left: 12px; margin: 0; color: #aeb9ce; font-size: .68rem; line-height: 1.5; pointer-events: none; text-shadow: 0 1px 5px #101522; }
       .surface-status.error { color: #ff9a9a; }
       .surface-badges { position: absolute; top: 12px; left: 12px; display: grid; gap: 6px; pointer-events: none; }
@@ -266,7 +271,7 @@
                 <select id="gene"></select>
               </label>
             </div>
-            <p class="gene-meta">Demo profiles are invented. Edit values or load a normalized CSV to explore the schematic; commands use the selected region's value for a temporary whole-brain color flare.</p>
+            <p class="gene-meta">Demo profiles are invented. Edit values or load a normalized CSV to explore the schematic; commands use the selected region's value to drive a moving flare across the 3D surface.</p>
             <div class="upload-row">
               <label class="file-button">Load expression CSV<input id="file" type="file" accept=".csv,text/csv"></label>
             </div>
@@ -301,7 +306,7 @@
         </aside>
       </section>
 
-      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. It is normally grayscale; during a command, the whole 3D surface is temporarily tinted by the mapped region's expression value. The atlas has no vertex-level regional mapping, so this is a display effect, not measured or localized activity. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, not gene-expression measurements. Loaded CSV values stay in the browser.</p>
+      <p class="notice"><strong>Scientific scope:</strong> The left cortical surface is an ICBM152 template mesh, not a participant scan. During a command, animated orange-to-yellow waves move across its mesh and brighten with the selected expression value. The atlas has no vertex-level regional mapping, so the moving pattern is a display effect, not measured or localized activity. The expandable body-map schematic summarizes classic human stimulation mapping; its broad regions overlap and vary. Demo values are invented, not gene-expression measurements. Loaded CSV values stay in the browser.</p>
       <footer>
         <a href="https://doi.org/10.1093/brain/60.4.389" target="_blank" rel="noopener noreferrer">Penfield &amp; Boldrey · human cortical stimulation maps</a>
         · <a href="https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images" target="_blank" rel="noopener noreferrer">Surface source · NiiVue</a>
@@ -354,14 +359,13 @@
             detail: { active, value },
           }));
           if (active) {
-            const intensity = expressionIntensity(value);
-            surfaceView.style.setProperty("--fire-brightness", intensity.flareBrightness.toFixed(2));
-            surfaceView.style.setProperty("--fire-glow", `${(8 + value * 24).toFixed(1)}px`);
+            surfaceView.style.setProperty("--fire-brightness", (1.1 + value * 0.45).toFixed(2));
+            surfaceView.style.setProperty("--fire-glow", `${(4 + value * 16).toFixed(1)}px`);
             surfaceView.style.setProperty("--fire-color", expressionColor(value));
             modelFlareTimeout = window.setTimeout(() => {
               modelFlareTimeout = null;
               setSurfaceModelFlare(false);
-            }, 3300);
+            }, 5200);
           } else {
             surfaceView.style.removeProperty("--fire-brightness");
             surfaceView.style.removeProperty("--fire-glow");
@@ -658,7 +662,7 @@
             );
             commandStatus.textContent =
               `Visual command: ${input.trim()} → warm neural pulses fire across ${regionNames.join(" + ")}. ` +
-              "The 3D flare color and brightness follow expression; this is a display effect, not measured activity.";
+              "Moving 3D fire waves brighten and speed up with expression; this is a visual effect, not measured activity.";
             commandStatus.className = "command-status";
             renderBrain();
             flareTimeout = window.setTimeout(() => {
@@ -786,27 +790,71 @@
       (async () => {
       const status = document.querySelector("#surface-status");
       const baseSurfaceColor = [205, 205, 205, 255];
+      const fireFragmentShader = `#version 300 es
+precision highp int;
+precision highp float;
+uniform float opacity;
+uniform float uFire;
+uniform float uExpression;
+uniform float uTime;
+in vec4 vClr;
+in vec3 vN;
+in vec4 vP;
+out vec4 color;
+void main() {
+  float wave = 0.5 + 0.5 * sin(
+    vP.x * 0.055 + vP.y * 0.037 - vP.z * 0.048 - uTime * 3.2 +
+    sin(vP.y * 0.062 + vP.z * 0.041 + uTime * 0.7) * 0.7
+  );
+  float sparks = 0.5 + 0.5 * sin(
+    vP.x * 0.12 - vP.y * 0.08 + vP.z * 0.09 - uTime * 6.4
+  );
+  float field = wave * 0.76 + sparks * 0.24;
+  float heat = smoothstep(0.38, 0.9, field);
+  vec3 flame = mix(vec3(1.0, 0.2, 0.015), vec3(1.0, 0.9, 0.2), sqrt(uExpression));
+  float core = smoothstep(0.72, 0.98, field) * uExpression;
+  flame = mix(flame, vec3(1.0, 0.98, 0.62), core);
+  float intensity = heat * (0.18 + uExpression * 0.72) * uFire;
+  vec3 material = mix(vClr.rgb, flame, intensity);
+  vec3 ray = vec3(0.0, 0.0, 1.0);
+  vec3 normal = normalize(vN);
+  vec3 light = normalize(vec3(0.0, 10.0, -5.0));
+  float diffuse = max(dot(normal, light), 0.0);
+  float specular = 0.2 * pow(max(dot(reflect(light, normal), ray), 0.0), 10.0);
+  color = vec4(material * (0.35 + diffuse * 0.5) + specular, opacity);
+}`;
       let viewer = null;
+      let fireShader = null;
+      let fireFrame = null;
+      let fireGeneration = 0;
       function updateSurfaceFlare({ active, value = 0 }) {
-        if (!viewer) return;
+        if (!viewer || !fireShader) return;
         const mesh = viewer.meshes[0];
-        if (!active) {
-          viewer.setMeshProperty(mesh.id, "rgba255", baseSurfaceColor);
-          const surfaceView = document.querySelector(".surface-view-wrap");
-          surfaceView.style.removeProperty("--fire-brightness");
-          surfaceView.style.removeProperty("--fire-glow");
-          surfaceView.style.removeProperty("--fire-color");
-          viewer.drawScene();
-          return;
-        }
-        const intensity = window.ExpressionAtlas.expressionIntensity(value);
-        const channels = window.ExpressionAtlas.expressionColor(value).match(/\d+/g).map(Number);
-        viewer.setMeshProperty(mesh.id, "rgba255", [...channels, 255]);
-        const surfaceView = document.querySelector(".surface-view-wrap");
-        surfaceView.style.setProperty("--fire-brightness", intensity.flareBrightness.toFixed(2));
-        surfaceView.style.setProperty("--fire-glow", `${(8 + value * 24).toFixed(1)}px`);
-        surfaceView.style.setProperty("--fire-color", window.ExpressionAtlas.expressionColor(value));
-        viewer.drawScene();
+        if (!mesh) return;
+        fireGeneration++;
+        if (fireFrame !== null) cancelAnimationFrame(fireFrame);
+        fireFrame = null;
+        const generation = fireGeneration;
+        const start = performance.now();
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let lastDraw = 0;
+        const drawFire = now => {
+          if (generation !== fireGeneration) return;
+          if (lastDraw === 0 || now - lastDraw >= 1000 / 30) {
+            const gl = viewer.gl;
+            gl.useProgram(fireShader.program);
+            gl.uniform1f(fireShader.uniforms.uFire, active ? 1 : 0);
+            gl.uniform1f(fireShader.uniforms.uExpression, value);
+            gl.uniform1f(
+              fireShader.uniforms.uTime,
+              active && !reduceMotion ? ((now - start) / 1000) * (1.5 + value * 2.5) : 0
+            );
+            viewer.drawScene();
+            lastDraw = now;
+          }
+          if (active && !reduceMotion) fireFrame = requestAnimationFrame(drawFire);
+        };
+        drawFire(start);
       }
       window.addEventListener("braincode:model-flare", event => {
         updateSurfaceFlare(event.detail);
@@ -836,7 +884,7 @@
         }
         const { Niivue } = window.niivue;
         viewer = new Niivue({
-          backColor: [0.067, 0.082, 0.122, 1],
+          backColor: [0.067, 0.082, 0.122, 0],
           show3Dcrosshair: false,
           meshXRay: 0,
         });
@@ -849,10 +897,14 @@
           name: "BrainMesh_ICBM152.lh.mz3",
           rgba255: baseSurfaceColor,
         }]);
+        const shaderIndex = viewer.setCustomMeshShader(fireFragmentShader);
+        viewer.setMeshShader(viewer.meshes[0].id, shaderIndex);
+        fireShader = viewer.meshShaders[shaderIndex].shader;
+        if (!fireShader) throw Error("The brain fire shader could not be initialized.");
         viewer.scene.volScaleMultiplier = 1.35;
         document.querySelector(".surface-view-wrap").dataset.modelReady = "true";
         updateSurfaceFlare(window.BrainCodeExpressionFire ?? { active: false });
-        status.textContent = "Atlas surface loaded · commands tint it to show the selected region's expression intensity.";
+        status.textContent = "Atlas surface loaded · commands send expression-scaled fire through the mesh.";
       } catch (error) {
         status.textContent = `3D surface viewer could not load: ${error.message}`;
         status.classList.add("error");

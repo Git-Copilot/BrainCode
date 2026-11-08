@@ -19,8 +19,10 @@ The surface mesh is from NiiVue's demo image directory, pinned to commit
 Its local copy is in `assets/brain/`. NiiVue's BSD 2-Clause license is
 included in `assets/brain/NIIVUE-LICENSE.txt`.
 
-The surface is standard-template geometry, not an individual scan. It is
-displayed in white and gray without a colored motor-activity overlay.
+The surface is standard-template geometry, not an individual scan. It starts
+white and gray; action commands animate orange-to-yellow fire waves directly
+on the cortical mesh with a GPU shader. The waves are a visual effect, not a
+motor-activity overlay.
 
 ## Regional expression graph and CSV
 
@@ -31,10 +33,10 @@ six values as data. The schematic's expression markers use a warm orange-to-
 yellow scale: higher normalized values appear brighter, larger, and glow more.
 When an action command is entered, neuron-like pulses travel along the selected
 region's connections; higher-expression regions fire larger, faster, brighter
-pulses. The command also tints the whole 3D surface orange-to-yellow according
-to the mapped region's value. This whole-surface tint is a display cue because
-the atlas has no vertex-level expression mapping; it is not measured or
-localized activity.
+pulses. The actual 3D mesh also carries moving orange-to-yellow fire waves,
+with brighter and faster firing for higher expression values. The atlas has no
+vertex-level expression mapping, so the 3D pattern is a display cue and does
+not represent measured or localized activity.
 
 CSV imports need `gene`, `region`, and `expression` columns. Expression values
 must already be normalized from `0` to `1`. Each row assigns one value to a
@@ -65,18 +67,18 @@ normalize or validate their biological provenance, and data stays in the
 browser.
 
 An action command briefly fires warm pulses across the selected region in the
-schematic and tints the 3D brain in proportion to its normalized expression.
-The 3D tint covers the whole model because the atlas has no vertex-level
-expression mapping; this is a display effect, not measured or predicted neural
-activity.
+schematic and sends animated orange-to-yellow waves across the 3D mesh. The
+wave brightness and speed scale with normalized expression. The atlas has no
+vertex-level expression mapping, so the spatial pattern is a display effect,
+not measured or predicted neural activity.
 
 ## Scientific scope
 
 The schematic summarizes classic human stimulation mapping
 ([Penfield & Boldrey](https://doi.org/10.1093/brain/60.4.389)). Functional
 representations overlap and vary between people; this broad map is not an
-individual atlas. The command field only changes the grayscale display and
-schematic. It does not decode brain signals or control a device.
+individual atlas. The command field only triggers the visual schematic and
+mesh effects. It does not decode brain signals or control a device.
 BrainCode makes no biological or clinical predictions.
 
 ## Tests
