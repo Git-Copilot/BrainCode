@@ -1,13 +1,20 @@
-# Python-style blocks and JavaScript-style const declarations can be mixed.
-brain SimplePerceiver:
-  input stimulus: Signal
-  memory recent(capacity=8)
-  neuron detector(threshold=0.65)
-  state attention = 0.0
+# Model a simple motor-intent signal using two thresholds and a rolling window.
+brain MotorIntent:
+  input eeg: Signal
+  memory recent(capacity=3)
+  neuron permissive(threshold=0.4)
+  neuron strict(threshold=0.8)
+  state confidence = 0.1
+  state baseline = 0.2
 
-  on stimulus as signal:
-    const response = detector.fire(signal)
-    recent.store(response)
-    attention = learn(attention, from=response, rate=0.4)
-    if attention > 0.5:
-      decide "notice"
+  on eeg as sample:
+    let active = permissive.fire(sample)
+    let high_confidence = strict.fire(sample)
+    recent.store(active)
+    confidence = learn(confidence, from: recent.mean(), rate: 0.5)
+    baseline = max(baseline, sample * 0.5)
+    if recent.ratio() and active and not high_confidence:
+      decide "motor-intent"
+      emit "confidence", confidence
+    else:
+      emit "baseline", baseline

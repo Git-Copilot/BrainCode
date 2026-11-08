@@ -33,6 +33,48 @@ brain SimplePerceiver:
       decide "notice"
 """
 
+NETWORK_EXAMPLE = """\
+brain MotorIntent:
+  input eeg: Signal
+  memory recent(capacity=3)
+  neuron permissive(threshold=0.4)
+  neuron strict(threshold=0.8)
+  state confidence = 0.1
+  state baseline = 0.2
+
+  on eeg as sample:
+    let active = permissive.fire(sample)
+    let high_confidence = strict.fire(sample)
+    recent.store(active)
+    confidence = learn(confidence, from: recent.mean(), rate: 0.5)
+    baseline = max(baseline, sample * 0.5)
+    if recent.ratio() and active and not high_confidence:
+      decide "motor-intent"
+      emit "confidence", confidence
+    else:
+      emit "baseline", baseline
+"""
+
+BRACED_NETWORK_EXAMPLE = """\
+brain BracedNetwork {
+  input eeg: Signal;
+  memory recent(capacity=2);
+  neuron detector(threshold=0.5);
+  state confidence = 0.0;
+  on eeg as sample {
+    let active = detector.fire(sample);
+    recent.store(active);
+    if (active) {
+      decide "active";
+      confidence = learn(confidence, from: recent.mean(), rate: 0.5);
+      emit "confidence", confidence;
+    } else {
+      emit "confidence", confidence;
+    }
+  }
+}
+"""
+
 BRACED_EXAMPLE = """\
 brain SimplePerceiver {
   input stimulus: Signal;
@@ -98,6 +140,59 @@ class BrainCodeTests(unittest.TestCase):
     def test_python_blocks_require_indentation(self):
         with self.assertRaisesRegex(BrainCodeError, "indented body"):
             parse(MIXED_EXAMPLE.replace("  input stimulus", "input stimulus"))
+
+    def test_multiple_neurons_states_memory_and_outputs(self):
+        program = parse(NETWORK_EXAMPLE)
+        simulation = Simulation(program)
+
+        fired, decided = simulation.step(0.6)
+
+        self.assertTrue(fired)
+        self.assertTrue(decided)
+        self.assertEqual(simulation.last_decision, "motor-intent")
+        self.assertAlmostEqual(simulation.states["confidence"], 0.55)
+        self.assertAlmostEqual(simulation.states["baseline"], 0.3)
+        self.assertEqual(simulation.last_outputs, [
+            {"type": "decision", "label": "motor-intent"},
+            {"type": "signal", "label": "confidence", "value": 0.55},
+        ])
+
+    def test_memory_window_and_else_branch_evolve_across_samples(self):
+        simulation = Simulation(parse(NETWORK_EXAMPLE))
+        simulation.step(0.6)
+        simulation.step(0.9)
+        _, decided = simulation.step(0.1)
+
+        self.assertFalse(decided)
+        self.assertEqual(simulation.recent, [True, True, False])
+        self.assertEqual(simulation.last_outputs[0]["label"], "baseline")
+        self.assertAlmostEqual(simulation.last_outputs[0]["value"], 0.45)
+
+    def test_braced_nested_conditions_and_same_line_else(self):
+        simulation = Simulation(parse(BRACED_NETWORK_EXAMPLE))
+        _, decided = simulation.step(0.9)
+        self.assertTrue(decided)
+        self.assertEqual(simulation.last_decision, "active")
+        self.assertEqual(simulation.last_outputs[1]["value"], 0.5)
+
+        _, decided = simulation.step(0.1)
+        self.assertFalse(decided)
+        self.assertEqual(simulation.last_outputs, [
+            {"type": "signal", "label": "confidence", "value": 0.5},
+        ])
+
+    def test_unknown_state_assignment_and_unsafe_expressions_are_rejected(self):
+        with self.assertRaisesRegex(BrainCodeError, "undeclared state"):
+            parse(NETWORK_EXAMPLE.replace(
+                "baseline = max(baseline, sample * 0.5)",
+                "unknown = sample",
+            ))
+        unsafe = NETWORK_EXAMPLE.replace(
+            "let active = permissive.fire(sample)",
+            "let active = __import__('os').system('echo unsafe')",
+        )
+        with self.assertRaisesRegex(BrainCodeError, "unsupported function"):
+            Simulation(parse(unsafe)).step(0.6)
 
 
 if __name__ == "__main__":
