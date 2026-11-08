@@ -10,6 +10,53 @@ Try the [BrainCode Motor Cortex Atlas](https://git-copilot.github.io/BrainCode/)
 The 3D viewer loads NiiVue 0.69.0 from jsDelivr, so an internet connection is
 needed to display the surface.
 
+## BrainCode language
+
+[Explore the BrainCode language showcase](https://git-copilot.github.io/BrainCode/language.html).
+
+The `.brain` language runs small, event-driven neural simulations. A program
+declares a normalized signal input, rolling memory, one or more threshold
+neurons, and persistent states; its `on` handler describes what happens for
+each input sample. It supports `let`/`const`, arithmetic and comparisons,
+`and`/`or`/`not`, nested `if`/`else`, rolling-window statistics, state updates,
+decisions, and named output signals. Indentation-based blocks and brace-based
+blocks are both accepted.
+
+```brain
+brain MotorIntent:
+  input eeg: Signal
+  memory recent(capacity=3)
+  neuron permissive(threshold=0.4)
+  neuron strict(threshold=0.8)
+  state confidence = 0.1
+  state baseline = 0.2
+
+  on eeg as sample:
+    let active = permissive.fire(sample)
+    let high_confidence = strict.fire(sample)
+    recent.store(active)
+    confidence = learn(confidence, from: recent.mean(), rate: 0.5)
+    baseline = max(baseline, sample * 0.5)
+    if recent.ratio() and active and not high_confidence:
+      decide "motor-intent"
+      emit "confidence", confidence
+    else:
+      emit "baseline", baseline
+```
+
+Run a stream of normalized samples from the repository root:
+
+```powershell
+python braincode.py examples/simple_perceiver.brain --signal 0.6 --signal 0.9 --signal 0.1 --json
+```
+
+Each input advances persistent state and rolling memory. JSON mode emits a
+machine-readable result for each sample, including states, decisions, and
+explicitly emitted signals. Expressions are interpreted from a restricted
+operator/function allowlist; BrainCode source is not executed as Python.
+Inputs and neuron thresholds are normalized to `0`–`1`. This is a lightweight
+simulation language, not a hardware driver, validated BCI, or clinical tool.
+
 ## Surface assets and provenance
 
 The surface mesh and motor-labeled example layer are from NiiVue's demo image
