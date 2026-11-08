@@ -8,7 +8,9 @@ work.
 
 Try the [BrainCode Motor Cortex Atlas](https://git-copilot.github.io/BrainCode/).
 The 3D viewer loads NiiVue 0.69.0 from jsDelivr, so an internet connection is
-needed to display the surface.
+needed for the viewer library. A bundled copy of the atlas mesh data also
+supports file-based local previews where browsers block direct access to
+neighboring binary files.
 
 ## Surface assets and provenance
 
@@ -23,12 +25,18 @@ motor layer is labeled as a motor example in NiiVue's demo assets, but its file
 does not provide study-level provenance. It is included for visualization and
 must not be treated as measured activity or a validated functional atlas.
 
-## Schematic values CSV
+## Regional expression graph and CSV
 
-The optional side panel lets you explore normalized values on the schematic
-only; it does not recolor the 3D surface. CSV files need `gene`, `region`, and
-`expression` columns. Expression values must already be normalized from `0` to
-`1`. Each row assigns one value to a broad M1 body-map region:
+The expression panel plots the selected profile as a labeled horizontal bar
+graph and lists the normalized values by broad M1 region. Use **Download graph
+SVG** to save a standalone vector graph, or **Download values CSV** to save the
+six values as data. These regional values update the schematic and graph only;
+they are not painted onto the 3D atlas surface, which has no matching
+gene-expression measurements or per-region mesh mapping.
+
+CSV imports need `gene`, `region`, and `expression` columns. Expression values
+must already be normalized from `0` to `1`. Each row assigns one value to a
+broad M1 body-map region:
 
 | Region ID | Display |
 |---|---|
