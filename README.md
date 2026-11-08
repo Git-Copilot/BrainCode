@@ -27,9 +27,11 @@ displayed in white and gray without a colored motor-activity overlay.
 The expression panel plots the selected profile as a labeled horizontal bar
 graph and lists the normalized values by broad M1 region. Use **Download graph
 SVG** to save a standalone vector graph, or **Download values CSV** to save the
-six values as data. These regional values update the schematic and graph only;
-they are not painted onto the 3D atlas surface, which has no matching
-gene-expression measurements or per-region mesh mapping.
+six values as data. The schematic's expression markers use a warm orange-to-
+yellow scale: higher normalized values appear brighter, larger, and glow more.
+These regional values update the schematic and graph only; they are not painted
+onto the 3D atlas surface, which has no matching gene-expression measurements
+or per-region mesh mapping.
 
 CSV imports need `gene`, `region`, and `expression` columns. Expression values
 must already be normalized from `0` to `1`. Each row assigns one value to a

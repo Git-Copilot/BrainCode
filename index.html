@@ -60,7 +60,7 @@
       .expression-table { width: 100%; border-collapse: collapse; color: #c8d2e4; font-size: .68rem; text-align: left; }
       .expression-table th, .expression-table td { border-bottom: 1px solid #ffffff10; padding: 6px 5px; }
       .expression-table th { color: #8995ad; font-size: .62rem; font-weight: 650; }
-      .expression-table td:last-child, .expression-table th:last-child { color: #9ce8d2; font-family: ui-monospace, Consolas, monospace; text-align: right; }
+      .expression-table td:last-child, .expression-table th:last-child { color: #ffc65e; font-family: ui-monospace, Consolas, monospace; text-align: right; }
       .graph-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
       .graph-actions button { min-height: 34px; font-size: .66rem; }
       .map-details { margin-top: 12px; border: 1px solid #ffffff14; border-radius: 11px; background: #111724; }
@@ -71,22 +71,22 @@
       .brain-outline { fill: url(#cortexFill); stroke: #91a0b7; stroke-width: 3; }
       .brain-fold { fill: none; stroke: #8390a7; stroke-width: 2; stroke-linecap: round; opacity: .43; }
       .region-zone { fill: #263248; stroke: #a7b3c5; stroke-width: 1; opacity: .63; }
-      .region-zone.active { fill: #396575; stroke: #c2f5e1; stroke-width: 2; opacity: 1; }
+      .region-zone.active { fill: #67401e; stroke: #ffcc69; stroke-width: 2; opacity: 1; }
       .network-link { stroke: #a6bbce; stroke-width: 1.5; opacity: .14; }
-      .network-node { stroke: #d8fff1; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
-      .network-node.flaring { fill: #fff3a1 !important; stroke: #ffffff; filter: url(#softGlow); animation: neuron-flare 1s ease-in-out 3 alternate; transform-box: fill-box; transform-origin: center; }
-      .region-zone.flaring { fill: #fff0a0; stroke: #fffbd4; stroke-width: 3; opacity: 1; animation: region-flare 1s ease-in-out 3 alternate; }
-      @keyframes neuron-flare { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(1.9); filter: brightness(1.8) url(#softGlow); } }
+      .network-node { stroke: #ffe2aa; stroke-width: 1.2; transition: fill .2s ease, opacity .2s ease, filter .2s ease, r .2s ease; }
+      .network-node.flaring { stroke: #fff4bd; filter: url(#softGlow); animation: neuron-flare 1s ease-in-out 3 alternate; transform-box: fill-box; transform-origin: center; }
+      .region-zone.flaring { fill: #ffbf52; stroke: #fff0b0; stroke-width: 3; opacity: 1; animation: region-flare 1s ease-in-out 3 alternate; }
+      @keyframes neuron-flare { from { opacity: .55; transform: scale(1); } to { opacity: 1; transform: scale(var(--flare-scale)); filter: brightness(var(--flare-brightness)) url(#softGlow); } }
       @keyframes region-flare { from { fill-opacity: .55; } to { fill-opacity: 1; } }
       .brain-label { fill: #aeb9ce; font: 12px ui-sans-serif, system-ui, sans-serif; pointer-events: none; }
-      .brain-label.active { fill: #c2f5e1; font-weight: 700; }
+      .brain-label.active { fill: #ffdc8a; font-weight: 700; }
       .small-label { fill: #aeb9ce; font: 10px ui-sans-serif, system-ui, sans-serif; }
       .callout { fill: none; stroke: #f0b970; stroke-width: 1.3; }
       .region-hit { fill: transparent; stroke: transparent; cursor: pointer; }
       .region-hit:focus-visible { stroke: #ffffff; stroke-width: 2; outline: none; }
       .brain-footer { display: flex; justify-content: space-between; gap: 12px; padding: 0 4px 4px; color: #8995ad; font-size: .68rem; }
       .legend { display: flex; align-items: center; gap: 7px; }
-      .legend-bar { width: 86px; height: 8px; border-radius: 9px; background: linear-gradient(90deg, #30304a, #9ce8d2, #fff4ad); }
+      .legend-bar { width: 86px; height: 8px; border-radius: 9px; background: linear-gradient(90deg, #703010, #e87920, #fff270); }
       .command-panel { display: grid; gap: 8px; margin: 0 0 12px; border: 1px solid #ffffff12; border-radius: 11px; padding: 12px; background: #111724; }
       .command-title { color: #e7edfa; font-size: .75rem; font-weight: 700; }
       .command-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
@@ -115,7 +115,7 @@
       input[type="range"] { grid-column: 1 / -1; width: 100%; height: 15px; margin: 0; accent-color: #83e2c2; cursor: pointer; }
       .selected-region { border: 1px solid #ffffff14; border-radius: 10px; padding: 11px; background: #111724; }
       .selected-name { display: flex; justify-content: space-between; gap: 10px; color: #e7edfa; font-size: .77rem; font-weight: 700; }
-      .selected-name span { color: #9ce8d2; font-family: ui-monospace, Consolas, monospace; }
+      .selected-name span { color: #ffc65e; font-family: ui-monospace, Consolas, monospace; }
       .selected-copy { margin: 5px 0 0; color: #8995ad; font-size: .69rem; line-height: 1.55; }
       .message { min-height: 16px; margin: -6px 0 0; color: #9ce8d2; font-size: .7rem; }
       .message.error { color: #ff9a9a; }
@@ -244,7 +244,7 @@
               </svg>
             <div class="brain-footer">
               <span>Teaching schematic · approximate, overlapping, not to scale</span>
-              <span class="legend"><span>Lower</span><span class="legend-bar" aria-hidden="true"></span><span>Demo value</span></span>
+              <span class="legend"><span>Lower expression</span><span class="legend-bar" aria-hidden="true"></span><span>Higher expression</span></span>
             </div>
             </details>
           </div>
@@ -309,7 +309,7 @@
     <script src="expression.js"></script>
     <script>
       (() => {
-        const { REGIONS, DEMO_DATA, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
+        const { REGIONS, DEMO_DATA, expressionColor, parseCsv, toCsv, parseCommand } = window.ExpressionAtlas;
         const svg = document.querySelector("#brain");
         const geneSelect = document.querySelector("#gene");
         const profileList = document.querySelector("#expression-list");
@@ -366,16 +366,6 @@
           return records.get(gene);
         }
 
-        function colorFor(value) {
-          const low = [53, 48, 77];
-          const high = [192, 255, 222];
-          const amount = Math.sqrt(value);
-          const channels = low.map((channel, index) =>
-            Math.round(channel + (high[index] - channel) * amount)
-          );
-          return `rgb(${channels.join(" ")})`;
-        }
-
         function addSvgElement(parent, tag, attributes = {}) {
           const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
           for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
@@ -428,10 +418,10 @@
             });
             addSvgElement(expressionChart, "rect", {
               x: plotLeft, y: y + 2, width: (plotWidth * region.value).toFixed(2),
-              height: 18, rx: 4, fill: colorFor(region.value),
+              height: 18, rx: 4, fill: expressionColor(region.value),
             });
             const valueLabel = addSvgElement(expressionChart, "text", {
-              x: 350, y: y + 16, fill: "#9ce8d2", "font-size": 11,
+              x: 350, y: y + 16, fill: "#ffc65e", "font-size": 11,
               "font-family": "ui-monospace,Consolas,monospace", "text-anchor": "end",
             });
             valueLabel.textContent = region.value.toFixed(2);
@@ -481,10 +471,11 @@
                 class: `network-node${isFlaring ? " flaring" : ""}`,
                 cx: x,
                 cy: y,
-                r: (2 + value * 3.2 + (index % 3) * 0.25).toFixed(1),
-                fill: colorFor(value),
-                opacity: (0.22 + value * 0.78).toFixed(2),
-                filter: value > 0.58 ? "url(#softGlow)" : "",
+                r: (1.7 + value * 3.7 + (index % 3) * 0.25).toFixed(1),
+                style: `--flare-scale:${(1.25 + value * 0.7).toFixed(2)};--flare-brightness:${(1.2 + value * 1.1).toFixed(2)}`,
+                fill: expressionColor(value),
+                opacity: (0.18 + value * 0.82).toFixed(2),
+                filter: value > 0.25 ? "url(#softGlow)" : "",
               });
             }
             const zone = svg.querySelector(`[data-zone="${region.id}"]`);
