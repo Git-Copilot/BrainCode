@@ -62,19 +62,25 @@ expression. Imported CSV values are displayed as supplied; the page does not
 normalize or validate their biological provenance, and data stays in the
 browser.
 
+The action command briefly brightens the 3D model's example motor layer and
+highlights the corresponding broad region in the schematic. The 3D flash
+brightens the full layer because the atlas has no command-specific regional
+mesh mapping; it is not measured or predicted neural activity.
+
 ## Scientific scope
 
 The schematic summarizes classic human stimulation mapping
 ([Penfield & Boldrey](https://doi.org/10.1093/brain/60.4.389)). Functional
 representations overlap and vary between people; this broad map is not an
-individual atlas. The command field only highlights schematic regions. It does
-not decode brain signals, alter the 3D example layer, or control a device.
+individual atlas. The command field only changes the display of the example
+layer and schematic. It does not decode brain signals or control a device.
 BrainCode makes no biological or clinical predictions.
 
 ## Tests
 
 ```powershell
 node --test test_expression.js
+node --test test_brain_model_flare.js
 node --test test_biocode.js
 python -m unittest
 ```
