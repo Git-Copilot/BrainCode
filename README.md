@@ -14,16 +14,13 @@ neighboring binary files.
 
 ## Surface assets and provenance
 
-The surface mesh and motor-labeled example layer are from NiiVue's demo image
-directory, pinned to commit
+The surface mesh is from NiiVue's demo image directory, pinned to commit
 [`2a060d5`](https://github.com/niivue/niivue/tree/2a060d5f64a15094a5147f3eae42d3382333f206/packages/niivue/demos/images).
-Their local copies are in `assets/brain/`. NiiVue's BSD 2-Clause license is
+Its local copy is in `assets/brain/`. NiiVue's BSD 2-Clause license is
 included in `assets/brain/NIIVUE-LICENSE.txt`.
 
-The surface is standard-template geometry, not an individual scan. The bundled
-motor layer is labeled as a motor example in NiiVue's demo assets, but its file
-does not provide study-level provenance. It is included for visualization and
-must not be treated as measured activity or a validated functional atlas.
+The surface is standard-template geometry, not an individual scan. It is
+displayed in white and gray without a colored motor-activity overlay.
 
 ## Regional expression graph and CSV
 
@@ -62,26 +59,23 @@ expression. Imported CSV values are displayed as supplied; the page does not
 normalize or validate their biological provenance, and data stays in the
 browser.
 
-The 3D brain starts hidden. An action command briefly reveals it, brightens its
-example motor layer, and highlights the corresponding broad region in the
-schematic; the brain is hidden again when the flare ends. The 3D flash
-brightens the full layer because the atlas has no command-specific regional
-mesh mapping; it is not measured or predicted neural activity.
+An action command briefly brightens the grayscale 3D brain and highlights the
+corresponding broad region in the schematic. The 3D flash is a display effect,
+not measured or predicted neural activity.
 
 ## Scientific scope
 
 The schematic summarizes classic human stimulation mapping
 ([Penfield & Boldrey](https://doi.org/10.1093/brain/60.4.389)). Functional
 representations overlap and vary between people; this broad map is not an
-individual atlas. The command field only changes the display of the example
-layer and schematic. It does not decode brain signals or control a device.
+individual atlas. The command field only changes the grayscale display and
+schematic. It does not decode brain signals or control a device.
 BrainCode makes no biological or clinical predictions.
 
 ## Tests
 
 ```powershell
 node --test test_expression.js
-node --test test_brain_model_flare.js
 node --test test_biocode.js
 python -m unittest
 ```
