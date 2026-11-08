@@ -44,7 +44,21 @@
       #surface-viewer { display: block; width: 100%; height: 480px; }
       .surface-status { position: absolute; right: 12px; bottom: 8px; left: 12px; margin: 0; color: #aeb9ce; font-size: .68rem; line-height: 1.5; pointer-events: none; text-shadow: 0 1px 5px #101522; }
       .surface-status.error { color: #ff9a9a; }
+      .surface-badges { position: absolute; top: 12px; left: 12px; display: grid; gap: 6px; pointer-events: none; }
+      .surface-badge { border: 1px solid #ffffff25; border-radius: 7px; padding: 6px 8px; background: #101522d9; color: #dce5f6; font-size: .65rem; font-weight: 700; }
+      .surface-badge.layer { color: #f0c98e; }
       .surface-caption { display: flex; justify-content: space-between; gap: 12px; margin: 9px 3px 14px; color: #8995ad; font-size: .68rem; line-height: 1.5; }
+      .expression-output { margin-top: 15px; border: 1px solid #ffffff14; border-radius: 11px; padding: 12px; background: #111724; }
+      .output-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+      .output-head h3 { margin: 0; color: #e7edfa; font-size: .78rem; }
+      .output-head p { margin: 4px 0 0; color: #8995ad; font-size: .66rem; line-height: 1.5; }
+      .expression-chart { display: block; width: 100%; height: auto; margin: 8px 0; overflow: visible; }
+      .expression-table { width: 100%; border-collapse: collapse; color: #c8d2e4; font-size: .68rem; text-align: left; }
+      .expression-table th, .expression-table td { border-bottom: 1px solid #ffffff10; padding: 6px 5px; }
+      .expression-table th { color: #8995ad; font-size: .62rem; font-weight: 650; }
+      .expression-table td:last-child, .expression-table th:last-child { color: #9ce8d2; font-family: ui-monospace, Consolas, monospace; text-align: right; }
+      .graph-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+      .graph-actions button { min-height: 34px; font-size: .66rem; }
       .map-details { margin-top: 12px; border: 1px solid #ffffff14; border-radius: 11px; background: #111724; }
       .map-details summary { padding: 11px 13px; color: #c8d2e4; cursor: pointer; font-size: .73rem; font-weight: 700; }
       .map-details[open] summary { border-bottom: 1px solid #ffffff12; }
@@ -145,6 +159,10 @@
           <div class="brain-wrap">
             <div class="surface-view-wrap">
               <canvas id="surface-viewer" role="img" aria-label="Interactive three-dimensional left hemisphere cortical surface"></canvas>
+              <div class="surface-badges" aria-label="Atlas and overlay labels">
+                <span class="surface-badge">ICBM152 · left hemisphere</span>
+                <span class="surface-badge layer">Example motor layer · not gene expression</span>
+              </div>
               <p id="surface-status" class="surface-status" role="status" aria-live="polite">Loading the cortical surface viewer…</p>
             </div>
             <div class="surface-caption">
@@ -242,7 +260,6 @@
                 <span class="field-label">Gene / profile</span>
                 <select id="gene"></select>
               </label>
-              <button id="download" type="button" aria-label="Download current expression profile as CSV">Export CSV</button>
             </div>
             <p class="gene-meta">Demo profiles are invented and do not color the atlas surface. Edit values or load your own normalized CSV to explore the schematic key.</p>
             <div class="upload-row">
@@ -253,6 +270,26 @@
               <button type="submit">Add profile</button>
             </form>
             <div id="expression-list" class="expression-list" aria-label="Expression values by brain region"></div>
+            <section class="expression-output" aria-labelledby="output-title">
+              <div class="output-head">
+                <div>
+                  <h3 id="output-title">Gene-expression output</h3>
+                  <p id="output-description">Regional values from the selected profile · normalized 0–1</p>
+                </div>
+              </div>
+              <svg id="expression-chart" class="expression-chart" viewBox="0 0 380 278" role="img" aria-labelledby="chart-title chart-description">
+                <title id="chart-title">Regional gene-expression values</title>
+                <desc id="chart-description">Horizontal bar chart of normalized gene-expression values across six broad primary motor cortex regions.</desc>
+              </svg>
+              <table class="expression-table">
+                <thead><tr><th scope="col">M1 region</th><th scope="col">Normalized value</th></tr></thead>
+                <tbody id="expression-output"></tbody>
+              </table>
+              <div class="graph-actions">
+                <button id="download-graph" type="button">Download graph SVG</button>
+                <button id="download" type="button">Download values CSV</button>
+              </div>
+            </section>
             <div id="selected-region" class="selected-region" aria-live="polite"></div>
             <p id="message" class="message" role="status" aria-live="polite"></p>
           </div>
@@ -274,6 +311,8 @@
         const geneSelect = document.querySelector("#gene");
         const profileList = document.querySelector("#expression-list");
         const selectedRegionCard = document.querySelector("#selected-region");
+        const expressionOutput = document.querySelector("#expression-output");
+        const expressionChart = document.querySelector("#expression-chart");
         const message = document.querySelector("#message");
         const datasetLabel = document.querySelector("#dataset-label");
         const commandInput = document.querySelector("#action-command");
@@ -325,6 +364,73 @@
           for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
           parent.append(element);
           return element;
+        }
+
+        function renderExpressionOutput() {
+          const profile = profileFor();
+          const values = REGIONS.map(region => ({
+            ...region,
+            value: profile?.get(region.id) ?? 0,
+          }));
+          document.querySelector("#output-description").textContent =
+            `${currentGene} · regional values normalized 0–1 · schematic only`;
+          expressionChart.replaceChildren();
+          const title = addSvgElement(expressionChart, "title", { id: "chart-title" });
+          title.textContent = `${currentGene} · normalized expression by M1 region`;
+          const description = addSvgElement(expressionChart, "desc", { id: "chart-description" });
+          description.textContent =
+            `Regional values for ${currentGene}. Horizontal bars show normalized values from 0 to 1 for six broad M1 regions. These values are not mapped onto the 3D surface.`;
+          addSvgElement(expressionChart, "rect", {
+            x: 0, y: 0, width: 380, height: 278, rx: 8, fill: "#111724",
+          });
+          const plotLeft = 120;
+          const plotWidth = 192;
+          const top = 14;
+          const rowHeight = 38;
+          for (const tick of [0, 0.25, 0.5, 0.75, 1]) {
+            const x = plotLeft + plotWidth * tick;
+            addSvgElement(expressionChart, "line", {
+              x1: x, y1: top, x2: x, y2: top + rowHeight * values.length - 7,
+              stroke: "#738097", "stroke-width": 1, opacity: 0.28,
+            });
+            const tickLabel = addSvgElement(expressionChart, "text", {
+              x, y: 267, fill: "#8995ad", "font-size": 10,
+              "font-family": "ui-sans-serif,system-ui,sans-serif", "text-anchor": "middle",
+            });
+            tickLabel.textContent = tick.toFixed(tick === 0 || tick === 1 ? 0 : 2);
+          }
+          values.forEach((region, index) => {
+            const y = top + index * rowHeight;
+            const label = addSvgElement(expressionChart, "text", {
+              x: 110, y: y + 15, fill: "#c8d2e4", "font-size": 11,
+              "font-family": "ui-sans-serif,system-ui,sans-serif", "text-anchor": "end",
+            });
+            label.textContent = region.label;
+            addSvgElement(expressionChart, "rect", {
+              x: plotLeft, y: y + 2, width: plotWidth, height: 18, rx: 4, fill: "#283248",
+            });
+            addSvgElement(expressionChart, "rect", {
+              x: plotLeft, y: y + 2, width: (plotWidth * region.value).toFixed(2),
+              height: 18, rx: 4, fill: colorFor(region.value),
+            });
+            const valueLabel = addSvgElement(expressionChart, "text", {
+              x: 350, y: y + 16, fill: "#9ce8d2", "font-size": 11,
+              "font-family": "ui-monospace,Consolas,monospace", "text-anchor": "end",
+            });
+            valueLabel.textContent = region.value.toFixed(2);
+          });
+          expressionOutput.replaceChildren();
+          values.forEach(region => {
+            const row = document.createElement("tr");
+            const regionCell = document.createElement("th");
+            regionCell.scope = "row";
+            regionCell.textContent = region.label;
+            const valueCell = document.createElement("td");
+            valueCell.textContent = region.value.toFixed(2);
+            row.append(regionCell, valueCell);
+            expressionOutput.append(row);
+          });
+          expressionChart.setAttribute("aria-label", `Expression output graph for ${currentGene}`);
         }
 
         function renderBrain() {
@@ -419,6 +525,7 @@
               message.className = "message";
               renderBrain();
               renderSelectedRegion();
+              renderExpressionOutput();
             });
             profileList.append(item);
           }
@@ -442,6 +549,7 @@
         function renderAll() {
           renderBrain();
           renderControls();
+          renderExpressionOutput();
         }
 
         function updateGeneOptions() {
@@ -564,30 +672,73 @@
           }
         });
 
+        function downloadFile(filename, content, type) {
+          const url = URL.createObjectURL(new Blob([content], { type }));
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = filename;
+          anchor.click();
+          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
         document.querySelector("#download").addEventListener("click", () => {
           const csv = toCsv(REGIONS.map(region => ({
             gene: currentGene,
             region: region.id,
             expression: profileFor().get(region.id) ?? 0,
           })));
-          const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-          const anchor = document.createElement("a");
-          anchor.href = url;
-          anchor.download = `${currentGene.replace(/[^A-Za-z0-9_-]+/g, "_")}-expression.csv`;
-          anchor.click();
-          URL.revokeObjectURL(url);
+          downloadFile(
+            `${currentGene.replace(/[^A-Za-z0-9_-]+/g, "_")}-expression.csv`,
+            csv,
+            "text/csv",
+          );
+        });
+
+        document.querySelector("#download-graph").addEventListener("click", () => {
+          const graph = expressionChart.cloneNode(true);
+          graph.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          const svg = new XMLSerializer().serializeToString(graph);
+          downloadFile(
+            `${currentGene.replace(/[^A-Za-z0-9_-]+/g, "_")}-expression-graph.svg`,
+            `<?xml version="1.0" encoding="UTF-8"?>\n${svg}`,
+            "image/svg+xml;charset=utf-8",
+          );
         });
 
         updateGeneOptions();
         renderAll();
       })();
     </script>
-    <script type="module">
+    <script src="https://cdn.jsdelivr.net/npm/@niivue/niivue@0.69.0/dist/niivue.umd.js"></script>
+    <script>
+      (async () => {
       const status = document.querySelector("#surface-status");
       try {
-        const { Niivue, NVMesh } = await import(
-          "https://cdn.jsdelivr.net/npm/@niivue/niivue@0.69.0/+esm"
-        );
+        if (!window.niivue?.Niivue) throw Error("NiiVue viewer library did not load.");
+        let surfaceUrl = "assets/brain/BrainMesh_ICBM152.lh.mz3";
+        let motorUrl = "assets/brain/BrainMesh_ICBM152.lh.motor.mz3";
+        async function useInlineAssets() {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "assets/brain/inline-atlas-assets.js";
+            script.onload = resolve;
+            script.onerror = () => reject(Error("Bundled local atlas data could not be loaded."));
+            document.head.append(script);
+          });
+          surfaceUrl = `data:application/octet-stream;base64,${window.BrainAtlasAssetData.surface}`;
+          motorUrl = `data:application/octet-stream;base64,${window.BrainAtlasAssetData.motor}`;
+        }
+        if (window.location.protocol === "file:") {
+          await useInlineAssets();
+        } else {
+          try {
+            const response = await fetch(surfaceUrl, { method: "HEAD" });
+            if (!response.ok) await useInlineAssets();
+          } catch {
+            await useInlineAssets();
+          }
+        }
+        const { Niivue, NVMesh } = window.niivue;
         const viewer = new Niivue({
           backColor: [0.067, 0.082, 0.122, 1],
           show3Dcrosshair: false,
@@ -598,14 +749,16 @@
         viewer.opts.isColorbar = true;
         await viewer.attachTo("surface-viewer");
         await viewer.loadMeshes([{
-          url: "assets/brain/BrainMesh_ICBM152.lh.mz3",
+          url: surfaceUrl,
+          name: "BrainMesh_ICBM152.lh.mz3",
           rgba255: [194, 204, 220, 255],
         }]);
         viewer.scene.volScaleMultiplier = 1.35;
         status.textContent = "Atlas surface loaded. Loading the packaged motor-labeled example layer…";
         try {
           await NVMesh.loadLayer({
-            url: "assets/brain/BrainMesh_ICBM152.lh.motor.mz3",
+            url: motorUrl,
+            name: "BrainMesh_ICBM152.lh.motor.mz3",
             cal_min: 0.5,
             cal_max: 5.5,
             useNegativeCmap: true,
@@ -624,6 +777,7 @@
         status.textContent = `3D surface viewer could not load: ${error.message}`;
         status.classList.add("error");
       }
+      })();
     </script>
   </body>
 </html>
