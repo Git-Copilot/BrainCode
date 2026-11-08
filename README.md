@@ -62,8 +62,9 @@ expression. Imported CSV values are displayed as supplied; the page does not
 normalize or validate their biological provenance, and data stays in the
 browser.
 
-The action command briefly brightens the 3D model's example motor layer and
-highlights the corresponding broad region in the schematic. The 3D flash
+The 3D brain starts hidden. An action command briefly reveals it, brightens its
+example motor layer, and highlights the corresponding broad region in the
+schematic; the brain is hidden again when the flare ends. The 3D flash
 brightens the full layer because the atlas has no command-specific regional
 mesh mapping; it is not measured or predicted neural activity.
 

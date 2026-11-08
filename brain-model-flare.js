@@ -10,8 +10,15 @@
     }
 
     const baseOpacity = layer.opacity;
+    setVisibility(false);
     let timeout = null;
     let generation = 0;
+
+    function setVisibility(visible) {
+      const updated = viewer.setMeshProperty(mesh.id, "visible", visible);
+      if (updated === -1) throw Error("The brain model surface is no longer available.");
+      viewer.drawScene();
+    }
 
     async function setOpacity(opacity) {
       const updated = await viewer.setMeshLayerProperty(mesh.id, 0, "opacity", opacity);
@@ -25,19 +32,25 @@
       if (timeout !== null) globalThis.clearTimeout(timeout);
       timeout = null;
       await setOpacity(baseOpacity);
+      setVisibility(false);
     }
 
     async function flare() {
       const activeGeneration = ++generation;
       if (timeout !== null) globalThis.clearTimeout(timeout);
       timeout = null;
+      setVisibility(true);
       await setOpacity(1);
       if (activeGeneration !== generation) return;
 
       timeout = globalThis.setTimeout(() => {
         timeout = null;
         if (activeGeneration === generation) {
-          setOpacity(baseOpacity).catch(onError);
+          setOpacity(baseOpacity)
+            .then(() => {
+              if (activeGeneration === generation) setVisibility(false);
+            })
+            .catch(onError);
         }
       }, duration);
     }

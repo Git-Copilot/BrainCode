@@ -169,7 +169,7 @@
               <p id="surface-status" class="surface-status" role="status" aria-live="polite">Loading the cortical surface viewer…</p>
             </div>
             <div class="surface-caption">
-              <span>Drag to rotate · scroll to zoom · color is the example layer</span>
+              <span>The brain appears during a command · color is the example layer</span>
               <span>Standard atlas geometry · not an individual brain</span>
             </div>
             <section class="command-panel" aria-label="Mapped motor action command">
@@ -788,6 +788,8 @@
           name: "BrainMesh_ICBM152.lh.mz3",
           rgba255: [194, 204, 220, 255],
         }]);
+        viewer.setMeshProperty(viewer.meshes[0].id, "visible", false);
+        viewer.drawScene();
         viewer.scene.volScaleMultiplier = 1.35;
         status.textContent = "Atlas surface loaded. Loading the packaged motor-labeled example layer…";
         try {
@@ -804,7 +806,7 @@
           viewer.meshes[0].updateMesh(viewer.gl);
           viewer.drawScene();
           document.querySelector(".surface-view-wrap").dataset.modelReady = "true";
-          status.textContent = "Atlas surface and example motor layer loaded · layer provenance is limited; see scientific scope.";
+          status.textContent = "Atlas loaded. Enter an action to briefly reveal the brain and flare its example motor layer.";
           modelFlareController = window.BrainModelFlare.createBrainModelFlare(viewer, {
             onError: reportModelFlareError,
           });
