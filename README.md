@@ -46,6 +46,42 @@ illustrative, not a trained classifier or medical interpretation. Validate
 feature extraction, calibration, latency, and safety independently before
 considering any real BCI/BTI application.
 
+## Local MCP server
+
+The repository includes a custom stdio MCP server for coding with BrainCode.
+It uses the pinned official Python MCP SDK and runs locally; it does not connect
+to a hosted MCP service. Install the dependency and start it from the repository:
+
+```powershell
+python -m pip install -r requirements.txt
+python mcp_server.py
+```
+
+Configure an MCP host to run `python` with the absolute path to `mcp_server.py`
+as its argument. For hosts using the `mcpServers` configuration format, the
+entry resembles:
+
+```json
+{
+  "mcpServers": {
+    "braincode": {
+      "command": "python",
+      "args": ["C:\\path\\to\\BrainCode\\mcp_server.py"]
+    }
+  }
+}
+```
+
+The server provides BrainCode parsing and bounded replay, repository search and
+file reading, and an exact-text replacement tool for edits. Signal replay is
+limited to 256 inputs; EEG replay is limited to 100,000 samples per channel and
+256 windows. Repository access is fixed to this checkout and excludes hidden,
+generated, asset, and GitHub workflow paths; files are limited to 200 KB.
+Editing requires an exact text span that occurs once. The server exposes no
+shell, network, device, or arbitrary Python execution tools. File edits are
+written immediately when the tool is called, so connect it only to a trusted
+MCP client and review the resulting changes in your Git diff.
+
 ## Surface assets and provenance
 
 The surface mesh is from NiiVue's demo image directory, pinned to commit
