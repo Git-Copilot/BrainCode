@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101522">
-    <meta name="description" content="Explore BrainCode, a small event-driven language for safe, stateful neural simulations.">
-    <title>BrainCode Language · Neural Simulation</title>
+    <meta name="description" content="Explore BrainCode, a language for replaying and prototyping multichannel EEG/BCI signal pipelines.">
+    <title>BrainCode Language · BCI Prototyping</title>
     <style>
       :root {
         color-scheme: dark;
@@ -90,9 +90,9 @@
       </header>
 
       <section class="hero">
-        <div class="eyebrow">A small language for neural simulations</div>
-        <h1>Describe a signal.<br>See how state changes.</h1>
-        <p class="intro">BrainCode is an event-driven language for exploring threshold neurons, rolling memory, and explicit outputs. Write a handler once; each normalized input sample advances its state.</p>
+        <div class="eyebrow">A language for BCI prototyping</div>
+        <h1>Turn EEG windows<br>into clear events.</h1>
+        <p class="intro">Replay multichannel EEG from CSV, extract per-window signal features, and express classification rules in a small readable language. BrainCode emits intent labels and telemetry for inspection without connecting to a device.</p>
         <div class="hero-actions">
           <a class="button primary" href="#editor">Write a program</a>
           <a class="button" href="#syntax">Browse syntax</a>
@@ -101,19 +101,19 @@
 
       <section class="grid" aria-label="Language features">
         <article class="card">
-          <span class="feature-number">01 · SIGNALS</span>
-          <h2>Threshold neurons</h2>
-          <p>Declare multiple neurons with different normalized thresholds, then ask each whether the current sample fires.</p>
+          <span class="feature-number">01 · EEG WINDOWS</span>
+          <h2>Replay multichannel data</h2>
+          <p>Declare channel names, sample rate, and overlapping window sizes; replay uniformly sampled EEG columns from CSV.</p>
         </article>
         <article class="card">
-          <span class="feature-number">02 · STATE</span>
-          <h2>Memory that evolves</h2>
-          <p>Keep a bounded rolling window, query recent values, and update persistent state with allowlisted expressions.</p>
+          <span class="feature-number">02 · FEATURES</span>
+          <h2>Inspect signal features</h2>
+          <p>Compute band power, RMS, mean, and line length per channel and window, then combine features with ordinary expressions.</p>
         </article>
         <article class="card">
-          <span class="feature-number">03 · OUTPUTS</span>
-          <h2>Make results explicit</h2>
-          <p>Emit named signals or decisions for each sample. The command-line runner can return one JSON record per input.</p>
+          <span class="feature-number">03 · CLASSIFICATION</span>
+          <h2>Emit auditable events</h2>
+          <p>Write conditional intent labels and feature telemetry; the CLI returns one JSON record for every processed window.</p>
         </article>
       </section>
 
@@ -123,7 +123,7 @@
             <div class="eyebrow">Your workspace</div>
             <h2 class="section-title" id="editor-title">Start with a blank program.</h2>
           </div>
-          <p>No sample program or simulated output is preloaded. Write your own BrainCode source, then download it to run with the Python interpreter.</p>
+          <p>No program or simulated output is preloaded. Write BrainCode source, then download it to run against your own CSV recording.</p>
         </div>
         <div class="code-card">
           <div class="code-head"><label for="program-source">Untitled program · .brain</label><span>BrainCode</span></div>
@@ -144,36 +144,46 @@
             <div class="eyebrow">Language reference</div>
             <h2 class="section-title" id="syntax-title">The building blocks.</h2>
           </div>
-          <p>Use indentation or braces for blocks. Programs receive one normalized sample at a time and retain declared state between samples.</p>
+          <p>EEG programs declare their sampling contract up front. The previous normalized-signal simulator is still supported.</p>
         </div>
         <div class="reference-grid">
           <article class="card reference">
-            <h2>Program setup</h2>
+            <h2>EEG program setup</h2>
             <code>brain &lt;name&gt;:</code>
-            <code>input &lt;name&gt;: Signal</code>
-            <code>neuron &lt;name&gt;(threshold=&lt;0..1&gt;)</code>
-            <code>memory &lt;name&gt;(capacity=&lt;count&gt;)</code>
+            <code>input eeg: EEG</code>
+            <code>sample_rate 256Hz</code>
+            <code>window 256 samples step 128 samples</code>
+            <code>channels C3, C4</code>
           </article>
           <article class="card reference">
-            <h2>State and events</h2>
+            <h2>Features and events</h2>
+            <code>bandpower(frame, "C3", 8, 13)</code>
+            <code>rms(frame, "C3") · mean(frame, "C3")</code>
+            <code>line_length(frame, "C3")</code>
             <code>state &lt;name&gt; = &lt;number&gt;</code>
-            <code>on &lt;input&gt; as &lt;sample&gt;:</code>
-            <code>let &lt;name&gt; = &lt;expression&gt;</code>
-            <code>&lt;state&gt; = &lt;expression&gt;</code>
           </article>
           <article class="card reference">
             <h2>Control and output</h2>
+            <code>on eeg as frame:</code>
+            <code>let &lt;name&gt; = &lt;expression&gt;</code>
             <code>if &lt;condition&gt;: … else: …</code>
-            <code>decide "&lt;label&gt;"</code>
-            <code>emit "&lt;label&gt;", &lt;expression&gt;</code>
+            <code>decide "&lt;intent-label&gt;"</code>
+            <code>emit "&lt;feature-name&gt;", &lt;value&gt;</code>
+          </article>
+          <article class="card reference">
+            <h2>Signal simulation compatibility</h2>
+            <code>input &lt;name&gt;: Signal</code>
+            <code>neuron &lt;name&gt;(threshold=&lt;0..1&gt;)</code>
+            <code>memory &lt;name&gt;(capacity=&lt;count&gt;)</code>
             <code>recent.mean() · recent.ratio()</code>
+            <code>learn(state, from: value, rate: rate)</code>
           </article>
           <article class="card reference">
             <h2>Expressions</h2>
             <code>+ - * / % · comparisons</code>
             <code>and · or · not</code>
             <code>abs · min · max · round</code>
-            <code>learn(state, from: value, rate: rate)</code>
+            <code>if / else blocks · indentation or braces</code>
           </article>
         </div>
       </section>
@@ -182,23 +192,23 @@
         <div class="section-heading">
           <div>
             <div class="eyebrow">Run locally</div>
-            <h2 class="section-title" id="run-title">Use the Python interpreter.</h2>
+            <h2 class="section-title" id="run-title">Replay EEG locally.</h2>
           </div>
-          <p>The website edits and downloads source; it does not execute BrainCode in the browser.</p>
+          <p>The website edits source; the Python interpreter processes CSV windows locally and does not upload recordings.</p>
         </div>
         <div class="card">
-          <p>Download your program, clone the <a href="https://github.com/Git-Copilot/BrainCode">repository</a>, then run the interpreter with normalized input values from <code>0</code> to <code>1</code>:</p>
-          <pre><code>python braincode.py &lt;your-program.brain&gt; --signal &lt;value&gt; --json</code></pre>
-          <p>Use additional <code>--signal</code> arguments to process a sequence. Each JSON output record includes the input, persistent states, any decision, and explicitly emitted signals.</p>
+          <p>Download your program, clone the <a href="https://github.com/Git-Copilot/BrainCode">repository</a>, and provide a CSV whose headers match the declared channel names:</p>
+          <pre><code>python braincode.py examples/motor_imagery.brain --csv RECORDING.csv --json</code></pre>
+          <p>Each output record includes its sample/time offset, persistent states, optional intent decision, and explicitly emitted feature values. Repeated <code>--signal</code> inputs remain available for the lightweight simulation mode.</p>
         </div>
       </section>
 
-      <p class="limit-note"><strong>Scope and safety:</strong> BrainCode is a lightweight simulation language, not a hardware driver, validated BCI, or clinical tool. Its interpreter evaluates expressions through a restricted operator and function allowlist; BrainCode source is not executed as Python. User-defined thresholds and inputs are simulation parameters, not biological measurements.</p>
+      <p class="limit-note"><strong>Scope and safety:</strong> EEG support is offline CSV replay for prototyping, not live acquisition, a validated classifier, medical interpretation, or a hardware driver. Decisions are emitted as data only; the interpreter does not stimulate tissue or control devices. BrainCode uses an allowlisted expression evaluator, not Python execution. Validate datasets, calibration, latency, and safety independently.</p>
 
       <footer>
         <a href="index.html">Explore the motor cortex atlas</a>
         <a href="https://github.com/Git-Copilot/BrainCode">View source and tests</a>
-        <span>BrainCode · neural simulation language</span>
+        <span>BrainCode · BCI programming language prototype</span>
       </footer>
     </main>
     <script>

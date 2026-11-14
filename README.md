@@ -10,31 +10,35 @@ Try the [BrainCode Motor Cortex Atlas](https://git-copilot.github.io/BrainCode/)
 The 3D viewer loads NiiVue 0.69.0 from jsDelivr, so an internet connection is
 needed to display the surface.
 
-## BrainCode language
+## BrainCode for BCI prototyping
 
 [Explore the BrainCode language showcase](https://git-copilot.github.io/BrainCode/language.html).
 
-The `.brain` language runs small, event-driven neural simulations. A program
-declares a normalized signal input, rolling memory, one or more threshold
-neurons, and persistent states; its `on` handler describes what happens for
-each input sample. It supports `let`/`const`, arithmetic and comparisons,
-`and`/`or`/`not`, nested `if`/`else`, rolling-window statistics, state updates,
-decisions, and named output signals. Indentation-based blocks and brace-based
-blocks are both accepted.
-
-Write a `.brain` program in the blank editor on the showcase page and run it
-from the repository root with normalized input values from `0` to `1`:
+BrainCode can replay multichannel EEG recordings from CSV in overlapping
+windows, compute channel features, classify patterns, and emit event labels
+and telemetry as JSON. For example, the included motor-pattern program reads
+`C3` and `C4`, compares their normalized 8–13 Hz band power, and emits a label:
 
 ```powershell
-python braincode.py PROGRAM_FILE --signal SIGNAL_VALUE --json
+python braincode.py examples/motor_imagery.brain --csv RECORDING.csv --json
 ```
 
-Each input advances persistent state and rolling memory. JSON mode emits a
-machine-readable result for each sample, including states, decisions, and
-explicitly emitted signals. Expressions are interpreted from a restricted
-operator/function allowlist; BrainCode source is not executed as Python.
-Inputs and neuron thresholds are normalized to `0`–`1`. This is a lightweight
-simulation language, not a hardware driver, validated BCI, or clinical tool.
+The CSV needs one header per declared EEG channel (such as `C3,C4`), followed
+by uniformly sampled numeric rows. The program declares the sampling rate and
+window/step sizes in samples. `bandpower(frame, channel, low_hz, high_hz)`
+returns the fraction of window power in a frequency band using a Hann window;
+`mean`, `rms`, and `line_length` provide additional channel features. Add
+`emit` statements for telemetry and `decide` statements for intent labels.
+JSON mode emits one record per window with sample/time offsets, decisions,
+states, and emitted values.
+
+The original normalized-signal simulator remains available with repeated
+`--signal` arguments. Both modes use a restricted expression allowlist;
+BrainCode source is not executed as Python. EEG mode is offline CSV replay: it
+does not acquire live signals or control hardware. The example labels are
+illustrative, not a trained classifier or medical interpretation. Validate
+feature extraction, calibration, latency, and safety independently before
+considering any real BCI/BTI application.
 
 ## Surface assets and provenance
 

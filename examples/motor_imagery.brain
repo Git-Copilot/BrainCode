@@ -1,0 +1,16 @@
+brain MotorImagery:
+  input eeg: EEG
+  sample_rate 256Hz
+  window 256 samples step 128 samples
+  channels C3, C4
+
+  on eeg as frame:
+    let c3_mu = bandpower(frame, "C3", 8, 13)
+    let c4_mu = bandpower(frame, "C4", 8, 13)
+    emit "c3_mu_power", c3_mu
+    emit "c4_mu_power", c4_mu
+    if c3_mu > 0.8:
+      decide "left-motor-pattern"
+    else:
+      if c4_mu > 0.8:
+        decide "right-motor-pattern"

@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import ast
+import csv
 import json
+import math
 import operator
 import re
 import sys
@@ -51,6 +53,11 @@ class Program:
     neurons: dict[str, Neuron] = field(default_factory=dict)
     initial_states: dict[str, float] = field(default_factory=dict)
     body: tuple[Statement, ...] = ()
+    input_kind: str = "Signal"
+    sample_rate_hz: int | None = None
+    window_samples: int | None = None
+    step_samples: int | None = None
+    channels: tuple[str, ...] = ()
 
 
 def _strip_comment(line: str) -> str:
@@ -101,10 +108,13 @@ _NUMBER = r"(?:\d+(?:\.\d*)?|\.\d+)"
 _IDENTIFIER = r"[A-Za-z_]\w*"
 _DECLARATIONS = {
     "brain": re.compile(rf"brain ({_IDENTIFIER}):"),
-    "input": re.compile(rf"input ({_IDENTIFIER}): Signal"),
+    "input": re.compile(rf"input ({_IDENTIFIER}): (Signal|EEG)"),
     "memory": re.compile(rf"memory ({_IDENTIFIER})\(capacity\s*[:=]\s*(\d+)\)"),
     "neuron": re.compile(rf"neuron ({_IDENTIFIER})\(threshold\s*[:=]\s*({_NUMBER})\)"),
     "state": re.compile(rf"state ({_IDENTIFIER})\s*=\s*({_NUMBER})"),
+    "sample_rate": re.compile(r"sample_rate\s+(\d+)\s*Hz"),
+    "window": re.compile(r"window\s+(\d+)\s*samples(?:\s+step\s+(\d+)\s*samples)?"),
+    "channels": re.compile(rf"channels\s+({_IDENTIFIER}(?:\s*,\s*{_IDENTIFIER})*)"),
     "on": re.compile(rf"on ({_IDENTIFIER}) as ({_IDENTIFIER}):"),
 }
 
@@ -218,7 +228,10 @@ def parse(source: str) -> Program:
         raise BrainCodeError("empty BrainCode program")
 
     declarations: dict[str, list[tuple[str, ...]]] = {
-        key: [] for key in ("brain", "input", "memory", "neuron", "state")
+        key: [] for key in (
+            "brain", "input", "memory", "neuron", "state",
+            "sample_rate", "window", "channels",
+        )
     }
     handler_index = None
     brain_indent = None
@@ -252,18 +265,46 @@ def parse(source: str) -> Program:
         raise BrainCodeError("missing input handler")
     if len(declarations["brain"]) != 1 or len(declarations["input"]) != 1:
         raise BrainCodeError("program needs exactly one brain and one input declaration")
-    if len(declarations["memory"]) != 1:
-        raise BrainCodeError("program needs exactly one memory declaration")
-    if not declarations["neuron"]:
-        raise BrainCodeError("program needs at least one neuron declaration")
-    if not declarations["state"]:
-        raise BrainCodeError("program needs at least one state declaration")
-
     brain_name = declarations["brain"][0][0]
-    input_name = declarations["input"][0][0]
-    memory_name, capacity_text = declarations["memory"][0]
+    input_name, input_kind = declarations["input"][0]
+    if input_kind == "Signal":
+        if len(declarations["memory"]) != 1:
+            raise BrainCodeError("Signal programs need exactly one memory declaration")
+        if not declarations["neuron"]:
+            raise BrainCodeError("Signal programs need at least one neuron declaration")
+        if not declarations["state"]:
+            raise BrainCodeError("Signal programs need at least one state declaration")
+        if any(declarations[key] for key in ("sample_rate", "window", "channels")):
+            raise BrainCodeError("EEG declarations require an EEG input")
+    else:
+        for key in ("sample_rate", "window", "channels"):
+            if len(declarations[key]) != 1:
+                raise BrainCodeError(f"EEG programs need exactly one {key.replace('_', ' ')} declaration")
+        if len(declarations["memory"]) > 1:
+            raise BrainCodeError("EEG programs may declare memory only once")
+
+    memory_name, capacity_text = declarations["memory"][0] if declarations["memory"] else ("recent", "1")
     if event_input != input_name:
         raise BrainCodeError("input handler must reference the declared input")
+
+    sample_rate_hz = None
+    window_samples = None
+    step_samples = None
+    channels: tuple[str, ...] = ()
+    if input_kind == "EEG":
+        sample_rate_hz = int(declarations["sample_rate"][0][0])
+        window_text, step_text = declarations["window"][0]
+        window_samples = int(window_text)
+        step_samples = int(step_text) if step_text else window_samples
+        channels = tuple(channel.strip() for channel in declarations["channels"][0][0].split(","))
+        if sample_rate_hz < 1:
+            raise BrainCodeError("sample rate must be at least 1 Hz")
+        if window_samples < 2:
+            raise BrainCodeError("EEG window must contain at least 2 samples")
+        if step_samples < 1 or step_samples > window_samples:
+            raise BrainCodeError("EEG step must be between 1 and the window size")
+        if len(set(channels)) != len(channels):
+            raise BrainCodeError("EEG channel names must be unique")
 
     neurons: dict[str, Neuron] = {}
     for neuron_name, threshold_text in declarations["neuron"]:
@@ -286,6 +327,8 @@ def parse(source: str) -> Program:
     capacity = int(capacity_text)
     if capacity < 1:
         raise BrainCodeError("memory capacity must be at least 1")
+    if not neurons and input_kind == "Signal":
+        raise BrainCodeError("Signal programs need at least one neuron declaration")
 
     handler_indent, _ = lines[handler_index]
     if handler_index + 1 >= len(lines) or lines[handler_index + 1][0] <= handler_indent:
@@ -297,11 +340,13 @@ def parse(source: str) -> Program:
     for statement in _walk_statements(body):
         if statement.kind == "store" and statement.value != memory_name:
             raise BrainCodeError(f"store must reference declared memory {memory_name}")
+        if statement.kind == "store" and not declarations["memory"]:
+            raise BrainCodeError("memory.store requires a memory declaration")
         if statement.kind == "assign" and statement.value not in states:
             raise BrainCodeError(f"assignment to undeclared state or local: {statement.value}")
 
-    primary_neuron_name, primary_neuron = next(iter(neurons.items()))
-    primary_state_name, primary_state_value = next(iter(states.items()))
+    primary_neuron_name, primary_neuron = next(iter(neurons.items()), ("detector", Neuron("detector", 0.5)))
+    primary_state_name, primary_state_value = next(iter(states.items()), ("confidence", 0.0))
     decision = next(
         (statement.value for statement in _walk_statements(body) if statement.kind == "decide"),
         "decision",
@@ -332,6 +377,11 @@ def parse(source: str) -> Program:
         neurons=neurons,
         initial_states=states,
         body=body,
+        input_kind=input_kind,
+        sample_rate_hz=sample_rate_hz,
+        window_samples=window_samples,
+        step_samples=step_samples,
+        channels=channels,
     )
 
 
@@ -439,6 +489,23 @@ class _Expression:
                     if not all(0 <= value <= 1 for value in (current, observation, rate)):
                         raise BrainCodeError("learn values and rate must be between 0 and 1")
                     return current + rate * (observation - current)
+                if node.func.id in {"mean", "rms", "line_length", "bandpower"} and not keywords:
+                    if node.func.id == "bandpower":
+                        if len(arguments) != 4:
+                            raise BrainCodeError('bandpower expects an EEG frame, channel name, low Hz, and high Hz')
+                        frame, channel, low_hz, high_hz = arguments
+                        return self.simulation._bandpower(
+                            frame, str(channel), float(low_hz), float(high_hz)
+                        )
+                    if len(arguments) != 2:
+                        raise BrainCodeError(f"{node.func.id} expects an EEG frame and channel name")
+                    frame, channel = arguments
+                    samples = self.simulation._channel_samples(frame, str(channel))
+                    if node.func.id == "mean":
+                        return sum(samples) / len(samples)
+                    if node.func.id == "rms":
+                        return math.sqrt(sum(sample * sample for sample in samples) / len(samples))
+                    return sum(abs(right - left) for left, right in zip(samples, samples[1:]))
                 functions = {"abs": abs, "min": min, "max": max, "round": round}
                 if node.func.id in functions and not keywords:
                     return functions[node.func.id](*arguments)
@@ -467,12 +534,13 @@ class Simulation:
     states: dict[str, float] = field(init=False)
     last_outputs: list[dict[str, Any]] = field(default_factory=list)
     last_decision: str | None = None
+    current_window: dict[str, list[float]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.states = dict(self.program.initial_states or {
             self.program.state_name: self.program.initial_state
-        })
-        self.attention = self.states[self.program.state_name]
+        } if self.program.state_name else {})
+        self.attention = self.states.get(self.program.state_name, 0.0)
 
     @staticmethod
     def _validate_signal(signal: float) -> None:
@@ -488,6 +556,54 @@ class Simulation:
             mean = sum(float(value) for value in self.recent) / len(self.recent) if self.recent else 0.0
             return mean > 0.5 if method == "ratio" else mean
         raise BrainCodeError(f"unknown memory method: {method}")
+
+    def _channel_samples(self, frame: Any, channel: str) -> list[float]:
+        if self.program.input_kind != "EEG":
+            raise BrainCodeError("EEG channel features require an EEG input")
+        if frame is not self.current_window:
+            raise BrainCodeError("EEG features must use the current input frame")
+        if channel not in self.program.channels:
+            raise BrainCodeError(f"undeclared EEG channel: {channel}")
+        if channel not in self.current_window:
+            raise BrainCodeError(f"no current window for EEG channel: {channel}")
+        return self.current_window[channel]
+
+    def _bandpower(self, frame: Any, channel: str, low_hz: float, high_hz: float) -> float:
+        samples = self._channel_samples(frame, channel)
+        sample_rate = self.program.sample_rate_hz
+        if not math.isfinite(low_hz) or not math.isfinite(high_hz):
+            raise BrainCodeError("bandpower frequencies must be finite")
+        if low_hz < 0 or high_hz <= low_hz or high_hz > sample_rate / 2:
+            raise BrainCodeError(f"bandpower range must be within 0..{sample_rate / 2:g} Hz")
+
+        count = len(samples)
+        mean = sum(samples) / count
+        centered = [sample - mean for sample in samples]
+        windowed = [
+            sample * (0.5 - 0.5 * math.cos(2 * math.pi * index / (count - 1)))
+            for index, sample in enumerate(centered)
+        ]
+        first_bin = max(1, math.ceil(low_hz * count / sample_rate))
+        last_bin = min(count // 2, math.floor(high_hz * count / sample_rate))
+        if first_bin > last_bin:
+            raise BrainCodeError(
+                "bandpower range has no frequency bins at this window size; widen the band or use a longer window"
+            )
+        total_power = sum(sample * sample for sample in windowed) * count
+        if total_power == 0:
+            return 0.0
+        band_power = 0.0
+        for frequency_bin in range(first_bin, last_bin + 1):
+            real = 0.0
+            imaginary = 0.0
+            for index, sample in enumerate(windowed):
+                angle = 2 * math.pi * frequency_bin * index / count
+                real += sample * math.cos(angle)
+                imaginary -= sample * math.sin(angle)
+            power = real * real + imaginary * imaginary
+            is_nyquist = count % 2 == 0 and frequency_bin == count // 2
+            band_power += power if is_nyquist else 2 * power
+        return min(1.0, band_power / total_power)
 
     def _execute(
         self,
@@ -517,20 +633,48 @@ class Simulation:
             elif statement.kind == "decide":
                 outputs.append({"type": "decision", "label": statement.value})
             elif statement.kind == "emit":
+                value = evaluator.evaluate(statement.expression)
+                if not isinstance(value, (bool, int, float, str)):
+                    raise BrainCodeError("emit accepts only scalar values")
+                if isinstance(value, float) and not math.isfinite(value):
+                    raise BrainCodeError("emit values must be finite")
                 outputs.append({
                     "type": "signal",
                     "label": statement.value,
-                    "value": evaluator.evaluate(statement.expression),
+                    "value": value,
                 })
             else:
                 raise BrainCodeError(f"unsupported statement: {statement.kind}")
 
     def step(self, signal: float) -> tuple[bool, bool]:
         """Process one normalized input and return (primary_neuron_fired, decided)."""
+        if self.program.input_kind != "Signal":
+            raise BrainCodeError("EEG programs must be run with CSV windows, not --signal")
         self._validate_signal(signal)
+        return self._run_sample(signal)
+
+    def step_window(self, window: dict[str, list[float]]) -> tuple[bool, bool]:
+        """Process one multichannel EEG window."""
+        if self.program.input_kind != "EEG":
+            raise BrainCodeError("Signal programs cannot process EEG windows")
+        expected = self.program.window_samples
+        normalized: dict[str, list[float]] = {}
+        for channel in self.program.channels:
+            samples = window.get(channel)
+            if samples is None or len(samples) != expected:
+                raise BrainCodeError(f"channel {channel} needs exactly {expected} samples per window")
+            if not all(math.isfinite(sample) for sample in samples):
+                raise BrainCodeError(f"channel {channel} contains a non-finite sample")
+            normalized[channel] = samples
+        self.current_window = normalized
+        return self._run_sample(0.0)
+
+    def _run_sample(self, signal: float) -> tuple[bool, bool]:
         outputs: list[dict[str, Any]] = []
         variables: dict[str, Any] = dict(self.states)
-        variables[self.program.binding_name] = signal
+        variables[self.program.binding_name] = (
+            self.current_window if self.program.input_kind == "EEG" else signal
+        )
         variables["signal"] = signal
         self._execute(self.program.body, variables, outputs)
         self.last_outputs = outputs
@@ -544,50 +688,131 @@ class Simulation:
             for name in self.states
             if name in variables and isinstance(variables[name], (int, float, bool))
         })
-        self.attention = self.states[self.program.state_name]
+        self.attention = self.states.get(self.program.state_name, 0.0)
         primary_fired = signal >= self.program.threshold
         return primary_fired, decision is not None
 
 
+def read_eeg_csv(path: Path, channels: tuple[str, ...]) -> dict[str, list[float]]:
+    """Read continuous EEG samples from a CSV with one named column per channel."""
+    try:
+        with path.open(newline="", encoding="utf-8-sig") as file:
+            reader = csv.DictReader(file)
+            headers = [header.strip() for header in (reader.fieldnames or [])]
+            if not headers:
+                raise BrainCodeError("EEG CSV needs a header row with channel names")
+            reader.fieldnames = headers
+            if len(set(headers)) != len(headers):
+                raise BrainCodeError("EEG CSV column names must be unique")
+            missing = [channel for channel in channels if channel not in headers]
+            if missing:
+                raise BrainCodeError(f"EEG CSV is missing channel(s): {', '.join(missing)}")
+            samples = {channel: [] for channel in channels}
+            for line, row in enumerate(reader, start=2):
+                for channel in channels:
+                    try:
+                        value = float((row.get(channel) or "").strip())
+                    except ValueError as error:
+                        raise BrainCodeError(
+                            f"EEG CSV line {line}: {channel} must be a numeric sample"
+                        ) from error
+                    if not math.isfinite(value):
+                        raise BrainCodeError(f"EEG CSV line {line}: {channel} must be finite")
+                    samples[channel].append(value)
+    except UnicodeDecodeError as error:
+        raise BrainCodeError("EEG CSV must be UTF-8 encoded") from error
+    except csv.Error as error:
+        raise BrainCodeError(f"invalid EEG CSV: {error}") from error
+    if not samples or not next(iter(samples.values())):
+        raise BrainCodeError("EEG CSV needs at least one sample row")
+    return samples
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run a BrainCode simulation")
+    parser = argparse.ArgumentParser(description="Run a BrainCode signal or EEG replay")
     parser.add_argument("program", type=Path, help="path to a .brain file")
-    parser.add_argument(
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument(
         "--signal",
         type=float,
         action="append",
-        required=True,
         help="normalized input signal (0 to 1); repeat to process a sequence",
     )
+    inputs.add_argument("--csv", type=Path, help="multichannel EEG sample CSV for an EEG program")
     parser.add_argument("--json", action="store_true", help="print one JSON result per input")
     args = parser.parse_args(argv)
 
     try:
         program = parse(args.program.read_text(encoding="utf-8"))
         simulation = Simulation(program)
-        if not args.json:
-            print(f"BrainCode simulation: {program.name}")
-        for index, signal in enumerate(args.signal, start=1):
-            fired, decided = simulation.step(signal)
-            result = {
-                "step": index,
-                "signal": signal,
-                "fired": fired,
-                "states": simulation.states,
-                "decision": simulation.last_decision if decided else None,
-                "outputs": simulation.last_outputs,
-            }
-            if args.json:
-                print(json.dumps(result, separators=(",", ":")))
-            else:
-                print(
-                    f"{index}: signal={signal:.3f} fired={str(fired).lower()} "
-                    f"states={json.dumps(simulation.states, sort_keys=True)} "
-                    f"decision={simulation.last_decision or 'none'}"
+        if program.input_kind == "EEG":
+            if args.csv is None:
+                raise BrainCodeError("EEG programs require --csv")
+            samples = read_eeg_csv(args.csv, program.channels)
+            window_size = program.window_samples
+            step_size = program.step_samples
+            windows = range(0, len(next(iter(samples.values()))) - window_size + 1, step_size)
+            if len(windows) == 0:
+                raise BrainCodeError(
+                    f"EEG CSV contains fewer than {window_size} samples required by the window"
                 )
-                for output in simulation.last_outputs:
-                    if output["type"] == "signal":
-                        print(f"  emit {output['label']}={output['value']}")
+            if not args.json:
+                print(
+                    f"BrainCode EEG replay: {program.name} "
+                    f"({program.sample_rate_hz} Hz, {len(windows)} windows)"
+                )
+            for index, start in enumerate(windows, start=1):
+                frame = {
+                    channel: values[start:start + window_size]
+                    for channel, values in samples.items()
+                }
+                _, decided = simulation.step_window(frame)
+                result = {
+                    "window": index,
+                    "sample_start": start,
+                    "sample_end": start + window_size,
+                    "time_start_s": start / program.sample_rate_hz,
+                    "sample_rate_hz": program.sample_rate_hz,
+                    "states": simulation.states,
+                    "decision": simulation.last_decision if decided else None,
+                    "outputs": simulation.last_outputs,
+                }
+                if args.json:
+                    print(json.dumps(result, separators=(",", ":")))
+                else:
+                    print(
+                        f"{index}: samples={start}:{start + window_size} "
+                        f"decision={simulation.last_decision or 'none'}"
+                    )
+                    for output in simulation.last_outputs:
+                        if output["type"] == "signal":
+                            print(f"  emit {output['label']}={output['value']}")
+        else:
+            if args.signal is None:
+                raise BrainCodeError("Signal programs require --signal")
+            if not args.json:
+                print(f"BrainCode simulation: {program.name}")
+            for index, signal in enumerate(args.signal, start=1):
+                fired, decided = simulation.step(signal)
+                result = {
+                    "step": index,
+                    "signal": signal,
+                    "fired": fired,
+                    "states": simulation.states,
+                    "decision": simulation.last_decision if decided else None,
+                    "outputs": simulation.last_outputs,
+                }
+                if args.json:
+                    print(json.dumps(result, separators=(",", ":")))
+                else:
+                    print(
+                        f"{index}: signal={signal:.3f} fired={str(fired).lower()} "
+                        f"states={json.dumps(simulation.states, sort_keys=True)} "
+                        f"decision={simulation.last_decision or 'none'}"
+                    )
+                    for output in simulation.last_outputs:
+                        if output["type"] == "signal":
+                            print(f"  emit {output['label']}={output['value']}")
         return 0
     except (OSError, BrainCodeError) as error:
         print(f"braincode: {error}", file=sys.stderr)
