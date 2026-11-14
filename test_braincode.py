@@ -232,6 +232,58 @@ class BrainCodeTests(unittest.TestCase):
         self.assertGreater(simulation.last_outputs[0]["value"], 0.95)
         self.assertEqual(program.channels, ("C3", "C4"))
 
+    def test_eeg_elif_classifies_multiple_patterns(self):
+        source = EEG_EXAMPLE.replace(
+            '    else:\n      if c4_mu > 0.8:\n        decide "right-motor-pattern"',
+            '    elif c4_mu > 0.8:\n      decide "right-motor-pattern"\n'
+            '    else:\n      decide "no-motor-pattern"',
+        )
+        simulation = Simulation(parse(source))
+        c3 = [math.sin(2 * math.pi * 20 * i / 256) for i in range(256)]
+        c4 = [math.sin(2 * math.pi * 10 * i / 256) for i in range(256)]
+
+        simulation.step_window({"C3": c3, "C4": c4})
+
+        self.assertEqual(simulation.last_decision, "right-motor-pattern")
+
+        quiet = [0.0] * 256
+        simulation.step_window({"C3": quiet, "C4": quiet})
+
+        self.assertEqual(simulation.last_decision, "no-motor-pattern")
+
+    def test_numeric_operators_and_helpers_work_in_signal_programs(self):
+        source = EXAMPLE.replace(
+            "    let response = detector.fire(signal)\n",
+            "    let response = clamp(sqrt((signal if signal > 0.5 else 0) ** 2) / 3 + 5 // 2, 0, 3)\n",
+        ).replace(
+            "    recent.store(response)\n",
+            '    emit "feature", response + log10(100)\n',
+        ).replace(
+            "    attention = learn(attention, from: response, rate: 0.4)\n",
+            "",
+        )
+        simulation = Simulation(parse(source))
+
+        simulation.step(0.9)
+
+        self.assertEqual(simulation.last_outputs, [
+            {"type": "signal", "label": "feature", "value": 4.3},
+        ])
+
+    def test_safe_numeric_helpers_reject_invalid_domains_and_exponents(self):
+        for expression, error in (
+            ("sqrt(-1)", "math domain"),
+            ("log10(0)", "math domain"),
+            ("2 ** 1001", "power exponent"),
+        ):
+            source = EXAMPLE.replace(
+                "let response = detector.fire(signal)",
+                f"let response = {expression}",
+            )
+            with self.subTest(expression=expression):
+                with self.assertRaises(BrainCodeError):
+                    Simulation(parse(source)).step(0.9)
+
     def test_eeg_memory_persists_between_windows(self):
         source = EEG_EXAMPLE.replace(
             "  channels C3, C4",

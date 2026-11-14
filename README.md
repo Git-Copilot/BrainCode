@@ -30,8 +30,11 @@ returns the fraction of window power in a frequency band using a Hann-windowed
 FFT; the spectrum is computed once per channel and reused within each window.
 `mean`, `rms`, `line_length`, and `peak_to_peak` provide additional channel
 features useful for checking amplitude and artifacts. EEG state variables can
-hold finite feature values in the recording's units. Add
-`emit` statements for telemetry and `decide` statements for intent labels.
+hold finite feature values in the recording's units. Classification handlers
+support chained `if`/`elif`/`else` branches, and expressions include exponent
+and floor-division operators, conditional expressions, `clamp`, and common
+math helpers (`sqrt`, `log`, `log10`, `exp`, `floor`, `ceil`). Add `emit`
+statements for telemetry and `decide` statements for intent labels.
 JSON mode emits one record per window with sample/time offsets, decisions,
 states, and emitted values.
 

@@ -167,7 +167,7 @@
             <h2>Control and output</h2>
             <code>on eeg as frame:</code>
             <code>let &lt;name&gt; = &lt;expression&gt;</code>
-            <code>if &lt;condition&gt;: … else: …</code>
+            <code>if &lt;condition&gt;: … elif …: … else: …</code>
             <code>decide "&lt;intent-label&gt;"</code>
             <code>emit "&lt;feature-name&gt;", &lt;value&gt;</code>
           </article>
@@ -181,9 +181,11 @@
           </article>
           <article class="card reference">
             <h2>Expressions</h2>
-            <code>+ - * / % · comparisons</code>
-            <code>and · or · not</code>
-            <code>abs · min · max · round</code>
+            <code>+ - * / // % ** · comparisons</code>
+            <code>and · or · not · chained comparisons</code>
+            <code>abs · min · max · round · clamp</code>
+            <code>sqrt · log · log10 · exp · floor · ceil</code>
+            <code>value if condition else fallback</code>
             <code>if / else blocks · indentation or braces</code>
           </article>
         </div>

@@ -147,7 +147,7 @@ def _parse_block(lines: list[tuple[int, str]], position: int, indent: int) -> tu
         if line_indent > indent:
             raise BrainCodeError(f"unexpected indentation: {line}")
 
-        if line == "else:":
+        if line == "else:" or line.startswith("elif "):
             break
 
         conditional = re.fullmatch(r"if\s+(.+):", line)
@@ -160,20 +160,8 @@ def _parse_block(lines: list[tuple[int, str]], position: int, indent: int) -> tu
             position += 1
             continue
         if conditional:
-            if position + 1 >= len(lines) or lines[position + 1][0] <= indent:
-                raise BrainCodeError("if block must contain an indented body")
-            body, position = _parse_block(lines, position + 1, lines[position + 1][0])
-            otherwise = ()
-            if position < len(lines) and lines[position] == (indent, "else:"):
-                if position + 1 >= len(lines) or lines[position + 1][0] <= indent:
-                    raise BrainCodeError("else block must contain an indented body")
-                otherwise, position = _parse_block(lines, position + 1, lines[position + 1][0])
-            statements.append(Statement(
-                "if",
-                expression=_normalise_expression(conditional.group(1)),
-                body=body,
-                otherwise=otherwise,
-            ))
+            statement, position = _parse_conditional(lines, position, indent)
+            statements.append(statement)
             continue
 
         decide = re.fullmatch(r'decide "([^"]+)"', line)
@@ -219,6 +207,36 @@ def _parse_block(lines: list[tuple[int, str]], position: int, indent: int) -> tu
             continue
         raise BrainCodeError(f"invalid statement: {line}")
     return tuple(statements), position
+
+
+def _parse_conditional(
+    lines: list[tuple[int, str]],
+    position: int,
+    indent: int,
+) -> tuple[Statement, int]:
+    line = lines[position][1]
+    conditional = re.fullmatch(r"(?:if|elif)\s+(.+):", line)
+    if conditional is None:
+        raise BrainCodeError(f"invalid conditional: {line}")
+    if position + 1 >= len(lines) or lines[position + 1][0] <= indent:
+        raise BrainCodeError("if block must contain an indented body")
+    body, position = _parse_block(lines, position + 1, lines[position + 1][0])
+    otherwise: tuple[Statement, ...] = ()
+    if position < len(lines) and lines[position][0] == indent:
+        next_line = lines[position][1]
+        if next_line.startswith("elif "):
+            nested, position = _parse_conditional(lines, position, indent)
+            otherwise = (nested,)
+        elif next_line == "else:":
+            if position + 1 >= len(lines) or lines[position + 1][0] <= indent:
+                raise BrainCodeError("else block must contain an indented body")
+            otherwise, position = _parse_block(lines, position + 1, lines[position + 1][0])
+    return Statement(
+        "if",
+        expression=_normalise_expression(conditional.group(1)),
+        body=body,
+        otherwise=otherwise,
+    ), position
 
 
 def parse(source: str) -> Program:
@@ -399,7 +417,9 @@ _BINARY_OPERATORS = {
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
     ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
     ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
 }
 _COMPARISON_OPERATORS = {
     ast.Eq: operator.eq,
@@ -483,7 +503,10 @@ class _Expression:
     def evaluate(self, expression: str) -> Any:
         try:
             node = ast.parse(expression, mode="eval").body
-            return self._visit(node)
+            value = self._visit(node)
+            if isinstance(value, float) and not math.isfinite(value):
+                raise BrainCodeError("expression result must be finite")
+            return value
         except BrainCodeError:
             raise
         except (SyntaxError, ArithmeticError, TypeError, ValueError) as error:
@@ -491,6 +514,8 @@ class _Expression:
 
     def _visit(self, node: ast.AST) -> Any:
         if isinstance(node, ast.Constant) and isinstance(node.value, (bool, float, int, str)):
+            if isinstance(node.value, float) and not math.isfinite(node.value):
+                raise BrainCodeError("numeric literals must be finite")
             return node.value
         if isinstance(node, ast.Name):
             if node.id in self.variables:
@@ -503,7 +528,17 @@ class _Expression:
                 return 3.141592653589793
             raise BrainCodeError(f"unknown value: {node.id}")
         if isinstance(node, ast.BinOp) and type(node.op) in _BINARY_OPERATORS:
-            return _BINARY_OPERATORS[type(node.op)](self._visit(node.left), self._visit(node.right))
+            left = self._visit(node.left)
+            right = self._visit(node.right)
+            if isinstance(node.op, ast.Pow):
+                if not isinstance(right, (int, float)) or abs(right) > 1000:
+                    raise BrainCodeError("power exponent must be between -1000 and 1000")
+            result = _BINARY_OPERATORS[type(node.op)](left, right)
+            if isinstance(result, complex):
+                raise BrainCodeError("complex expression results are not supported")
+            if isinstance(result, float) and not math.isfinite(result):
+                raise BrainCodeError("expression result must be finite")
+            return result
         if isinstance(node, ast.UnaryOp):
             value = self._visit(node.operand)
             if isinstance(node.op, ast.Not):
@@ -528,6 +563,8 @@ class _Expression:
                 left = right
             else:
                 return True
+        if isinstance(node, ast.IfExp):
+            return self._visit(node.body) if self._visit(node.test) else self._visit(node.orelse)
         if isinstance(node, ast.Call):
             arguments = [self._visit(argument) for argument in node.args]
             keywords = {
@@ -595,6 +632,30 @@ class _Expression:
                 functions = {"abs": abs, "min": min, "max": max, "round": round}
                 if node.func.id in functions and not keywords:
                     return functions[node.func.id](*arguments)
+                numeric_functions = {
+                    "sqrt": math.sqrt,
+                    "log": math.log,
+                    "log10": math.log10,
+                    "exp": math.exp,
+                    "floor": math.floor,
+                    "ceil": math.ceil,
+                }
+                if node.func.id in numeric_functions and not keywords:
+                    if len(arguments) != 1:
+                        raise BrainCodeError(f"{node.func.id} expects one argument")
+                    value = float(arguments[0])
+                    if not math.isfinite(value):
+                        raise BrainCodeError(f"{node.func.id} expects a finite number")
+                    return numeric_functions[node.func.id](value)
+                if node.func.id == "clamp" and not keywords:
+                    if len(arguments) != 3:
+                        raise BrainCodeError("clamp expects a value, lower bound, and upper bound")
+                    value, lower, upper = map(float, arguments)
+                    if not all(math.isfinite(item) for item in (value, lower, upper)):
+                        raise BrainCodeError("clamp arguments must be finite")
+                    if lower > upper:
+                        raise BrainCodeError("clamp lower bound must not exceed its upper bound")
+                    return min(max(value, lower), upper)
             if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
                 owner = node.func.value.id
                 method = node.func.attr
