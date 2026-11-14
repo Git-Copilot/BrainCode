@@ -26,8 +26,11 @@ python braincode.py examples/motor_imagery.brain --csv RECORDING.csv --json
 The CSV needs one header per declared EEG channel (such as `C3,C4`), followed
 by uniformly sampled numeric rows. The program declares the sampling rate and
 window/step sizes in samples. `bandpower(frame, channel, low_hz, high_hz)`
-returns the fraction of window power in a frequency band using a Hann window;
-`mean`, `rms`, and `line_length` provide additional channel features. Add
+returns the fraction of window power in a frequency band using a Hann-windowed
+FFT; the spectrum is computed once per channel and reused within each window.
+`mean`, `rms`, `line_length`, and `peak_to_peak` provide additional channel
+features useful for checking amplitude and artifacts. EEG state variables can
+hold finite feature values in the recording's units. Add
 `emit` statements for telemetry and `decide` statements for intent labels.
 JSON mode emits one record per window with sample/time offsets, decisions,
 states, and emitted values.

@@ -252,6 +252,40 @@ class BrainCodeTests(unittest.TestCase):
         self.assertEqual(len(simulation.recent), 2)
         self.assertGreater(simulation.last_outputs[0]["value"], 0.95)
 
+    def test_eeg_spectral_features_reuse_fft_and_measure_signal_quality(self):
+        source = EEG_EXAMPLE.replace(
+            '    let c4_mu = bandpower(frame, "C4", 8, 13)\n',
+            '    let c4_mu = bandpower(frame, "C4", 8, 13)\n'
+            '    let c3_beta = bandpower(frame, "C3", 14, 30)\n'
+            '    let c3_ptp = peak_to_peak(frame, "C3")\n'
+            '    emit "c3_beta", c3_beta\n'
+            '    emit "c3_ptp", c3_ptp\n',
+        )
+        simulation = Simulation(parse(source))
+        c3 = [2 * math.sin(2 * math.pi * 10 * i / 256) for i in range(256)]
+        c4 = [math.sin(2 * math.pi * 20 * i / 256) for i in range(256)]
+
+        simulation.step_window({"C3": c3, "C4": c4})
+
+        self.assertGreater(simulation.last_outputs[2]["value"], 0.95)
+        self.assertAlmostEqual(simulation.last_outputs[1]["value"], 4, delta=0.1)
+        self.assertEqual(set(simulation.spectrum_cache), {"C3", "C4"})
+
+    def test_eeg_state_can_store_unscaled_feature_values(self):
+        source = EEG_EXAMPLE.replace(
+            "  channels C3, C4",
+            "  channels C3, C4\n  state baseline = -2.0",
+        ).replace(
+            '    emit "c3_mu_power", c3_mu',
+            '    baseline = mean(frame, "C3")\n    emit "baseline", baseline',
+        )
+        simulation = Simulation(parse(source))
+        samples = [4.0 + math.sin(2 * math.pi * 10 * i / 256) for i in range(256)]
+
+        simulation.step_window({"C3": samples, "C4": samples})
+
+        self.assertAlmostEqual(simulation.states["baseline"], 4.0)
+
     def test_eeg_declarations_and_windows_are_validated(self):
         with self.assertRaisesRegex(BrainCodeError, "sample rate"):
             parse(EEG_EXAMPLE.replace("256Hz", "0Hz"))
@@ -272,7 +306,7 @@ class BrainCodeTests(unittest.TestCase):
         with self.assertRaisesRegex(BrainCodeError, "within 0..128 Hz"):
             simulation.step_window({"C3": [0.0] * 256, "C4": [0.0] * 256})
 
-        source = EEG_EXAMPLE.replace("8, 13", "8.2, 8.8")
+        source = EEG_EXAMPLE.replace("8, 13", "8.01, 8.02")
         simulation = Simulation(parse(source))
         with self.assertRaisesRegex(BrainCodeError, "no frequency bins"):
             simulation.step_window({"C3": [0.0] * 256, "C4": [0.0] * 256})
@@ -308,6 +342,9 @@ class BrainCodeTests(unittest.TestCase):
                 read_eeg_csv(csv_path, ("C3", "C4"))
             csv_path.write_text("C3,C4\n0.1,invalid\n", encoding="utf-8")
             with self.assertRaisesRegex(BrainCodeError, "numeric sample"):
+                read_eeg_csv(csv_path, ("C3", "C4"))
+            csv_path.write_text("C3,C4\n0.1,0.2,0.3\n", encoding="utf-8")
+            with self.assertRaisesRegex(BrainCodeError, "too many columns"):
                 read_eeg_csv(csv_path, ("C3", "C4"))
 
     def test_legacy_signal_cli_remains_available(self):

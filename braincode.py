@@ -111,7 +111,7 @@ _DECLARATIONS = {
     "input": re.compile(rf"input ({_IDENTIFIER}): (Signal|EEG)"),
     "memory": re.compile(rf"memory ({_IDENTIFIER})\(capacity\s*[:=]\s*(\d+)\)"),
     "neuron": re.compile(rf"neuron ({_IDENTIFIER})\(threshold\s*[:=]\s*({_NUMBER})\)"),
-    "state": re.compile(rf"state ({_IDENTIFIER})\s*=\s*({_NUMBER})"),
+    "state": re.compile(rf"state ({_IDENTIFIER})\s*=\s*(-?{_NUMBER})"),
     "sample_rate": re.compile(r"sample_rate\s+(\d+)\s*Hz"),
     "window": re.compile(r"window\s+(\d+)\s*samples(?:\s+step\s+(\d+)\s*samples)?"),
     "channels": re.compile(rf"channels\s+({_IDENTIFIER}(?:\s*,\s*{_IDENTIFIER})*)"),
@@ -320,8 +320,10 @@ def parse(source: str) -> Program:
         if state_name in states:
             raise BrainCodeError(f"duplicate state declaration: {state_name}")
         initial = float(initial_text)
-        if not 0.0 <= initial <= 1.0:
+        if input_kind == "Signal" and not 0.0 <= initial <= 1.0:
             raise BrainCodeError(f"state {state_name} must be between 0 and 1")
+        if not math.isfinite(initial):
+            raise BrainCodeError(f"state {state_name} must be finite")
         states[state_name] = initial
 
     capacity = int(capacity_text)
@@ -409,6 +411,66 @@ _COMPARISON_OPERATORS = {
 }
 
 
+def _power_spectrum(samples: list[float]) -> tuple[list[float], int]:
+    """Return one-sided Hann-windowed FFT powers and their FFT size."""
+    size = 1 << (len(samples) - 1).bit_length()
+    real = [0.0] * size
+    imaginary = [0.0] * size
+    scale = max(abs(sample) for sample in samples)
+    if scale == 0:
+        return [0.0] * (size // 2 + 1), size
+    scaled = [sample / scale for sample in samples]
+    mean = math.fsum(scaled) / len(scaled)
+    for index, sample in enumerate(samples):
+        taper = 0.5 - 0.5 * math.cos(2 * math.pi * index / (len(samples) - 1))
+        real[index] = (scaled[index] - mean) * taper
+
+    reversed_index = 0
+    for index in range(1, size):
+        bit = size >> 1
+        while reversed_index & bit:
+            reversed_index ^= bit
+            bit >>= 1
+        reversed_index ^= bit
+        if index < reversed_index:
+            real[index], real[reversed_index] = real[reversed_index], real[index]
+            imaginary[index], imaginary[reversed_index] = imaginary[reversed_index], imaginary[index]
+
+    length = 2
+    while length <= size:
+        angle = -2 * math.pi / length
+        step_real = math.cos(angle)
+        step_imaginary = math.sin(angle)
+        for start in range(0, size, length):
+            twiddle_real = 1.0
+            twiddle_imaginary = 0.0
+            half = length // 2
+            for offset in range(half):
+                even = start + offset
+                odd = even + half
+                product_real = (
+                    real[odd] * twiddle_real - imaginary[odd] * twiddle_imaginary
+                )
+                product_imaginary = (
+                    real[odd] * twiddle_imaginary + imaginary[odd] * twiddle_real
+                )
+                real[odd] = real[even] - product_real
+                imaginary[odd] = imaginary[even] - product_imaginary
+                real[even] += product_real
+                imaginary[even] += product_imaginary
+                twiddle_real, twiddle_imaginary = (
+                    twiddle_real * step_real - twiddle_imaginary * step_imaginary,
+                    twiddle_real * step_imaginary + twiddle_imaginary * step_real,
+                )
+        length *= 2
+
+    powers = [
+        real[index] * real[index] + imaginary[index] * imaginary[index]
+        for index in range(size // 2 + 1)
+    ]
+    return powers, size
+
+
 class _Expression:
     def __init__(
         self,
@@ -489,7 +551,9 @@ class _Expression:
                     if not all(0 <= value <= 1 for value in (current, observation, rate)):
                         raise BrainCodeError("learn values and rate must be between 0 and 1")
                     return current + rate * (observation - current)
-                if node.func.id in {"mean", "rms", "line_length", "bandpower"} and not keywords:
+                if node.func.id in {
+                    "mean", "rms", "line_length", "peak_to_peak", "bandpower"
+                } and not keywords:
                     if node.func.id == "bandpower":
                         if len(arguments) != 4:
                             raise BrainCodeError('bandpower expects an EEG frame, channel name, low Hz, and high Hz')
@@ -502,10 +566,32 @@ class _Expression:
                     frame, channel = arguments
                     samples = self.simulation._channel_samples(frame, str(channel))
                     if node.func.id == "mean":
-                        return sum(samples) / len(samples)
+                        scale = max(abs(sample) for sample in samples)
+                        return 0.0 if scale == 0 else scale * (
+                            math.fsum(sample / scale for sample in samples) / len(samples)
+                        )
                     if node.func.id == "rms":
-                        return math.sqrt(sum(sample * sample for sample in samples) / len(samples))
-                    return sum(abs(right - left) for left, right in zip(samples, samples[1:]))
+                        scale = max(abs(sample) for sample in samples)
+                        return 0.0 if scale == 0 else scale * math.sqrt(
+                            math.fsum((sample / scale) ** 2 for sample in samples) / len(samples)
+                        )
+                    if node.func.id == "line_length":
+                        scale = max(abs(sample) for sample in samples)
+                        if scale == 0:
+                            return 0.0
+                        value = scale * math.fsum(
+                            abs(right / scale - left / scale)
+                            for left, right in zip(samples, samples[1:])
+                        )
+                    else:
+                        scale = max(abs(sample) for sample in samples)
+                        value = 0.0 if scale == 0 else scale * (
+                            max(sample / scale for sample in samples)
+                            - min(sample / scale for sample in samples)
+                        )
+                    if not math.isfinite(value):
+                        raise BrainCodeError(f"{node.func.id} feature exceeds the finite numeric range")
+                    return value
                 functions = {"abs": abs, "min": min, "max": max, "round": round}
                 if node.func.id in functions and not keywords:
                     return functions[node.func.id](*arguments)
@@ -535,6 +621,7 @@ class Simulation:
     last_outputs: list[dict[str, Any]] = field(default_factory=list)
     last_decision: str | None = None
     current_window: dict[str, list[float]] = field(default_factory=dict)
+    spectrum_cache: dict[str, tuple[list[float], int]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.states = dict(self.program.initial_states or {
@@ -546,6 +633,12 @@ class Simulation:
     def _validate_signal(signal: float) -> None:
         if not 0.0 <= signal <= 1.0:
             raise BrainCodeError(f"signal must be between 0 and 1, got {signal}")
+
+    def _validate_state(self, value: float) -> None:
+        if not math.isfinite(value):
+            raise BrainCodeError("state values must be finite")
+        if self.program.input_kind == "Signal":
+            self._validate_signal(value)
 
     def _memory_value(self, method: str) -> float | int | bool:
         if method == "count":
@@ -576,33 +669,21 @@ class Simulation:
         if low_hz < 0 or high_hz <= low_hz or high_hz > sample_rate / 2:
             raise BrainCodeError(f"bandpower range must be within 0..{sample_rate / 2:g} Hz")
 
-        count = len(samples)
-        mean = sum(samples) / count
-        centered = [sample - mean for sample in samples]
-        windowed = [
-            sample * (0.5 - 0.5 * math.cos(2 * math.pi * index / (count - 1)))
-            for index, sample in enumerate(centered)
-        ]
-        first_bin = max(1, math.ceil(low_hz * count / sample_rate))
-        last_bin = min(count // 2, math.floor(high_hz * count / sample_rate))
+        if channel not in self.spectrum_cache:
+            self.spectrum_cache[channel] = _power_spectrum(samples)
+        powers, fft_size = self.spectrum_cache[channel]
+        first_bin = max(1, math.ceil(low_hz * fft_size / sample_rate))
+        last_bin = min(len(powers) - 1, math.floor(high_hz * fft_size / sample_rate))
         if first_bin > last_bin:
             raise BrainCodeError(
-                "bandpower range has no frequency bins at this window size; widen the band or use a longer window"
+                "bandpower range has no frequency bins at this sample rate; widen the band or use a longer window"
             )
-        total_power = sum(sample * sample for sample in windowed) * count
+        total_power = powers[0] + powers[-1] + 2 * sum(powers[1:-1])
         if total_power == 0:
             return 0.0
-        band_power = 0.0
-        for frequency_bin in range(first_bin, last_bin + 1):
-            real = 0.0
-            imaginary = 0.0
-            for index, sample in enumerate(windowed):
-                angle = 2 * math.pi * frequency_bin * index / count
-                real += sample * math.cos(angle)
-                imaginary -= sample * math.sin(angle)
-            power = real * real + imaginary * imaginary
-            is_nyquist = count % 2 == 0 and frequency_bin == count // 2
-            band_power += power if is_nyquist else 2 * power
+        band_power = 2 * sum(powers[first_bin:last_bin + 1])
+        if last_bin == len(powers) - 1:
+            band_power -= powers[last_bin]
         return min(1.0, band_power / total_power)
 
     def _execute(
@@ -618,7 +699,7 @@ class Simulation:
                 variables[statement.value] = value
                 if statement.value in self.states:
                     numeric = float(value)
-                    self._validate_signal(numeric)
+                    self._validate_state(numeric)
                     self.states[statement.value] = numeric
             elif statement.kind == "store":
                 value = evaluator.evaluate(statement.expression)
@@ -667,6 +748,7 @@ class Simulation:
                 raise BrainCodeError(f"channel {channel} contains a non-finite sample")
             normalized[channel] = samples
         self.current_window = normalized
+        self.spectrum_cache.clear()
         return self._run_sample(0.0)
 
     def _run_sample(self, signal: float) -> tuple[bool, bool]:
@@ -709,6 +791,8 @@ def read_eeg_csv(path: Path, channels: tuple[str, ...]) -> dict[str, list[float]
                 raise BrainCodeError(f"EEG CSV is missing channel(s): {', '.join(missing)}")
             samples = {channel: [] for channel in channels}
             for line, row in enumerate(reader, start=2):
+                if None in row:
+                    raise BrainCodeError(f"EEG CSV line {line}: too many columns")
                 for channel in channels:
                     try:
                         value = float((row.get(channel) or "").strip())

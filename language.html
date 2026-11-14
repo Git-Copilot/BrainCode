@@ -108,7 +108,7 @@
         <article class="card">
           <span class="feature-number">02 · FEATURES</span>
           <h2>Inspect signal features</h2>
-          <p>Compute band power, RMS, mean, and line length per channel and window, then combine features with ordinary expressions.</p>
+          <p>Compute band power, RMS, mean, line length, and peak-to-peak amplitude per channel and window, then combine features with ordinary expressions.</p>
         </article>
         <article class="card">
           <span class="feature-number">03 · CLASSIFICATION</span>
@@ -160,6 +160,7 @@
             <code>bandpower(frame, "C3", 8, 13)</code>
             <code>rms(frame, "C3") · mean(frame, "C3")</code>
             <code>line_length(frame, "C3")</code>
+            <code>peak_to_peak(frame, "C3")</code>
             <code>state &lt;name&gt; = &lt;number&gt;</code>
           </article>
           <article class="card reference">
