@@ -2,7 +2,7 @@ name: Deploy BrainCode Playground
 
 on:
   push:
-    branches: [master]
+    branches: [master, feature/language-showcase]
   workflow_dispatch:
 
 permissions:
