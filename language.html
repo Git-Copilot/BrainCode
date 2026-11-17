@@ -16,6 +16,7 @@
       }
 
       * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; scroll-padding-top: 24px; }
       body {
         min-width: 320px;
         margin: 0;
@@ -27,17 +28,23 @@
       main { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 32px 0 42px; }
       a { color: #a3ead2; text-decoration: none; }
       a:hover { text-decoration: underline; }
+      :focus-visible { outline: 2px solid #83e2c2; outline-offset: 3px; }
+      .skip-link { position: absolute; z-index: 5; top: 10px; left: 10px; transform: translateY(-160%); border-radius: 8px; padding: 10px 14px; background: #d7fff1; color: #101522; font-size: .8rem; font-weight: 750; }
+      .skip-link:focus { transform: translateY(0); }
       .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
       .brand { display: flex; gap: 10px; align-items: center; color: #dce5f6; font-size: .82rem; font-weight: 750; letter-spacing: .03em; }
       .brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid #79dfbe60; border-radius: 9px; color: #9ce8d2; }
-      .nav-links { display: flex; gap: 18px; color: #b6c0d5; font-size: .76rem; }
+      .nav-links { display: flex; flex-wrap: wrap; gap: 8px 18px; color: #b6c0d5; font-size: .76rem; }
+      .nav-links a[aria-current="page"] { color: #9ce8d2; }
       .hero { padding: 78px 0 54px; }
       .eyebrow { color: #9ce8d2; font-size: .72rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
       h1 { max-width: 800px; margin: 12px 0; font-size: clamp(2.7rem, 7vw, 5.2rem); letter-spacing: -.065em; line-height: 1.02; }
       .intro { max-width: 700px; margin: 16px 0 24px; color: #b6c0d5; font-size: 1.02rem; line-height: 1.7; }
       .hero-actions, .editor-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-      .button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 14px; background: #222c3d; color: #d7e1f3; font-size: .78rem; font-weight: 700; }
+      .button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 14px; background: #222c3d; color: #d7e1f3; cursor: pointer; font: 700 .78rem ui-sans-serif, system-ui, sans-serif; text-decoration: none; }
       .button.primary { border-color: #79dfbe50; background: #244b4b; color: #c5f6df; }
+      .button:hover { background: #303e53; text-decoration: none; }
+      .button.primary:hover { background: #2d5b59; }
       .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0 0 48px; }
       .card { min-width: 0; border: 1px solid #ffffff18; border-radius: 14px; padding: 18px; background: #171e2de8; box-shadow: 0 18px 60px #00000020; }
       .card h2, .section-title { margin: 0 0 8px; font-size: 1rem; letter-spacing: -.02em; }
@@ -49,16 +56,62 @@
       .section-title { margin: 4px 0 0; font-size: 1.5rem; }
       .code-card { overflow: hidden; border: 1px solid #ffffff18; border-radius: 14px; background: #111724; }
       .code-head { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #ffffff12; color: #9daac0; font: .7rem ui-monospace, Consolas, monospace; }
+      .editor-toolbar { display: grid; grid-template-columns: minmax(150px, .7fr) minmax(0, 1.3fr); gap: 12px 18px; align-items: end; padding: 14px 16px; border-bottom: 1px solid #ffffff12; }
+      .filename-label { display: block; margin-bottom: 6px; color: #aeb9ce; font-size: .7rem; font-weight: 700; }
+      .filename-row { display: flex; min-height: 42px; align-items: center; border: 1px solid #ffffff20; border-radius: 9px; background: #0e1420; }
+      .filename-row input { width: 100%; min-width: 0; border: 0; outline: 0; padding: 10px 11px; background: transparent; color: #edf2ff; font: .78rem ui-monospace, Consolas, monospace; }
+      .filename-row span { padding-right: 11px; color: #8995ad; font: .72rem ui-monospace, Consolas, monospace; }
+      .editor-actions { justify-content: flex-end; gap: 8px; }
+      .editor-actions .button { min-height: 38px; padding: 8px 11px; font-size: .7rem; }
+      .file-button { position: relative; overflow: hidden; }
+      .visually-hidden-file { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+      .file-button:focus-within { outline: 2px solid #83e2c2; outline-offset: 2px; }
       pre { overflow-x: auto; margin: 0; padding: 20px; color: #dbe5f6; font: .78rem/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
-      textarea { display: block; width: 100%; min-height: 340px; resize: vertical; border: 0; padding: 20px; outline: none; background: #111724; color: #dbe5f6; font: .78rem/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
+      textarea { display: block; width: 100%; min-height: clamp(320px, 48vh, 620px); resize: vertical; border: 0; padding: 20px; outline: none; background: #111724; color: #dbe5f6; font: .78rem/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
       textarea:focus-visible { box-shadow: inset 0 0 0 2px #83e2c2; }
       .editor-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid #ffffff12; }
-      .editor-foot p { margin: 0; color: #8995ad; font-size: .7rem; }
+      .editor-foot p { margin: 0; color: #aeb9ce; font-size: .7rem; line-height: 1.5; }
+      .editor-count { color: #8995ad; font: .68rem ui-monospace, Consolas, monospace; }
       .reference-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .reference { display: grid; gap: 8px; }
       .reference code { color: #9ce8d2; font: .72rem/1.6 ui-monospace, Consolas, monospace; }
       .limit-note { margin: 34px 0 0; border: 1px solid #f0b97035; border-radius: 12px; padding: 15px 17px; background: #231f1b66; color: #b6c0d5; font-size: .75rem; line-height: 1.65; }
       .limit-note strong { color: #f0c98e; }
+      .run-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); gap: 22px; align-items: center; }
+      .run-card h3 { margin: 0 0 8px; font-size: .92rem; }
+      .run-card p, .run-card li { color: #aeb9ce; font-size: .76rem; line-height: 1.65; }
+      .run-card p { margin: 0 0 10px; }
+      .run-card ol { margin: 0; padding-left: 20px; }
+      .run-command { min-width: 0; border: 1px solid #ffffff16; border-radius: 11px; background: #0e1420; }
+      .run-command-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #ffffff12; color: #8995ad; font-size: .68rem; }
+      .run-command pre { padding: 14px; color: #dbe5f6; font-size: .72rem; line-height: 1.6; }
+      .run-command button { min-height: 32px; padding: 6px 9px; font-size: .67rem; }
+      .runner-card { display: grid; gap: 14px; }
+      .runner-intro { margin: 0; color: #aeb9ce; font-size: .76rem; line-height: 1.6; }
+      .runner-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .runner-input { display: grid; align-content: start; gap: 7px; color: #d7e1f3; font-size: .73rem; font-weight: 700; }
+      .runner-input input { min-width: 0; min-height: 42px; border: 1px solid #ffffff20; border-radius: 9px; padding: 9px 11px; background: #0e1420; color: #edf2ff; font: .74rem ui-monospace, Consolas, monospace; }
+      .runner-input input[type="file"] { width: 100%; }
+      .runner-input small { color: #8995ad; font-size: .67rem; font-weight: 400; line-height: 1.5; }
+      .runner-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+      .runner-actions .privacy-note { margin: 0; color: #8995ad; font-size: .68rem; }
+      .run-status { min-height: 18px; margin: 0; color: #9ce8d2; font-size: .72rem; line-height: 1.5; }
+      .run-status.error { color: #ff9a9a; }
+      .run-results { display: grid; gap: 10px; }
+      .run-summary { margin: 0; color: #d7e1f3; font-size: .75rem; font-weight: 700; }
+      .results-scroll { overflow-x: auto; border: 1px solid #ffffff16; border-radius: 10px; }
+      .results-table { width: 100%; border-collapse: collapse; font-size: .7rem; }
+      .results-table th, .results-table td { min-width: 80px; padding: 9px 11px; border-bottom: 1px solid #ffffff12; text-align: left; vertical-align: top; }
+      .results-table th { background: #0e1420; color: #aeb9ce; font-weight: 700; }
+      .results-table td { color: #d7e1f3; font-family: ui-monospace, Consolas, monospace; }
+      .results-table td:last-child { min-width: 180px; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .results-scroll tr:last-child td { border-bottom: 0; }
+      .json-details { border: 1px solid #ffffff16; border-radius: 10px; background: #0e1420; }
+      .json-details summary, .cli-details summary { padding: 11px 13px; color: #c8d2e4; cursor: pointer; font-size: .72rem; font-weight: 700; }
+      .json-details pre { max-height: 360px; border-top: 1px solid #ffffff12; }
+      .cli-details { margin-top: 12px; border: 1px solid #ffffff16; border-radius: 12px; background: #171e2de8; }
+      .cli-details[open] summary, .json-details[open] summary { border-bottom: 1px solid #ffffff12; }
+      .cli-details .run-card { padding: 16px; }
       footer { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 30px; padding-top: 18px; border-top: 1px solid #ffffff16; color: #8995ad; font-size: .74rem; }
       @media (max-width: 760px) {
         main { width: min(100% - 24px, 620px); padding-top: 20px; }
@@ -66,25 +119,31 @@
         .grid, .reference-grid { grid-template-columns: 1fr; }
         .section-heading { display: block; }
         .section-heading p { margin-top: 8px; }
+        .editor-toolbar, .run-card { grid-template-columns: 1fr; }
+        .runner-inputs { grid-template-columns: 1fr; }
+        .editor-actions { justify-content: flex-start; }
       }
       @media (max-width: 460px) {
-        .topbar { align-items: flex-start; }
-        .nav-links { flex-direction: column; gap: 6px; align-items: flex-end; }
+        .topbar { align-items: flex-start; flex-direction: column; }
+        .nav-links { gap: 8px 14px; }
         .hero { padding-top: 46px; }
         th, td { padding: 10px 8px; font-size: .68rem; }
         pre { padding: 14px; font-size: .7rem; }
       }
       @media (prefers-reduced-motion: reduce) {
-        *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
       }
     </style>
   </head>
   <body>
     <main>
+      <a class="skip-link" href="#editor">Skip to program editor</a>
       <header class="topbar">
         <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ LANGUAGE</span></a>
         <nav class="nav-links" aria-label="Main navigation">
           <a href="index.html">Motor cortex atlas</a>
+          <a href="#editor" aria-current="page">Language editor</a>
           <a href="https://github.com/Git-Copilot/BrainCode">Source on GitHub</a>
         </nav>
       </header>
@@ -113,7 +172,7 @@
         <article class="card">
           <span class="feature-number">03 · CLASSIFICATION</span>
           <h2>Emit auditable events</h2>
-          <p>Write conditional intent labels and feature telemetry; the CLI returns one JSON record for every processed window.</p>
+          <p>Write conditional intent labels and feature telemetry; run programs in-browser and inspect one result per window.</p>
         </article>
       </section>
 
@@ -121,19 +180,29 @@
         <div class="section-heading">
           <div>
             <div class="eyebrow">Your workspace</div>
-            <h2 class="section-title" id="editor-title">Start with a blank program.</h2>
+            <h2 class="section-title" id="editor-title">Build a BrainCode program.</h2>
           </div>
-          <p>No program or simulated output is preloaded. Write BrainCode source, then download it to run against your own CSV recording.</p>
+          <p>The editor starts blank. Open a starter file or your own <code>.brain</code> program, edit it here, and download it when ready.</p>
         </div>
         <div class="code-card">
-          <div class="code-head"><label for="program-source">Untitled program · .brain</label><span>BrainCode</span></div>
+          <div class="code-head"><label id="program-file-label" for="program-source">untitled.brain</label><span>Tab indents · Ctrl/Cmd+S downloads</span></div>
+          <div class="editor-toolbar">
+            <div>
+              <label class="filename-label" for="program-name">Program filename</label>
+              <div class="filename-row"><input id="program-name" type="text" value="untitled" maxlength="60" autocomplete="off" spellcheck="false"><span>.brain</span></div>
+            </div>
+            <div class="editor-actions">
+              <label class="button file-button">Open .brain<input id="open-program" class="visually-hidden-file" type="file" accept=".brain,text/plain"></label>
+              <button class="button" id="load-example" type="button">Load starter</button>
+              <a class="button" href="examples/motor_imagery.brain" download="motor_imagery.brain">Download example</a>
+              <button class="button" id="clear-program" type="button">New blank</button>
+              <button class="button primary" id="download-program" type="button">Download .brain</button>
+            </div>
+          </div>
           <textarea id="program-source" aria-label="Write your BrainCode program" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
           <div class="editor-foot">
-            <p id="editor-status" role="status" aria-live="polite">Blank editor · your source stays in this page until downloaded.</p>
-            <div class="editor-actions">
-              <button class="button" id="clear-program" type="button">Clear</button>
-              <button class="button primary" id="download-program" type="button">Download .brain file</button>
-            </div>
+            <p id="editor-status" role="status" aria-live="polite">Blank editor · source stays in this page until you download it.</p>
+            <span id="editor-count" class="editor-count" aria-hidden="true">0 lines · 0 characters</span>
           </div>
         </div>
       </section>
@@ -194,16 +263,62 @@
       <section class="section" id="run-it" aria-labelledby="run-title">
         <div class="section-heading">
           <div>
-            <div class="eyebrow">Run locally</div>
-            <h2 class="section-title" id="run-title">Replay EEG locally.</h2>
+            <div class="eyebrow">Run in your browser</div>
+            <h2 class="section-title" id="run-title">Try BrainCode now.</h2>
           </div>
-          <p>The website edits source; the Python interpreter processes CSV windows locally and does not upload recordings.</p>
+          <p>The interpreter processes your program and selected CSV on this device. Nothing is uploaded. Larger recordings can use the Python CLI.</p>
         </div>
-        <div class="card">
-          <p>Download your program, clone the <a href="https://github.com/Git-Copilot/BrainCode">repository</a>, and provide a CSV whose headers match the declared channel names:</p>
-          <pre><code>python braincode.py examples/motor_imagery.brain --csv RECORDING.csv --json</code></pre>
-          <p>Each output record includes its sample/time offset, persistent states, optional intent decision, and explicitly emitted feature values. Repeated <code>--signal</code> inputs remain available for the lightweight simulation mode.</p>
+        <div class="card runner-card">
+          <p class="runner-intro">Open a BrainCode program above, choose the matching input below, then run it. EEG CSV headers must include every channel declared by the program.</p>
+          <div class="runner-inputs">
+            <label class="runner-input" for="recording-file">EEG recording CSV
+              <input id="recording-file" type="file" accept=".csv,text/csv">
+              <small>For programs declared with <code>input eeg: EEG</code>. Browser limit: 5 MB and 256 windows.</small>
+            </label>
+            <label class="runner-input" for="signal-values">Signal values
+              <input id="signal-values" type="text" inputmode="decimal" placeholder="0.2, 0.8, 0.95" autocomplete="off">
+              <small>Comma-separated values from 0 to 1 for programs declared with <code>input ...: Signal</code>.</small>
+            </label>
+          </div>
+          <div class="runner-actions">
+            <button class="button primary" id="run-program" type="button">Run program</button>
+            <button class="button" id="run-demo" type="button">Run synthetic EEG demo</button>
+            <button class="button" id="download-results" type="button" hidden>Download JSON results</button>
+            <p class="privacy-note">Synthetic demo only · not real EEG or a validated classifier.</p>
+          </div>
+          <p id="run-status" class="run-status" role="status" aria-live="polite">Ready · EEG samples and program run in this browser only.</p>
+          <div id="run-results" class="run-results" hidden>
+            <p id="run-summary" class="run-summary"></p>
+            <div class="results-scroll">
+              <table class="results-table">
+                <thead><tr><th scope="col">Window</th><th scope="col">Sample offset</th><th scope="col">Decision</th><th scope="col">Emitted values</th></tr></thead>
+                <tbody id="results-body"></tbody>
+              </table>
+            </div>
+            <details class="json-details">
+              <summary>Inspect full JSON output</summary>
+              <pre><code id="results-json"></code></pre>
+            </details>
+          </div>
         </div>
+        <details class="cli-details">
+          <summary>Run from the command line instead</summary>
+          <div class="run-card">
+            <div>
+              <h3>Use the Python interpreter</h3>
+              <ol>
+                <li>Install Python 3.10 or newer and clone the <a href="https://github.com/Git-Copilot/BrainCode">BrainCode repository</a>.</li>
+                <li>Put your downloaded <code>.brain</code> program and EEG CSV in the repository folder.</li>
+                <li>Match the CSV headers to the program's <code>channels</code> declaration, then run the command.</li>
+              </ol>
+              <p>Each JSON record includes its sample offset, intent decision, states, and emitted values.</p>
+            </div>
+            <div class="run-command">
+              <div class="run-command-head"><span>Run from the repository folder</span><button class="button" id="copy-run-command" type="button">Copy command</button></div>
+              <pre><code id="run-command">python braincode.py "untitled.brain" --csv "RECORDING.csv" --json</code></pre>
+            </div>
+          </div>
+        </details>
       </section>
 
       <p class="limit-note"><strong>Scope and safety:</strong> EEG support is offline CSV replay for prototyping, not live acquisition, a validated classifier, medical interpretation, or a hardware driver. Decisions are emitted as data only; the interpreter does not stimulate tissue or control devices. BrainCode uses an allowlisted expression evaluator, not Python execution. Validate datasets, calibration, latency, and safety independently.</p>
@@ -214,30 +329,251 @@
         <span>BrainCode · BCI programming language prototype</span>
       </footer>
     </main>
+    <script src="braincode-browser.js"></script>
     <script>
       (() => {
         const editor = document.querySelector("#program-source");
         const status = document.querySelector("#editor-status");
-        document.querySelector("#clear-program").addEventListener("click", () => {
-          editor.value = "";
-          status.textContent = "Editor cleared.";
-          editor.focus();
-        });
-        document.querySelector("#download-program").addEventListener("click", () => {
+        const fileName = document.querySelector("#program-name");
+        const count = document.querySelector("#editor-count");
+        const command = document.querySelector("#run-command");
+        const downloadButton = document.querySelector("#download-program");
+        const openButton = document.querySelector("#open-program");
+
+        function safeFileName() {
+          return fileName.value.trim().replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^[.-]+|[.-]+$/g, "") || "untitled";
+        }
+
+        function updateEditor() {
+          const lines = editor.value ? editor.value.split(/\r\n|\r|\n/).length : 0;
+          const outputName = `${safeFileName()}.brain`;
+          count.textContent = `${lines} ${lines === 1 ? "line" : "lines"} · ${editor.value.length} characters`;
+          document.querySelector("#program-file-label").textContent = outputName;
+          command.textContent = `python braincode.py "${outputName}" --csv "RECORDING.csv" --json`;
+        }
+
+        function downloadProgram() {
           const source = editor.value;
           if (!source.trim()) {
-            status.textContent = "Write a BrainCode program before downloading.";
+            status.textContent = "Write or open a BrainCode program before downloading.";
             editor.focus();
             return;
           }
           const blobUrl = URL.createObjectURL(new Blob([source], { type: "text/plain;charset=utf-8" }));
           const link = document.createElement("a");
           link.href = blobUrl;
-          link.download = "untitled.brain";
+          link.download = `${safeFileName()}.brain`;
           link.click();
           window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-          status.textContent = "Downloaded untitled.brain.";
+          status.textContent = `Downloaded ${link.download}.`;
+        }
+
+        editor.addEventListener("input", () => {
+          updateEditor();
+          status.textContent = editor.value.trim()
+            ? "Edits are in this page only · download to keep your program."
+            : "Blank editor · source stays in this page until you download it.";
         });
+        fileName.addEventListener("input", updateEditor);
+        editor.addEventListener("keydown", event => {
+          if (event.key === "Tab") {
+            event.preventDefault();
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            editor.setRangeText("  ", start, end, "end");
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
+          } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+            event.preventDefault();
+            downloadProgram();
+          }
+        });
+
+        document.querySelector("#clear-program").addEventListener("click", () => {
+          editor.value = "";
+          fileName.value = "untitled";
+          updateEditor();
+          status.textContent = "New blank program ready.";
+          editor.focus();
+        });
+        document.querySelector("#load-example").addEventListener("click", async () => {
+          try {
+            const response = await fetch("examples/motor_imagery.brain");
+            if (!response.ok) throw new Error(`server returned ${response.status}`);
+            editor.value = await response.text();
+            fileName.value = "motor_imagery";
+            updateEditor();
+            status.textContent = "Starter loaded. Edit the channel names and thresholds to match your data.";
+            editor.focus();
+          } catch (error) {
+            status.textContent = `Could not load the starter here (${error.message}). Use Download example, then Open .brain.`;
+          }
+        });
+        downloadButton.addEventListener("click", downloadProgram);
+        openButton.addEventListener("change", async () => {
+          const file = openButton.files?.[0];
+          if (!file) return;
+          try {
+            editor.value = await file.text();
+            fileName.value = file.name.replace(/\.brain$/i, "");
+            updateEditor();
+            status.textContent = `Opened ${file.name}. Choose the matching input below and run it in this browser.`;
+            editor.focus();
+          } catch (error) {
+            status.textContent = `Could not open file: ${error.message}`;
+          } finally {
+            openButton.value = "";
+          }
+        });
+        document.querySelector("#copy-run-command").addEventListener("click", async event => {
+          try {
+            await navigator.clipboard.writeText(command.textContent);
+            const button = event.currentTarget;
+            button.textContent = "Copied";
+            status.textContent = "Run command copied. Replace RECORDING.csv with your CSV filename.";
+            window.setTimeout(() => { button.textContent = "Copy command"; }, 1600);
+          } catch {
+            status.textContent = "Clipboard access is unavailable here. Select and copy the command shown.";
+          }
+        });
+
+        const recordingFile = document.querySelector("#recording-file");
+        const signalValues = document.querySelector("#signal-values");
+        const runButton = document.querySelector("#run-program");
+        const demoButton = document.querySelector("#run-demo");
+        const runStatus = document.querySelector("#run-status");
+        const runResults = document.querySelector("#run-results");
+        const runSummary = document.querySelector("#run-summary");
+        const resultRows = document.querySelector("#results-body");
+        const resultJson = document.querySelector("#results-json");
+        const resultsDownload = document.querySelector("#download-results");
+        let lastRun = null;
+        const MAX_CSV_BYTES = 5 * 1024 * 1024;
+
+        function setRunStatus(text, isError = false) {
+          runStatus.textContent = text;
+          runStatus.classList.toggle("error", isError);
+        }
+
+        function showRunResult(result, sourceLabel) {
+          lastRun = result;
+          runSummary.textContent =
+            `${result.program} · ${result.results.length} ${result.input_kind === "EEG" ? "window(s)" : "input(s)"} · ${sourceLabel}`;
+          resultRows.replaceChildren();
+          for (const item of result.results) {
+            const row = document.createElement("tr");
+            const values = item.outputs
+              .filter(output => output.type === "signal")
+              .map(output => `${output.label}: ${typeof output.value === "string" ? JSON.stringify(output.value) : String(output.value)}`)
+              .join("\n") || "—";
+            for (const value of [
+              String(item.index + 1),
+              item.sample_offset === undefined ? "—" : String(item.sample_offset),
+              item.decision || "—",
+              values,
+            ]) {
+              const cell = document.createElement("td");
+              cell.textContent = value;
+              row.append(cell);
+            }
+            resultRows.append(row);
+          }
+          resultJson.textContent = JSON.stringify(result, null, 2);
+          runResults.hidden = false;
+          resultsDownload.hidden = false;
+          setRunStatus("Run complete · results were generated in this browser and were not uploaded.");
+        }
+
+        function clearRunResult() {
+          lastRun = null;
+          runResults.hidden = true;
+          resultsDownload.hidden = true;
+        }
+
+        async function runCurrentProgram() {
+          clearRunResult();
+          runButton.disabled = true;
+          setRunStatus("Running BrainCode in this browser…");
+          await new Promise(resolve => window.setTimeout(resolve, 0));
+          try {
+            const program = BrainCodeBrowser.parseProgram(editor.value);
+            let result;
+            let inputLabel;
+            if (program.inputKind === "EEG") {
+              const file = recordingFile.files?.[0];
+              if (!file) {
+                recordingFile.focus();
+                throw new Error("Choose an EEG CSV file for this EEG program.");
+              }
+              if (file.size > MAX_CSV_BYTES) {
+                throw new Error("CSV exceeds the browser runner's 5 MB limit. Use the Python CLI for larger recordings.");
+              }
+              result = BrainCodeBrowser.runProgram(editor.value, { csvText: await file.text() });
+              inputLabel = file.name;
+            } else {
+              const raw = signalValues.value.trim();
+              if (!raw) {
+                signalValues.focus();
+                throw new Error("Enter comma-separated signal values from 0 to 1 for this Signal program.");
+              }
+              const tokens = raw.split(",");
+              if (tokens.some(token => !token.trim())) {
+                throw new Error("Signal values must be comma-separated numbers from 0 to 1.");
+              }
+              result = BrainCodeBrowser.runProgram(editor.value, {
+                signals: tokens.map(token => Number(token.trim())),
+              });
+              inputLabel = "Signal values";
+            }
+            showRunResult(result, inputLabel);
+          } catch (error) {
+            setRunStatus(error.message || "BrainCode could not run this program.", true);
+          } finally {
+            runButton.disabled = false;
+          }
+        }
+
+        async function runSyntheticDemo() {
+          clearRunResult();
+          demoButton.disabled = true;
+          setRunStatus("Preparing a clearly labeled synthetic EEG demo…");
+          await new Promise(resolve => window.setTimeout(resolve, 0));
+          try {
+            const response = await fetch("examples/motor_imagery.brain");
+            if (!response.ok) throw new Error(`could not load the bundled example (${response.status})`);
+            const source = await response.text();
+            const eegSamples = { C3: [], C4: [] };
+            for (let index = 0; index < 512; index += 1) {
+              eegSamples.C3.push(10 * Math.sin(2 * Math.PI * 10 * index / 256));
+              eegSamples.C4.push(10 * Math.sin(2 * Math.PI * 20 * index / 256));
+            }
+            const result = BrainCodeBrowser.runProgram(source, { eegSamples });
+            showRunResult(result, "synthetic 10 Hz / 20 Hz signals · not real EEG");
+          } catch (error) {
+            setRunStatus(`${error.message || "The synthetic demo could not run."} Use the deployed page or choose your own files.`, true);
+          } finally {
+            demoButton.disabled = false;
+          }
+        }
+
+        runButton.addEventListener("click", runCurrentProgram);
+        demoButton.addEventListener("click", runSyntheticDemo);
+        recordingFile.addEventListener("change", () => {
+          const file = recordingFile.files?.[0];
+          if (file) setRunStatus(`Selected ${file.name} · this file stays in your browser.`);
+        });
+        resultsDownload.addEventListener("click", () => {
+          if (!lastRun) return;
+          const blobUrl = URL.createObjectURL(new Blob(
+            [JSON.stringify(lastRun, null, 2)],
+            { type: "application/json;charset=utf-8" },
+          ));
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = `${safeFileName()}-results.json`;
+          link.click();
+          window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        });
+        updateEditor();
       })();
     </script>
   </body>

@@ -13,6 +13,10 @@ needed to display the surface.
 ## BrainCode for BCI prototyping
 
 [Explore the BrainCode language showcase](https://git-copilot.github.io/BrainCode/language.html).
+The browser editor starts blank, can load or open `.brain` files, and provides
+a browser runner for Signal and EEG programs. Programs and selected CSV files
+are processed on-device and are not uploaded. The Python CLI remains available
+for larger recordings.
 
 BrainCode can replay multichannel EEG recordings from CSV in overlapping
 windows, compute channel features, classify patterns, and emit event labels
@@ -129,5 +133,6 @@ BrainCode makes no biological or clinical predictions.
 ```powershell
 node --test test_expression.js
 node --test test_biocode.js
+node --test test_braincode_browser.js
 python -m unittest
 ```
