@@ -16,7 +16,8 @@ needed to display the surface.
 The browser editor starts blank, can load or open `.brain` files, and provides
 a browser runner for Signal and EEG programs. Programs and selected CSV files
 are processed on-device and are not uploaded. The Python CLI remains available
-for larger recordings.
+for larger recordings. Use the Settings menu on either page to switch between
+light and dark appearance; the choice is saved in this browser.
 
 BrainCode can replay multichannel EEG recordings from CSV in overlapping
 windows, compute channel features, classify patterns, and emit event labels

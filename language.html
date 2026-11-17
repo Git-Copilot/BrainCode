@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#101522">
     <meta name="description" content="Explore BrainCode, a language for replaying and prototyping multichannel EEG/BCI signal pipelines.">
     <title>BrainCode Language · BCI Prototyping</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("braincode-theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <link rel="stylesheet" href="theme.css">
     <style>
       :root {
         color-scheme: dark;
@@ -146,6 +153,7 @@
           <a href="#editor" aria-current="page">Language editor</a>
           <a href="https://github.com/Git-Copilot/BrainCode">Source on GitHub</a>
         </nav>
+        <div id="appearance-settings"></div>
       </header>
 
       <section class="hero">
@@ -329,6 +337,7 @@
         <span>BrainCode · BCI programming language prototype</span>
       </footer>
     </main>
+    <script src="theme.js"></script>
     <script src="braincode-browser.js"></script>
     <script>
       (() => {

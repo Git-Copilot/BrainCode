@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#101522">
     <meta name="description" content="Explore an interactive human cortical surface atlas focused on primary motor cortex.">
     <title>BrainCode · Motor Cortex Atlas</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("braincode-theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <link rel="stylesheet" href="theme.css">
     <style>
       :root {
         color-scheme: dark;
@@ -147,6 +154,7 @@
         <div class="brand"><span class="brand-mark" aria-hidden="true">B</span> BRAINCODE <span style="color:#79869d;font-weight:500">/ MOTOR CORTEX ATLAS</span></div>
         <a class="language-link" href="language.html">Explore the language →</a>
         <span class="status-tag">ICBM152 template · left hemisphere</span>
+        <div id="appearance-settings"></div>
       </header>
       <section class="hero">
         <div>
@@ -290,6 +298,7 @@
         · <a href="https://github.com/Git-Copilot/BrainCode">BrainCode on GitHub</a>
       </footer>
     </main>
+    <script src="theme.js"></script>
     <script src="expression.js?v=2"></script>
     <script>
       (() => {
